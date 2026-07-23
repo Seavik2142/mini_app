@@ -16,6 +16,7 @@ interface CartContextType {
   subtotal: number;
   discount: number;
   applyPromoCode: (code: string) => boolean;
+  redeemPromoCode: (code: string) => boolean;
   promoCode: string;
   totalPrice: number;
   totalRiel: number;
@@ -79,6 +80,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? Number(saved) : 250.00;
   });
 
+  const [redeemedCodes, setRedeemedCodes] = useState<string[]>(() => {
+    const saved = localStorage.getItem("mini_app_redeemed_codes");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [promoCode, setPromoCode] = useState<string>("");
   const [discountPercent, setDiscountPercent] = useState<number>(0);
 
@@ -93,6 +99,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem("mini_app_wallet_balance", String(walletBalance));
   }, [walletBalance]);
+
+  useEffect(() => {
+    localStorage.setItem("mini_app_redeemed_codes", JSON.stringify(redeemedCodes));
+  }, [redeemedCodes]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
@@ -132,7 +142,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyPromoCode = (code: string): boolean => {
     const clean = code.trim().toUpperCase();
-    if (clean === "TELEGRAM10" || clean === "SIAMDEV" || clean === "KEY15") {
+    if (clean === "TELEGRAM10" || clean === "SIAMDEV" || clean === "KEY15" || clean === "WELCOME50" || clean === "BONUS10") {
       setPromoCode(clean);
       setDiscountPercent(15);
       toast.success("Promo code applied! 15% OFF 🎉");
@@ -141,6 +151,40 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error("Invalid promo code");
       return false;
     }
+  };
+
+  const redeemPromoCode = (code: string): boolean => {
+    const clean = code.trim().toUpperCase();
+    if (!clean) {
+      toast.error("Please enter a promo code");
+      return false;
+    }
+
+    if (redeemedCodes.includes(clean)) {
+      toast.error("You have already redeemed this code!");
+      return false;
+    }
+
+    let bonusAmount = 0;
+    if (clean === "WELCOME50") {
+      bonusAmount = 50.0;
+    } else if (clean === "BONUS10" || clean === "KEY10") {
+      bonusAmount = 10.0;
+    } else if (clean === "TELEGRAM10" || clean === "SIAMDEV") {
+      bonusAmount = 15.0;
+      setPromoCode(clean);
+      setDiscountPercent(15);
+    } else if (clean === "PROMO100" || clean === "VIP100") {
+      bonusAmount = 100.0;
+    } else {
+      toast.error("Invalid or expired promo code");
+      return false;
+    }
+
+    setWalletBalance((prev) => prev + bonusAmount);
+    setRedeemedCodes((prev) => [...prev, clean]);
+    toast.success(`🎉 Code '${clean}' redeemed! +$${bonusAmount.toFixed(2)} (${formatKHR(bonusAmount)}) added to wallet!`);
+    return true;
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -217,6 +261,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         subtotal,
         discount,
         applyPromoCode,
+        redeemPromoCode,
         promoCode,
         totalPrice,
         totalRiel,
