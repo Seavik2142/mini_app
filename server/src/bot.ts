@@ -4,11 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
-const rawWebAppUrl = process.env.MINI_APP_URL || 'http://localhost:5173/app';
-
-// Ensure Web App URL is HTTPS for Telegram API compliance
-const isHttps = rawWebAppUrl.startsWith('https://');
-const webAppUrl = isHttps ? rawWebAppUrl : 'https://192.168.0.103:5173/app';
+const webAppUrl = process.env.MINI_APP_URL || 'https://mini-app1-one.vercel.app/app';
 
 export const initBot = () => {
   try {
@@ -23,25 +19,23 @@ export const initBot = () => {
       console.log('Bot Polling info:', err.message);
     });
 
-    // Set Telegram Bot persistent Menu Button if HTTPS
-    if (webAppUrl.startsWith('https://')) {
-      (bot as any)
-        ._request('setChatMenuButton', {
-          form: {
-            menu_button: JSON.stringify({
-              type: 'web_app',
-              text: '🔑 Open Key Vault',
-              web_app: { url: webAppUrl }
-            })
-          }
-        })
-        .then(() => {
-          console.log('✅ Bot Menu Button successfully updated to point to E-Commerce Mini App!');
-        })
-        .catch((err: any) => {
-          console.log('Bot Menu Button setup info:', err?.message || err);
-        });
-    }
+    // Set Telegram Bot persistent Menu Button
+    (bot as any)
+      ._request('setChatMenuButton', {
+        form: {
+          menu_button: JSON.stringify({
+            type: 'web_app',
+            text: '🔑 Open Key Vault',
+            web_app: { url: webAppUrl }
+          })
+        }
+      })
+      .then(() => {
+        console.log('✅ Bot Menu Button successfully updated to point to E-Commerce Mini App!');
+      })
+      .catch((err: any) => {
+        console.log('Bot Menu Button setup info:', err?.message || err);
+      });
 
     // Setup Bot Commands
     bot
@@ -61,19 +55,6 @@ export const initBot = () => {
 
       if (text.startsWith('/help')) return;
 
-      // Build Telegram compliant button (web_app if HTTPS, or standard URL)
-      const shopButton = isHttps
-        ? { text: '🔑 Open Digital Key Store', web_app: { url: webAppUrl } }
-        : { text: '🔑 Open Digital Key Store', url: rawWebAppUrl };
-
-      const vaultButton = isHttps
-        ? { text: '📦 My Key Vault', web_app: { url: `${webAppUrl}/orders` } }
-        : { text: '📦 My Key Vault', url: `${rawWebAppUrl}/orders` };
-
-      const profileButton = isHttps
-        ? { text: '👤 Balances & Profile', web_app: { url: `${webAppUrl}/profile` } }
-        : { text: '👤 Balances & Profile', url: `${rawWebAppUrl}/profile` };
-
       bot.sendMessage(
         chatId,
         `🔑 *Welcome to Key Vault Store*, ${firstName}!\n\n` +
@@ -84,8 +65,22 @@ export const initBot = () => {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [shopButton],
-              [vaultButton, profileButton]
+              [
+                {
+                  text: '🔑 Open Digital Key Store',
+                  web_app: { url: webAppUrl }
+                }
+              ],
+              [
+                {
+                  text: '📦 My Key Vault',
+                  web_app: { url: `${webAppUrl}/orders` }
+                },
+                {
+                  text: '👤 Balances & Profile',
+                  web_app: { url: `${webAppUrl}/profile` }
+                }
+              ]
             ]
           }
         }
