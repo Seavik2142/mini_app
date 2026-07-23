@@ -1,22 +1,16 @@
 import React, { useState } from "react";
-import { FaWallet, FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaMoneyBillWave, FaGift, FaTag, FaBolt } from "react-icons/fa";
-import { initData } from "@telegram-apps/sdk";
+import { FaWallet, FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaMoneyBillWave, FaGift, FaTag } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 
 const Profile: React.FC = () => {
-  const { walletBalance, formatKHR, redeemPromoCode } = useCart();
+  const { walletBalance, formatKHR, redeemPromoCode, telegramUser } = useCart();
   const [copied, setCopied] = useState(false);
   const [promoInput, setPromoInput] = useState("");
 
-  // Extract Telegram User if inside Telegram environment
-  const user = initData.user?.();
-  const username = user?.username || "TelegramUser";
-  const firstName = user?.first_name || "Alex";
-  const lastName = user?.last_name || "";
-  const tgId = user?.id || 778192031;
+  const { id: tgId, firstName, lastName, username, photoUrl } = telegramUser;
 
-  const referralLink = `https://t.me/SiamDevBot/mini_app?startapp=ref_${tgId}`;
+  const referralLink = `https://t.me/Sik_mybot/shop?startapp=ref_${tgId}`;
 
   const copyReferral = () => {
     navigator.clipboard.writeText(referralLink);
@@ -39,23 +33,31 @@ const Profile: React.FC = () => {
         <p className="text-xs text-slate-400">Telegram Account & Wallet Balances</p>
       </div>
 
-      {/* User Card */}
+      {/* Real Telegram User Card */}
       <div className="p-4 bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-950 border border-amber-500/30 rounded-2xl flex items-center gap-3.5 shadow-lg">
-        <div className="w-14 h-14 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-slate-950 text-xl font-black shadow-md shadow-amber-500/30 border border-white/20">
-          {firstName.charAt(0)}
-        </div>
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={firstName}
+            className="w-14 h-14 rounded-2xl object-cover border border-amber-400/40 shadow-md shadow-amber-500/20"
+          />
+        ) : (
+          <div className="w-14 h-14 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-slate-950 text-xl font-black shadow-md shadow-amber-500/30 border border-white/20">
+            {firstName?.charAt(0) || "T"}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h2 className="font-extrabold text-sm text-white truncate">
             {firstName} {lastName}
           </h2>
           <p className="text-xs text-amber-400 font-medium">@{username}</p>
           <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-slate-400 font-mono bg-slate-950/80 px-2 py-0.5 rounded-md border border-slate-800">
-            <FaShieldAlt className="text-amber-400 text-[9px]" /> ID: {tgId}
+            <FaShieldAlt className="text-amber-400 text-[9px]" /> Telegram ID: {tgId}
           </div>
         </div>
       </div>
 
-      {/* Wallet Money Balances ($ USD & Riel Khmer) */}
+      {/* Real Wallet Money Balances ($ USD & Riel Khmer) */}
       <div className="grid grid-cols-2 gap-3">
         <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl space-y-1 shadow-md">
           <div className="flex items-center justify-between text-xs text-amber-400 font-bold">
@@ -135,7 +137,7 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* Referral Link */}
+      {/* Real Telegram Referral Link */}
       <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl space-y-2.5 shadow-md">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-white flex items-center gap-1.5">

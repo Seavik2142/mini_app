@@ -24,15 +24,13 @@ const Cart: React.FC = () => {
   const [phone] = useState("+855 12 345 678");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      const order = placeOrder(paymentMethod, "Digital Delivery", phone);
-      setIsSubmitting(false);
-      if (order) {
-        navigate("/app/orders");
-      }
-    }, 800);
+    const order = await placeOrder(paymentMethod, "Digital Delivery", phone);
+    setIsSubmitting(false);
+    if (order) {
+      navigate("/app/orders");
+    }
   };
 
   // Telegram Native MainButton integration

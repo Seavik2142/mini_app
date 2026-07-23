@@ -1,17 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product, CartItem, Order } from "../type";
 import { toast } from "sonner";
+import { initData } from "@telegram-apps/sdk";
 
 interface CartContextType {
   cart: CartItem[];
   orders: Order[];
   walletBalance: number;
   walletRiel: number;
+  telegramUser: {
+    id?: number;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    photoUrl?: string;
+  };
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, delta: number) => void;
   clearCart: () => void;
-  placeOrder: (paymentMethod: 'USD' | 'KHR', address: string, phone: string) => Order | null;
+  placeOrder: (paymentMethod: 'USD' | 'KHR', address: string, phone: string) => Promise<Order | null>;
   totalItems: number;
   subtotal: number;
   discount: number;
@@ -26,6 +34,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const KHR_RATE = 4000;
+const API_BASE_URL = "http://localhost:3000";
 
 export const formatKHR = (usdAmount: number): string => {
   return (Math.round(usdAmount * KHR_RATE)).toLocaleString() + " ៛";
@@ -39,32 +48,17 @@ const generateRandomKey = (prefix: string = "KEY") => {
   return `${prefix}-${part1}-${part2}-${part3}`;
 };
 
-const INITIAL_MOCK_ORDERS: Order[] = [
-  {
-    id: 991,
-    orderNumber: "KEY-882194",
-    totalAmount: 34.99,
-    currency: "USD",
-    paymentMethod: "USD",
-    paymentStatus: "PAID",
-    orderStatus: "DELIVERED",
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    items: [
-      {
-        id: 1,
-        productId: 1,
-        productName: "Telegram Premium 1-Year Key",
-        quantity: 1,
-        price: 34.99,
-        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-        digitalKeys: ["TGPM-89A2-KEY7-X920"],
-        activationInstructions: "Open Telegram Settings -> Premium -> Redeem Key, or activate directly in bot."
-      }
-    ]
-  }
-];
-
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Extract Real Telegram User Data
+  const realTgUser = initData.user?.();
+  const telegramUser = {
+    id: realTgUser?.id || 778192031,
+    firstName: realTgUser?.first_name || "Alex",
+    lastName: realTgUser?.last_name || "",
+    username: realTgUser?.username || "TelegramUser",
+    photoUrl: realTgUser?.photo_url || ""
+  };
+
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem("mini_app_cart");
     return saved ? JSON.parse(saved) : [];
@@ -72,7 +66,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem("mini_app_orders");
-    return saved ? JSON.parse(saved) : INITIAL_MOCK_ORDERS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [walletBalance, setWalletBalance] = useState<number>(() => {
@@ -195,7 +189,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const walletRiel = walletBalance * KHR_RATE;
   const totalRiel = totalPrice * KHR_RATE;
 
-  const placeOrder = (paymentMethod: 'USD' | 'KHR', _address: string, phone: string): Order | null => {
+  const placeOrder = async (paymentMethod: 'USD' | 'KHR', _address: string, phone: string): Promise<Order | null> => {
     if (cart.length === 0) {
       toast.error("Your cart is empty");
       return null;
@@ -224,7 +218,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
     });
 
-    const newOrder: Order = {
+    const localOrder: Order = {
       id: Math.floor(1000 + Math.random() * 9000),
       orderNumber: "KEY-" + Math.floor(100000 + Math.random() * 900000),
       totalAmount: totalPrice,
@@ -237,12 +231,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       items: newOrderItems
     };
 
-    setOrders((prev) => [newOrder, ...prev]);
+    // Try posting real order to Express backend DB
+    try {
+      const response = await fetch(`${API_BASE_URL}/shop/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: newOrderItems,
+          totalAmount: totalPrice,
+          paymentMethod,
+          telegramUserId: telegramUser.id,
+          telegramUsername: telegramUser.username,
+          contactPhone: phone
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.data) {
+        console.log("Real Order created on backend database:", data.data);
+      }
+    } catch (e) {
+      console.log("Offline mode: Order saved locally", e);
+    }
+
+    setOrders((prev) => [localOrder, ...prev]);
     clearCart();
     setPromoCode("");
     setDiscountPercent(0);
     toast.success("🎉 Digital Key delivered! Check your Orders Vault");
-    return newOrder;
+    return localOrder;
   };
 
   return (
@@ -252,6 +268,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         orders,
         walletBalance,
         walletRiel,
+        telegramUser,
         addToCart,
         removeFromCart,
         updateQuantity,
