@@ -1,9 +1,9 @@
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { FaShoppingBag, FaKey, FaWallet } from 'react-icons/fa';
+import { FaShoppingBag, FaKey } from 'react-icons/fa';
 
 const Header = () => {
-    const { totalItems, walletBalance, formatKHR } = useCart();
+    const { totalItems } = useCart();
     const navigate = useNavigate();
 
     return (
@@ -21,31 +21,13 @@ const Header = () => {
                         Key Vault Store
                     </h1>
                     <p className="text-[9px] text-amber-400 font-extrabold tracking-wider uppercase">
-                        Digital Key Marketplace
+                        ABA & Bakong KHQR Checkout
                     </p>
                 </div>
             </div>
 
-            {/* Header Right Actions: USD & Khmer Riel Wallet Money Balance */}
+            {/* Header Right Action: Cart Button */}
             <div className="flex items-center gap-2">
-                {/* Wallet Balance Display ($ USD & Riel Khmer) */}
-                <div 
-                    onClick={() => navigate('/app/profile')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-amber-500/30 hover:border-amber-400 rounded-xl cursor-pointer active:scale-95 transition-all shadow-inner"
-                    title="Your Available Balance"
-                >
-                    <FaWallet className="text-amber-400 text-xs animate-pulse" />
-                    <div className="flex flex-col text-right">
-                        <span className="text-[11px] font-black text-amber-300 font-mono leading-none">
-                            ${walletBalance.toFixed(2)}
-                        </span>
-                        <span className="text-[9px] text-emerald-400 font-bold leading-none mt-0.5">
-                            {formatKHR(walletBalance)}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Cart Button */}
                 <button 
                     onClick={() => navigate('/app/cart')}
                     className="relative p-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 rounded-xl border border-slate-800 transition-all text-white"

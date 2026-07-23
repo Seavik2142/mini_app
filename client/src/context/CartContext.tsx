@@ -6,8 +6,6 @@ import { initData } from "@telegram-apps/sdk";
 interface CartContextType {
   cart: CartItem[];
   orders: Order[];
-  walletBalance: number;
-  walletRiel: number;
   telegramUser: {
     id?: number;
     firstName?: string;
@@ -19,12 +17,11 @@ interface CartContextType {
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, delta: number) => void;
   clearCart: () => void;
-  placeOrder: (paymentMethod: 'USD' | 'KHR', address: string, phone: string) => Promise<Order | null>;
+  placeOrder: (paymentMethod: 'ABA' | 'BAKONG' | 'CARD', phone: string) => Promise<Order | null>;
   totalItems: number;
   subtotal: number;
   discount: number;
   applyPromoCode: (code: string) => boolean;
-  redeemPromoCode: (code: string) => boolean;
   promoCode: string;
   totalPrice: number;
   totalRiel: number;
@@ -69,16 +66,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [walletBalance, setWalletBalance] = useState<number>(() => {
-    const saved = localStorage.getItem("mini_app_wallet_balance");
-    return saved ? Number(saved) : 250.00;
-  });
-
-  const [redeemedCodes, setRedeemedCodes] = useState<string[]>(() => {
-    const saved = localStorage.getItem("mini_app_redeemed_codes");
-    return saved ? JSON.parse(saved) : [];
-  });
-
   const [promoCode, setPromoCode] = useState<string>("");
   const [discountPercent, setDiscountPercent] = useState<number>(0);
 
@@ -89,14 +76,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem("mini_app_orders", JSON.stringify(orders));
   }, [orders]);
-
-  useEffect(() => {
-    localStorage.setItem("mini_app_wallet_balance", String(walletBalance));
-  }, [walletBalance]);
-
-  useEffect(() => {
-    localStorage.setItem("mini_app_redeemed_codes", JSON.stringify(redeemedCodes));
-  }, [redeemedCodes]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
@@ -136,7 +115,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyPromoCode = (code: string): boolean => {
     const clean = code.trim().toUpperCase();
-    if (clean === "TELEGRAM10" || clean === "SIAMDEV" || clean === "KEY15" || clean === "WELCOME50" || clean === "BONUS10") {
+    if (clean === "TELEGRAM10" || clean === "SIAMDEV" || clean === "KEY15" || clean === "ABA10" || clean === "BAKONG15") {
       setPromoCode(clean);
       setDiscountPercent(15);
       toast.success("Promo code applied! 15% OFF 🎉");
@@ -147,61 +126,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const redeemPromoCode = (code: string): boolean => {
-    const clean = code.trim().toUpperCase();
-    if (!clean) {
-      toast.error("Please enter a promo code");
-      return false;
-    }
-
-    if (redeemedCodes.includes(clean)) {
-      toast.error("You have already redeemed this code!");
-      return false;
-    }
-
-    let bonusAmount = 0;
-    if (clean === "WELCOME50") {
-      bonusAmount = 50.0;
-    } else if (clean === "BONUS10" || clean === "KEY10") {
-      bonusAmount = 10.0;
-    } else if (clean === "TELEGRAM10" || clean === "SIAMDEV") {
-      bonusAmount = 15.0;
-      setPromoCode(clean);
-      setDiscountPercent(15);
-    } else if (clean === "PROMO100" || clean === "VIP100") {
-      bonusAmount = 100.0;
-    } else {
-      toast.error("Invalid or expired promo code");
-      return false;
-    }
-
-    setWalletBalance((prev) => prev + bonusAmount);
-    setRedeemedCodes((prev) => [...prev, clean]);
-    toast.success(`🎉 Code '${clean}' redeemed! +$${bonusAmount.toFixed(2)} (${formatKHR(bonusAmount)}) added to wallet!`);
-    return true;
-  };
-
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = (subtotal * discountPercent) / 100;
   const totalPrice = Math.max(0, subtotal - discount);
-
-  const walletRiel = walletBalance * KHR_RATE;
   const totalRiel = totalPrice * KHR_RATE;
 
-  const placeOrder = async (paymentMethod: 'USD' | 'KHR', _address: string, phone: string): Promise<Order | null> => {
+  const placeOrder = async (paymentMethod: 'ABA' | 'BAKONG' | 'CARD', phone: string): Promise<Order | null> => {
     if (cart.length === 0) {
       toast.error("Your cart is empty");
       return null;
     }
-
-    if (walletBalance < totalPrice) {
-      toast.error(`Insufficient balance. Required: $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)})`);
-      return null;
-    }
-
-    // Deduct balance
-    setWalletBalance((prev) => Math.max(0, prev - totalPrice));
 
     const newOrderItems = cart.map((item, idx) => {
       const prefix = item.product.slug.substring(0, 4).toUpperCase();
@@ -222,11 +157,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: Math.floor(1000 + Math.random() * 9000),
       orderNumber: "KEY-" + Math.floor(100000 + Math.random() * 900000),
       totalAmount: totalPrice,
-      currency: paymentMethod,
+      currency: "USD",
       paymentMethod,
       paymentStatus: 'PAID',
       orderStatus: 'DELIVERED',
-      contactPhone: phone || 'Telegram Shopper',
+      contactPhone: phone || '+855 12 345 678',
       createdAt: new Date().toISOString(),
       items: newOrderItems
     };
@@ -257,7 +192,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearCart();
     setPromoCode("");
     setDiscountPercent(0);
-    toast.success("🎉 Digital Key delivered! Check your Orders Vault");
+    toast.success("🎉 KHQR Payment Verified! Digital Keys delivered to your Vault");
     return localOrder;
   };
 
@@ -266,8 +201,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         cart,
         orders,
-        walletBalance,
-        walletRiel,
         telegramUser,
         addToCart,
         removeFromCart,
@@ -278,7 +211,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         subtotal,
         discount,
         applyPromoCode,
-        redeemPromoCode,
         promoCode,
         totalPrice,
         totalRiel,
