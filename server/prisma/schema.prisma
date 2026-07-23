@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id            Int         @id @default(autoincrement())
+  name          String
+  username      String?
+  tgId          String      @unique
+  balance       Int         @default(0)
+  referBy       String?
+  referCode     String
+  publicKey     String?
+  address       String?
+  phone         String?
+  joinedAt      DateTime    @default(now())
+  lastSeenAt    DateTime?
+  isIntroShowed Boolean     @default(false)
+  isBlock       Boolean     @default(false)
+  isDelete      Boolean     @default(false)
+  cartItems     cart_item[]
+  orders        order[]
+}
+
+model category {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  icon        String?
+  image       String?
+  description String?
+  products    product[]
+}
+
+model product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  slug        String       @unique
+  description String
+  price       Float
+  tonPrice    Float?
+  starsPrice  Int?
+  images      String[]
+  categoryId  Int
+  category    category     @relation(fields: [categoryId], references: [id])
+  stock       Int          @default(100)
+  rating      Float        @default(4.8)
+  reviewCount Int          @default(12)
+  isFeatured  Boolean      @default(false)
+  isNew       Boolean      @default(false)
+  isOnSale    Boolean      @default(false)
+  discount    Int?         @default(0)
+  createdAt   DateTime     @default(now())
+  cartItems   cart_item[]
+  orderItems  order_item[]
+}
+
+model cart_item {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      user     @relation(fields: [userId], references: [id])
+  productId Int
+  product   product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+}
+
+model order {
+  id              Int          @id @default(autoincrement())
+  orderNumber     String       @unique
+  userId          Int
+  user            user         @relation(fields: [userId], references: [id])
+  totalAmount     Float
+  currency        String       @default("USD")
+  paymentMethod   String       @default("TON") // TON, STARS, CARD
+  paymentStatus   String       @default("PENDING") // PENDING, PAID, FAILED
+  orderStatus     String       @default("PROCESSING") // PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  shippingAddress String?
+  contactPhone    String?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  items           order_item[]
+}
+
+model order_item {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     order   @relation(fields: [orderId], references: [id])
+  productId Int
+  product   product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}

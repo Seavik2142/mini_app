@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: all;
+}
+
+@theme {
+  --font-bebas: "Bebas Neue", "cursive";
+  --font-monda: "Monda", "sans-serif";
+  --font-montserrat: "Montserrat", "sans-serif";
+  --font-opensans: "Open Sans", "sans-serif";
+  --font-roboto: "Roboto", "'sans-serif";
+  --font-tektur: "Tektur", "cursive";
+}
+
+* {
+  scrollbar-width: none;
+}
