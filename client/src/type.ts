@@ -57,7 +57,7 @@ export interface Order {
   orderNumber: string;
   totalAmount: number;
   currency: string;
-  paymentMethod: 'TON' | 'STARS' | 'CARD';
+  paymentMethod: 'USD' | 'KHR' | 'TON' | 'STARS' | 'CARD' | string;
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED';
   orderStatus: 'DELIVERED' | 'PROCESSING' | 'CANCELLED';
   shippingAddress?: string;

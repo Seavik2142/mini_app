@@ -1,15 +1,10 @@
 import { initData } from '@telegram-apps/sdk';
-import React from 'react';
 
 const Leaderboard = () => {
-    // const = initDataUser()
     initData.restore()
-    console.log(initData.user());
 
     function rndColor() {
         const randomNum = Math.random() * 3;
-        console.log(randomNum);
-        
         switch (Math.round(randomNum)) {
             case 0:
                 return `bg-cyan-300`;
@@ -17,7 +12,7 @@ const Leaderboard = () => {
                 return `bg-yellow-300`;
             case 2:
                 return `bg-blue-300`;
-            case 3:
+            default:
                 return `bg-purple-300`;
         }
     }

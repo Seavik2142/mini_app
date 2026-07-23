@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUser, FaWallet, FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaMoneyBillWave } from "react-icons/fa";
+import { FaWallet, FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaMoneyBillWave } from "react-icons/fa";
 import { initData } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
@@ -11,8 +11,8 @@ const Profile: React.FC = () => {
   // Extract Telegram User if inside Telegram environment
   const user = initData.user?.();
   const username = user?.username || "TelegramUser";
-  const firstName = user?.firstName || "Alex";
-  const lastName = user?.lastName || "";
+  const firstName = user?.first_name || "Alex";
+  const lastName = user?.last_name || "";
   const tgId = user?.id || 778192031;
 
   const referralLink = `https://t.me/SiamDevBot/mini_app?startapp=ref_${tgId}`;

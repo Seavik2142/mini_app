@@ -14,7 +14,6 @@ const Cart: React.FC = () => {
     promoCode,
     applyPromoCode,
     totalPrice,
-    totalRiel,
     formatKHR,
     placeOrder,
   } = useCart();
@@ -22,7 +21,7 @@ const Cart: React.FC = () => {
   const navigate = useNavigate();
   const [inputCode, setInputCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"USD" | "KHR">("USD");
-  const [phone, setPhone] = useState("+855 12 345 678");
+  const [phone] = useState("+855 12 345 678");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCheckout = () => {
@@ -40,30 +39,31 @@ const Cart: React.FC = () => {
   useEffect(() => {
     try {
       if (cart.length > 0) {
-        if (mainButton.mountSync.isAvailable() && !mainButton.isMounted()) {
-          mainButton.mountSync();
+        const mb = mainButton as any;
+        if (mb.mount?.isAvailable && !mb.isMounted?.()) {
+          mb.mount();
         }
-        if (mainButton.setParams.isAvailable()) {
-          mainButton.setParams({
+        if (mb.setParams?.isAvailable) {
+          mb.setParams({
             text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)})`,
-            bgColor: '#f59e0b',
+            backgroundColor: '#f59e0b',
             textColor: '#020617',
             isVisible: true,
             isEnabled: true,
           });
         }
-        const off = mainButton.onClick(handleCheckout);
+        const off = mb.onClick?.(handleCheckout);
         return () => {
-          off();
-          if (mainButton.setParams.isAvailable()) {
-            mainButton.setParams({ isVisible: false });
+          if (off) off();
+          if (mb.setParams?.isAvailable) {
+            mb.setParams({ isVisible: false });
           }
         };
       }
     } catch (err) {
       // Running outside Telegram app
     }
-  }, [cart, totalPrice, paymentMethod, phone]);
+  }, [cart, totalPrice, paymentMethod, phone, formatKHR]);
 
   if (cart.length === 0) {
     return (
