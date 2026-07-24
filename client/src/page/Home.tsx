@@ -37,158 +37,24 @@ const BANNER_SLIDES = [
   }
 ];
 
-const DEFAULT_PRODUCTS: Product[] = [
-  {
-    id: 1,
-    name: "Telegram Premium 1-Year Key",
-    slug: "telegram-premium-1-year-key",
-    description: "Instant redeemable activation key for 1 year of Telegram Premium. Unlock 4GB uploads, faster downloads, badges, and custom emojis.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 1,
-    categoryName: "Telegram & Bot Keys",
-    stock: 120,
-    rating: 4.9,
-    reviewCount: 340,
-    isFeatured: true,
-    isNew: true,
-    isOnSale: true,
-    discount: 15,
-    isDigital: true,
-    keyFormat: "TGPM-XXXX-XXXX-XXXX",
-    activationInstructions: "Open Telegram Settings -> Premium -> Redeem Key, or activate directly in bot."
-  },
-  {
-    id: 2,
-    name: "Steam $50 Digital Gift Card Key",
-    slug: "steam-50-digital-gift-card-key",
-    description: "Global Steam Wallet activation code. Instantly adds $50 USD to your Steam account balance.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 2,
-    categoryName: "Gaming & Gift Cards",
-    stock: 85,
-    rating: 4.9,
-    reviewCount: 512,
-    isFeatured: true,
-    isNew: false,
-    isOnSale: false,
-    discount: 0,
-    isDigital: true,
-    keyFormat: "STEAM-XXXX-XXXX-XXXX",
-    activationInstructions: "Go to store.steampowered.com/account/redeemwalletcode and enter your digital key."
-  },
-  {
-    id: 3,
-    name: "Express VPN Pro 1-Year License Key",
-    slug: "express-vpn-pro-1-year-key",
-    description: "High-speed encrypted VPN activation serial key. Supports 8 devices concurrently with unlimited bandwidth.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 3,
-    categoryName: "Software & VPN Licenses",
-    stock: 50,
-    rating: 4.8,
-    reviewCount: 198,
-    isFeatured: true,
-    isNew: false,
-    isOnSale: true,
-    discount: 25,
-    isDigital: true,
-    keyFormat: "VPNP-XXXX-XXXX-XXXX",
-    activationInstructions: "Enter key into Express VPN client under Account -> Enter Activation Code."
-  },
-  {
-    id: 4,
-    name: "SiamDev VIP Trading Bot API Key",
-    slug: "siamdev-vip-trading-bot-key",
-    description: "Lifetime API access license key for SiamDev Automated Telegram Trading & Alert Bot.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 4,
-    categoryName: "Crypto & AI Subscriptions",
-    stock: 15,
-    rating: 5.0,
-    reviewCount: 88,
-    isFeatured: true,
-    isNew: true,
-    isOnSale: true,
-    discount: 20,
-    isDigital: true,
-    keyFormat: "SIAM-API-XXXX-XXXX-XXXX",
-    activationInstructions: "Paste API Key into @SiamDevBot via /license command."
-  },
-  {
-    id: 5,
-    name: "Windows 11 Pro Retail License Key",
-    slug: "windows-11-pro-retail-key",
-    description: "Original 100% genuine retail activation key for Windows 11 Professional (32/64-bit).",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 3,
-    categoryName: "Software & VPN Licenses",
-    stock: 200,
-    rating: 4.9,
-    reviewCount: 620,
-    isFeatured: false,
-    isNew: false,
-    isOnSale: true,
-    discount: 30,
-    isDigital: true,
-    keyFormat: "W11P-XXXXX-XXXXX-XXXXX-XXXXX",
-    activationInstructions: "Go to Settings -> System -> Activation -> Change Product Key."
-  },
-  {
-    id: 6,
-    name: "ChatGPT Plus 1-Month Access Key",
-    slug: "chatgpt-plus-1-month-key",
-    description: "Digital activation voucher for 1 month of ChatGPT Plus (GPT-4o, DALL-E 3, Sora access).",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 4,
-    categoryName: "Crypto & AI Subscriptions",
-    stock: 40,
-    rating: 4.8,
-    reviewCount: 145,
-    isFeatured: true,
-    isNew: true,
-    isOnSale: false,
-    discount: 0,
-    isDigital: true,
-    keyFormat: "GPT4-XXXX-XXXX-XXXX",
-    activationInstructions: "Redeem voucher code at chatgpt.com/redeem."
-  }
-];
 
 const Home: React.FC = () => {
-  const { addToCart, formatKHR, requireAuth } = useCart();
-  const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
+  const { products, bannerSlides, addToCart, formatKHR, requireAuth } = useCart();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const activeSlides = bannerSlides && bannerSlides.length > 0 ? bannerSlides : BANNER_SLIDES;
+
   // Smooth Auto Scroll Animation every 3.5s
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
     }, 3500);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeSlides.length]);
 
-  const activeSlide = BANNER_SLIDES[currentSlide];
-
-  useEffect(() => {
-    fetch("http://localhost:3000/shop/products")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          setProducts(data.data);
-        }
-      })
-      .catch(() => {
-        // Fallback to default products
-      });
-  }, []);
+  const activeSlide = activeSlides[currentSlide] || activeSlides[0];
 
   const filteredProducts = products.filter((p) => {
     return (
@@ -197,8 +63,8 @@ const Home: React.FC = () => {
     );
   });
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + activeSlides.length) % activeSlides.length);
 
   return (
     <div className="space-y-4">

@@ -4,6 +4,38 @@ import { toast } from "sonner";
 import { initData, openTelegramLink } from "@telegram-apps/sdk";
 import { FaTimes, FaShieldAlt, FaLock, FaCheck, FaTelegram } from "react-icons/fa";
 
+import chatGptImg from "../assets/ChatGPT.jpg";
+import geminiImg from "../assets/gemini.jpeg";
+import claudeImg from "../assets/claude.jpg";
+
+export interface BannerSlide {
+  id: number;
+  badge: string;
+  title: string;
+  desc: string;
+  tag: string;
+  image: string;
+  gradient: string;
+}
+
+export interface PromoCodeItem {
+  id: number;
+  code: string;
+  discountPercent: number;
+  isActive: boolean;
+}
+
+export interface AdminUserItem {
+  id: number;
+  name: string;
+  username?: string;
+  tgId: string;
+  phone?: string;
+  role: "ADMIN" | "USER";
+  joinedAt: string;
+  isBlock: boolean;
+}
+
 interface CartContextType {
   cart: CartItem[];
   orders: Order[];
@@ -36,6 +68,19 @@ interface CartContextType {
   totalPrice: number;
   totalRiel: number;
   formatKHR: (usdAmount: number) => string;
+
+  // 🛡️ Admin Management State & Controls
+  products: Product[];
+  bannerSlides: BannerSlide[];
+  promoCodesList: PromoCodeItem[];
+  adminUsersList: AdminUserItem[];
+  addProduct: (product: Omit<Product, "id">) => void;
+  updateProduct: (id: number, updatedFields: Partial<Product>) => void;
+  deleteProduct: (id: number) => void;
+  updateBannerSlide: (id: number, updatedFields: Partial<BannerSlide>) => void;
+  addPromoCodeItem: (code: string, discountPercent: number) => void;
+  toggleUserRole: (userId: number) => void;
+  toggleUserBlock: (userId: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -54,6 +99,109 @@ const generateRandomKey = (prefix: string = "KEY") => {
   const part3 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   return `${prefix}-${part1}-${part2}-${part3}`;
 };
+
+const DEFAULT_BANNER_SLIDES: BannerSlide[] = [
+  {
+    id: 1,
+    badge: "ChatGPT Plus & GPT-4o 🤖",
+    title: "ChatGPT Plus Digital Keys",
+    desc: "Get instant activation vouchers for OpenAI ChatGPT Plus with GPT-4o, Sora & DALL-E 3 access!",
+    tag: "⚡ INSTANT AI ACCESS",
+    image: chatGptImg,
+    gradient: "from-emerald-950 via-teal-900/80 to-slate-950"
+  },
+  {
+    id: 2,
+    badge: "Google Gemini Advanced ✨",
+    title: "Gemini Advanced 1.5 Pro Keys",
+    desc: "Unlock Google's 2M token context window & Ultra AI capabilities with instant digital license codes!",
+    tag: "🔥 20% OFF TODAY",
+    image: geminiImg,
+    gradient: "from-blue-950 via-indigo-900/80 to-slate-950"
+  },
+  {
+    id: 3,
+    badge: "Anthropic Claude 3.5 Sonnet 🧠",
+    title: "Claude Pro Access Vouchers",
+    desc: "Top-tier AI coding & reasoning intelligence. Instant key redemption in USD ($) & Khmer Riel (៛)!",
+    tag: "💳 KHQR & ABA Supported",
+    image: claudeImg,
+    gradient: "from-amber-950 via-orange-950/80 to-slate-950"
+  }
+];
+
+const INITIAL_PRODUCTS: Product[] = [
+  {
+    id: 1,
+    name: "Telegram Premium 1-Year Key",
+    slug: "telegram-premium-1-year-key",
+    description: "Instant redeemable activation key for 1 year of Telegram Premium. Unlock 4GB uploads, faster downloads, badges, and custom emojis.",
+    price: 1.00,
+    images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"],
+    categoryId: 1,
+    categoryName: "Telegram & Bot Keys",
+    stock: 120,
+    rating: 4.9,
+    reviewCount: 340,
+    isFeatured: true,
+    isNew: true,
+    isOnSale: true,
+    discount: 15,
+    isDigital: true,
+    keyFormat: "TGPM-XXXX-XXXX-XXXX",
+    activationInstructions: "Open Telegram Settings -> Premium -> Redeem Key, or activate directly in bot."
+  },
+  {
+    id: 2,
+    name: "Steam $50 Digital Gift Card Key",
+    slug: "steam-50-digital-gift-card-key",
+    description: "Global Steam Wallet activation code. Instantly adds $50 USD to your Steam account balance.",
+    price: 1.00,
+    images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"],
+    categoryId: 2,
+    categoryName: "Gaming & Gift Cards",
+    stock: 85,
+    rating: 4.9,
+    reviewCount: 512,
+    isFeatured: true,
+    isNew: false,
+    isOnSale: false,
+    discount: 0,
+    isDigital: true,
+    keyFormat: "STEAM-XXXX-XXXX-XXXX",
+    activationInstructions: "Go to store.steampowered.com/account/redeemwalletcode and enter your digital key."
+  },
+  {
+    id: 3,
+    name: "Express VPN Pro 1-Year License Key",
+    slug: "express-vpn-pro-1-year-key",
+    description: "High-speed encrypted VPN activation serial key. Supports 8 devices concurrently with unlimited bandwidth.",
+    price: 1.00,
+    images: ["https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80"],
+    categoryId: 3,
+    categoryName: "Software & VPN Licenses",
+    stock: 50,
+    rating: 4.8,
+    reviewCount: 198,
+    isFeatured: true,
+    isNew: false,
+    isOnSale: true,
+    discount: 25,
+    isDigital: true,
+    keyFormat: "VPNP-XXXX-XXXX-XXXX",
+    activationInstructions: "Enter key into Express VPN client under Account -> Enter Activation Code."
+  }
+];
+
+const INITIAL_PROMOS: PromoCodeItem[] = [
+  { id: 1, code: "SIK10", discountPercent: 10, isActive: true },
+  { id: 2, code: "WELCOME20", discountPercent: 20, isActive: true }
+];
+
+const INITIAL_USERS: AdminUserItem[] = [
+  { id: 1, name: "Seavik Mao", username: "BoomBaya_ik", tgId: "5326192741", phone: "088499478", role: "ADMIN", joinedAt: "2026-07-20", isBlock: false },
+  { id: 2, name: "Alex Johnson", username: "alex_j", tgId: "982736154", phone: "096123456", role: "USER", joinedAt: "2026-07-22", isBlock: false }
+];
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Restore real Telegram WebApp launch params if available
@@ -89,6 +237,88 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const [currentOtpCode, setCurrentOtpCode] = useState<string>("");
+
+  // 🛡️ Global Admin State & Stores
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem("mini_app_products");
+    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+  });
+
+  const [bannerSlides, setBannerSlides] = useState<BannerSlide[]>(() => {
+    const saved = localStorage.getItem("mini_app_banners");
+    return saved ? JSON.parse(saved) : DEFAULT_BANNER_SLIDES;
+  });
+
+  const [promoCodesList, setPromoCodesList] = useState<PromoCodeItem[]>(() => {
+    const saved = localStorage.getItem("mini_app_promos");
+    return saved ? JSON.parse(saved) : INITIAL_PROMOS;
+  });
+
+  const [adminUsersList, setAdminUsersList] = useState<AdminUserItem[]>(() => {
+    const saved = localStorage.getItem("mini_app_admin_users");
+    return saved ? JSON.parse(saved) : INITIAL_USERS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("mini_app_products", JSON.stringify(products));
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem("mini_app_banners", JSON.stringify(bannerSlides));
+  }, [bannerSlides]);
+
+  useEffect(() => {
+    localStorage.setItem("mini_app_promos", JSON.stringify(promoCodesList));
+  }, [promoCodesList]);
+
+  useEffect(() => {
+    localStorage.setItem("mini_app_admin_users", JSON.stringify(adminUsersList));
+  }, [adminUsersList]);
+
+  const addProduct = (newProd: Omit<Product, "id">) => {
+    const p: Product = {
+      ...newProd,
+      id: Date.now()
+    };
+    setProducts(prev => [p, ...prev]);
+    toast.success("🎉 New product added to store!");
+  };
+
+  const updateProduct = (id: number, updatedFields: Partial<Product>) => {
+    setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updatedFields } : p)));
+    toast.success("✅ Product updated!");
+  };
+
+  const deleteProduct = (id: number) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+    toast.success("Product removed");
+  };
+
+  const updateBannerSlide = (id: number, updatedFields: Partial<BannerSlide>) => {
+    setBannerSlides(prev => prev.map(b => (b.id === id ? { ...b, ...updatedFields } : b)));
+    toast.success("✅ Banner slide updated!");
+  };
+
+  const addPromoCodeItem = (code: string, discountPercent: number) => {
+    const item: PromoCodeItem = {
+      id: Date.now(),
+      code: code.trim().toUpperCase(),
+      discountPercent,
+      isActive: true
+    };
+    setPromoCodesList(prev => [item, ...prev]);
+    toast.success(`Promo code ${item.code} created!`);
+  };
+
+  const toggleUserRole = (userId: number) => {
+    setAdminUsersList(prev => prev.map(u => (u.id === userId ? { ...u, role: u.role === "ADMIN" ? "USER" : "ADMIN" } : u)));
+    toast.success("User role updated");
+  };
+
+  const toggleUserBlock = (userId: number) => {
+    setAdminUsersList(prev => prev.map(u => (u.id === userId ? { ...u, isBlock: !u.isBlock } : u)));
+    toast.success("User status updated");
+  };
 
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem("mini_app_cart");
@@ -493,7 +723,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         promoCode,
         totalPrice,
         totalRiel,
-        formatKHR
+        formatKHR,
+
+        // 🛡️ Admin Controls
+        products,
+        bannerSlides,
+        promoCodesList,
+        adminUsersList,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        updateBannerSlide,
+        addPromoCodeItem,
+        toggleUserRole,
+        toggleUserBlock
       }}
     >
       {children}
