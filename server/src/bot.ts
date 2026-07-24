@@ -233,12 +233,13 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 8. /help — Command Guide
+    // 8. /help — Command Guide & Support Link
     // ──────────────────────────────────────────────────
     bot.onText(/\/help/, (msg) => {
       bot.sendMessage(
         msg.chat.id,
-        `💡 *Key Vault Bot Help Guide*\n\n` +
+        `💡 *Key Vault Bot Help & Support Guide*\n\n` +
+        `Need help or custom key orders? Contact owner *@BoomBaya_ik*!\n\n` +
         `Available Commands:\n` +
         `• /start - 🚀 Open Mini App & Welcome\n` +
         `• /orders - 📦 My Orders & Digital Keys\n` +
@@ -247,7 +248,15 @@ export const initBot = () => {
         `• /update - 🔄 Refresh Bot Menu & Links\n` +
         `• /clear - 🧹 Reset & Clear Sessions\n` +
         `• /help - 💡 Show Help & Support Guide`,
-        { parse_mode: 'Markdown' }
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
+              [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
       );
     });
 
@@ -271,7 +280,8 @@ export const initBot = () => {
           await bot.answerCallbackQuery(query.id);
           await bot.sendMessage(
             chatId,
-            `💡 *All Available Bot Commands:*\n\n` +
+            `💡 *Key Vault Help & Support Guide*\n\n` +
+            `Need help or custom key orders? Tap below to chat with owner *@BoomBaya_ik*!\n\n` +
             `• /start - 🚀 Open Mini App & Welcome\n` +
             `• /orders - 📦 My Orders & Keys\n` +
             `• /profile - 👤 My Account Profile\n` +
@@ -279,7 +289,15 @@ export const initBot = () => {
             `• /update - 🔄 Refresh Bot Menu & Config\n` +
             `• /clear - 🧹 Reset & Clear Sessions\n` +
             `• /help - 💡 Show Help & Support`,
-            { parse_mode: 'Markdown' }
+            {
+              parse_mode: 'Markdown',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
+                  [{ text: '🚀 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
+                ]
+              }
+            }
           );
         }
       } catch (e) {
@@ -346,7 +364,7 @@ function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
             { text: '👤 Profile', web_app: { url: getMiniAppUrl('/profile') } }
           ],
           [
-            { text: '🔄 Refresh Bot Menu', callback_data: 'refresh' },
+            { text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' },
             { text: '💡 Help Guide', callback_data: 'help' }
           ]
         ]
