@@ -1,4 +1,8 @@
 {
+  "version": 2,
+  "framework": null,
+  "buildCommand": "echo 'Static Admin Build Complete'",
+  "outputDirectory": ".",
   "cleanUrls": true,
   "routes": [
     { "src": "^/$", "dest": "/html/index.html" },
