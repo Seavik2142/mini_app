@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt } from "react-icons/fa";
+import { FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaUserShield } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 
@@ -211,11 +211,20 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Account Actions / Logout */}
+          {/* Account Actions / Admin Panel / Logout */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg">
             <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-              <FaShieldAlt className="text-indigo-400" /> Account Security & Session
+              <FaShieldAlt className="text-indigo-400" /> Account Security & Management
             </h3>
+
+            {/* Admin Control Panel Access */}
+            <button
+              onClick={() => navigate("/app/admin")}
+              className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 border border-indigo-400/30"
+            >
+              <FaUserShield className="text-sm" /> 🛡️ Open Admin Control Panel
+            </button>
+
             <button
               onClick={logout}
               className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-extrabold text-xs rounded-xl border border-rose-500/30 flex items-center justify-center gap-2 transition-all shadow-sm"

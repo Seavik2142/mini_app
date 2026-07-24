@@ -8,6 +8,7 @@ import Cart from "./page/Cart";
 import Orders from "./page/Orders";
 import Profile from "./page/Profile";
 import AuthLogin from "./page/AuthLogin";
+import AdminLayout from "./admin/AdminLayout";
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 const Routes = createBrowserRouter([
@@ -41,6 +42,10 @@ const Routes = createBrowserRouter([
             {
                 path: 'profile',
                 element: <Profile />
+            },
+            {
+                path: 'admin',
+                element: <AdminLayout />
             },
         ]
     },
