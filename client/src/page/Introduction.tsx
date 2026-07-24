@@ -34,7 +34,7 @@ const Introduction = () => {
         }
 
         if (miniApp.setHeaderColor.isAvailable()) {
-            miniApp.setHeaderColor('#d6f400');
+            miniApp.setHeaderColor('#000000');
         }
 
         if (miniApp.setBottomBarColor.isAvailable()) {
@@ -53,17 +53,17 @@ const Introduction = () => {
     return (
         <div className="min-h-screen" data-theme="black">
             <div
-                className="h-80 w-full flex items-center justify-center text-black flex-col font-monda bg-[#d6f400] object-cover rounded-b-2xl"
+                className="h-80 w-full flex items-center justify-center text-black flex-col font-monda bg-white object-cover rounded-b-2xl"
             >
                 <p
                     ref={text_count}
                     className="text-8xl font-black">400</p>
-                <p className="text-2xl">COOL</p>
+                <p className="text-2xl font-bold">COOL</p>
             </div>
 
             <div className="p-3 absolute bottom-0 w-full">
                 <p className="font-bebas text-4xl text-white text-center">Welcome to the party</p>
-                <p className="font-bebas mb-5 text-6xl text-center bg-gradient-to-tr from-[#D6F400] to-[#FFFFFF] text-transparent bg-clip-text">take a bribe.</p>
+                <p className="font-bebas mb-5 text-6xl text-center bg-gradient-to-tr from-white via-zinc-200 to-zinc-400 text-transparent bg-clip-text">take a bribe.</p>
 
                 <button
                     onClick={() => {

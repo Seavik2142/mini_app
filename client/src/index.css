@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bebas+Neue&family=Monda:wght@400;700&family=Montserrat:wght@400;600;700;800&family=Roboto:wght@400;500;700&family=Tektur:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @plugin "daisyui" {
@@ -5,14 +6,26 @@
 }
 
 @theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-bebas: "Bebas Neue", "cursive";
   --font-monda: "Monda", "sans-serif";
   --font-montserrat: "Montserrat", "sans-serif";
   --font-opensans: "Open Sans", "sans-serif";
-  --font-roboto: "Roboto", "'sans-serif";
+  --font-roboto: "Roboto", "sans-serif";
   --font-tektur: "Tektur", "cursive";
 }
 
 * {
   scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #0b0f17;
+  color: #f8fafc;
+  -webkit-tap-highlight-color: transparent;
 }

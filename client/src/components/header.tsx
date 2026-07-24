@@ -1,28 +1,32 @@
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { FaShoppingBag, FaKey } from 'react-icons/fa';
+import { FaShoppingBag } from 'react-icons/fa';
+import logoImg from '../assets/logo.jpeg';
 
 const Header = () => {
     const { totalItems } = useCart();
     const navigate = useNavigate();
 
     return (
-        <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-xl">
+        <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
             {/* App Branding */}
             <div 
                 onClick={() => navigate('/app')}
-                className="flex items-center gap-2.5 cursor-pointer hover:opacity-85 transition-opacity"
+                className="flex items-center gap-2.5 cursor-pointer group"
             >
-                <div className="bg-gradient-to-tr from-amber-500 to-orange-600 p-2 rounded-xl text-slate-950 shadow-md shadow-amber-500/20">
-                    <FaKey className="text-xl" />
+                <div className="relative">
+                    <img 
+                        src={logoImg} 
+                        alt="Logo" 
+                        className="w-10 h-10 rounded-xl object-cover border border-slate-700/80 shadow-md group-hover:scale-105 transition-transform duration-200" 
+                    />
+                    <div className="absolute inset-0 rounded-xl ring-1 ring-indigo-500/40 pointer-events-none" />
                 </div>
-                <div>
-                    <h1 className="font-black text-sm tracking-wide bg-gradient-to-r from-amber-300 via-white to-sky-300 bg-clip-text text-transparent">
-                        Key Vault Store
-                    </h1>
-                    <p className="text-[9px] text-amber-400 font-extrabold tracking-wider uppercase">
-                        ABA & Bakong KHQR Checkout
-                    </p>
+                <div className="flex flex-col">
+                    <span className="font-extrabold text-sm tracking-tight text-white group-hover:text-indigo-300 transition-colors flex items-center gap-1">
+                        KEY VAULT <span className="bg-indigo-500/20 text-indigo-400 text-[10px] px-1.5 py-0.2 rounded border border-indigo-500/30">PRO</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">Digital Keys & Licenses</span>
                 </div>
             </div>
 
@@ -30,12 +34,12 @@ const Header = () => {
             <div className="flex items-center gap-2">
                 <button 
                     onClick={() => navigate('/app/cart')}
-                    className="relative p-2.5 bg-slate-900 hover:bg-slate-800 active:scale-95 rounded-xl border border-slate-800 transition-all text-white"
+                    className="relative p-2.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition-all text-slate-200 hover:text-white shadow-sm"
                     aria-label="View Cart"
                 >
-                    <FaShoppingBag className="text-base text-amber-400" />
+                    <FaShoppingBag className="text-base text-indigo-400" />
                     {totalItems > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center animate-bounce shadow-md shadow-rose-500/40">
+                        <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow-md shadow-indigo-500/40 ring-2 ring-[#0b0f17]">
                             {totalItems}
                         </span>
                     )}

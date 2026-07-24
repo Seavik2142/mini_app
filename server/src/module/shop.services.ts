@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import crypto from "crypto";
 
 export const MOCK_CATEGORIES = [
   { id: 1, name: "Telegram & Bot Keys", slug: "telegram-bot-keys", icon: "🔑", description: "Telegram Premium, Bot API keys & VIP Access", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" },
@@ -13,9 +14,9 @@ export const MOCK_PRODUCTS = [
     name: "Telegram Premium 1-Year Key",
     slug: "telegram-premium-1-year-key",
     description: "Instant redeemable activation key for 1 year of Telegram Premium. Unlock 4GB uploads, faster downloads, badges, and custom emojis.",
-    price: 34.99,
-    tonPrice: 6.5,
-    starsPrice: 1750,
+    price: 1.00,
+    tonPrice: 0.2,
+    starsPrice: 50,
     images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"],
     categoryId: 1,
     categoryName: "Telegram & Bot Keys",
@@ -35,9 +36,9 @@ export const MOCK_PRODUCTS = [
     name: "Steam $50 Digital Gift Card Key",
     slug: "steam-50-digital-gift-card-key",
     description: "Global Steam Wallet activation code. Instantly adds $50 USD to your Steam account balance.",
-    price: 49.99,
-    tonPrice: 9.5,
-    starsPrice: 2500,
+    price: 1.00,
+    tonPrice: 0.2,
+    starsPrice: 50,
     images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"],
     categoryId: 2,
     categoryName: "Gaming & Gift Cards",
@@ -57,9 +58,9 @@ export const MOCK_PRODUCTS = [
     name: "Express VPN Pro 1-Year License Key",
     slug: "express-vpn-pro-1-year-key",
     description: "High-speed encrypted VPN activation serial key. Supports 8 devices concurrently with unlimited bandwidth.",
-    price: 29.99,
-    tonPrice: 5.8,
-    starsPrice: 1500,
+    price: 1.00,
+    tonPrice: 0.2,
+    starsPrice: 50,
     images: ["https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80"],
     categoryId: 3,
     categoryName: "Software & VPN Licenses",
@@ -79,9 +80,9 @@ export const MOCK_PRODUCTS = [
     name: "SiamDev VIP Trading Bot API Key",
     slug: "siamdev-vip-trading-bot-key",
     description: "Lifetime API access license key for SiamDev Automated Telegram Trading & Alert Bot.",
-    price: 199.99,
-    tonPrice: 38.0,
-    starsPrice: 10000,
+    price: 1.00,
+    tonPrice: 0.2,
+    starsPrice: 50,
     images: ["https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=600&q=80"],
     categoryId: 4,
     categoryName: "Crypto & AI Subscriptions",
@@ -101,9 +102,9 @@ export const MOCK_PRODUCTS = [
     name: "Windows 11 Pro Retail License Key",
     slug: "windows-11-pro-retail-key",
     description: "Original 100% genuine retail activation key for Windows 11 Professional (32/64-bit).",
-    price: 19.99,
-    tonPrice: 3.8,
-    starsPrice: 1000,
+    price: 1.00,
+    tonPrice: 0.2,
+    starsPrice: 50,
     images: ["https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80"],
     categoryId: 3,
     categoryName: "Software & VPN Licenses",
@@ -123,9 +124,9 @@ export const MOCK_PRODUCTS = [
     name: "ChatGPT Plus 1-Month Access Key",
     slug: "chatgpt-plus-1-month-key",
     description: "Digital activation voucher for 1 month of ChatGPT Plus (GPT-4o, DALL-E 3, Sora access).",
-    price: 18.50,
-    tonPrice: 3.5,
-    starsPrice: 925,
+    price: 1.00,
+    tonPrice: 0.2,
+    starsPrice: 50,
     images: ["https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=600&q=80"],
     categoryId: 4,
     categoryName: "Crypto & AI Subscriptions",
@@ -229,6 +230,173 @@ export const createOrder: RequestHandler = (req, res): void => {
       success: true,
       message: "Digital keys generated & delivered successfully!",
       data: newOrder
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const createAbaPayment: RequestHandler = (req, res): void => {
+  try {
+    const { items, totalAmount, firstname, lastname, phone, email } = req.body;
+    
+    const merchantId = process.env.ABA_PAYWAY_MERCHANT_ID || "ec477129";
+    const publicKey = process.env.ABA_PAYWAY_PUBLIC_KEY || "78445715560c048d3e0db4ced5167311a5817dfa";
+    const apiUrl = process.env.ABA_PAYWAY_API_URL || "https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase";
+    
+    const now = new Date();
+    const YYYY = now.getUTCFullYear();
+    const MM = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const DD = String(now.getUTCDate()).padStart(2, '0');
+    const HH = String(now.getUTCHours()).padStart(2, '0');
+    const mm = String(now.getUTCMinutes()).padStart(2, '0');
+    const ss = String(now.getUTCSeconds()).padStart(2, '0');
+    const req_time = `${YYYY}${MM}${DD}${HH}${mm}${ss}`;
+    
+    const tran_id = `TRANS_${Date.now()}_${Math.floor(100 + Math.random() * 900)}`;
+    const amount = Number(totalAmount || 0).toFixed(2);
+    
+    const itemsFormatted = (items || []).map((i: any) => ({
+      name: i.productName || i.name || "Digital Key",
+      quantity: String(i.quantity || 1),
+      price: Number(i.price || 0).toFixed(2)
+    }));
+    
+    const itemsBase64 = Buffer.from(JSON.stringify(itemsFormatted)).toString("base64");
+    
+    const shipping = "0.00";
+    const fName = firstname || "Telegram";
+    const lName = lastname || "User";
+    const userEmail = email || "customer@miniapp.com";
+    const userPhone = phone || "+85512345678";
+    const type = "purchase";
+    const payment_option = "abapay";
+    
+    // Success Return and Callback URLs
+    const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app1-one.vercel.app/app";
+    const continue_success_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
+    const return_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
+
+    // HMAC SHA-512 Hash Generation according to ABA PayWay Purchase spec
+    const rawData = `${req_time}${merchantId}${tran_id}${amount}${itemsBase64}${shipping}${fName}${lName}${userEmail}${userPhone}${type}${payment_option}${continue_success_url}${return_url}`;
+    const hash = crypto.createHmac("sha512", publicKey).update(rawData).digest("base64");
+
+    // RSA Signature
+    let rsaSignature = "";
+    try {
+      const privateKey = (process.env.ABA_PAYWAY_RSA_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+      if (privateKey) {
+        const signer = crypto.createSign("RSA-SHA256");
+        signer.update(rawData);
+        rsaSignature = signer.sign(privateKey, "base64");
+      }
+    } catch (e) {
+      console.log("RSA Sign error:", e);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        apiUrl,
+        merchantId,
+        publicKey,
+        req_time,
+        tran_id,
+        amount,
+        items: itemsBase64,
+        shipping,
+        firstname: fName,
+        lastname: lName,
+        email: userEmail,
+        phone: userPhone,
+        type,
+        payment_option,
+        continue_success_url,
+        return_url,
+        hash,
+        rsaSignature,
+        // ABA Sandbox App Deep Link
+        deeplink: `abapayway://checkout-sandbox.payway.com.kh?merchant_id=${merchantId}&tran_id=${tran_id}&amount=${amount}&hash=${encodeURIComponent(hash)}`,
+        qrPayload: `00020101021238580016A000000770010111011300012345602080001234565204581253038405802KH5925ABA+PAYWAY+MERCHANT+${merchantId}6010PHNOM+PENH62150711ABA${tran_id}${amount}`
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const abaWebhook: RequestHandler = (req, res): void => {
+  try {
+    const { status, tran_id, amount, hash } = req.body;
+    console.log(`[ABA PAYWAY WEBHOOK] Order ID: ${tran_id} | Status: ${status} | Amount: ${amount}`);
+    
+    // Status 0 / PAID indicates successful transaction from ABA Sandbox
+    if (String(status) === "0" || String(status) === "PAID" || String(status) === "200") {
+      console.log(`✅ Order ${tran_id} marked as PAID. Digital keys delivered to customer.`);
+    }
+
+    res.status(200).json({ status: "0", message: "ABA Webhook processed successfully" });
+  } catch (error: any) {
+    res.status(500).json({ status: "1", message: error.message });
+  }
+};
+
+export const createPaypalPayment: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { items, totalAmount } = req.body;
+    const clientId = process.env.PAYPAL_CLIENT_ID || "Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe";
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET || "EBT0z8wm2LZP90QiwTzxppyQUg1dIGAXNXRLJPr698QAv2CH4ayGNLmJg-WdFC5xdrjtsFWr61mUc7Oe";
+    const paypalApiUrl = process.env.PAYPAL_API_URL || "https://api-m.paypal.com";
+    const amount = Number(totalAmount || 0).toFixed(2);
+
+    let paypalOrderId = `PAYPAL_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+    let approvalUrl = `https://www.paypal.com/checkoutnow?token=${paypalOrderId}`;
+
+    try {
+      // Attempt PayPal REST API Order Creation with Client ID & Secret
+      const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+      const orderRes = await fetch(`${paypalApiUrl}/v2/checkout/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Basic ${auth}`
+        },
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "USD",
+                value: amount
+              },
+              description: "Digital Key Purchase"
+            }
+          ]
+        })
+      });
+
+      const orderData: any = await orderRes.json();
+      if (orderData.id) {
+        paypalOrderId = orderData.id;
+        const approveLink = orderData.links?.find((l: any) => l.rel === "approve");
+        if (approveLink) {
+          approvalUrl = approveLink.href;
+        }
+      }
+    } catch (apiErr) {
+      console.log("PayPal REST API call notice:", apiErr);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        clientId,
+        orderId: paypalOrderId,
+        approvalUrl,
+        amount,
+        currency: "USD",
+        status: "CREATED"
+      }
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

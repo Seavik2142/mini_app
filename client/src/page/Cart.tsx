@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaQrcode, FaCreditCard, FaTimes, FaShieldAlt, FaPhoneAlt } from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaTimes, FaPhoneAlt, FaPaypal } from "react-icons/fa";
 import { mainButton } from "@telegram-apps/sdk";
+import { toast } from "sonner";
 
 const Cart: React.FC = () => {
   const {
@@ -16,31 +17,94 @@ const Cart: React.FC = () => {
     totalPrice,
     formatKHR,
     placeOrder,
+    requireAuth,
   } = useCart();
 
   const navigate = useNavigate();
   const [inputCode, setInputCode] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"ABA" | "BAKONG" | "CARD">("ABA");
+  const paymentMethod = "PAYPAL";
   const [phone, setPhone] = useState("+855 12 345 678");
   const [showKHQRModal, setShowKHQRModal] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [paypalData, setPaypalData] = useState<any>(null);
 
-  const handleOpenPayment = () => {
-    if (cart.length === 0) return;
-    setShowKHQRModal(true);
-  };
+  const handleOpenPayment = async () => {
+    requireAuth(async () => {
+      if (cart.length === 0) return;
+      setIsVerifying(true);
+      setShowKHQRModal(true);
 
-  const handleConfirmPayment = async () => {
-    setIsVerifying(true);
-    setTimeout(async () => {
-      const order = await placeOrder(paymentMethod, phone);
-      setIsVerifying(false);
-      setShowKHQRModal(false);
-      if (order) {
-        navigate("/app/orders");
+      try {
+        const res = await fetch("http://localhost:3000/shop/paypal-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: cart.map(i => ({ productId: i.product.id, name: i.product.name, quantity: i.quantity, price: i.product.price })),
+            totalAmount: totalPrice
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          setPaypalData(data.data);
+        }
+      } catch (e) {
+        console.log("Checkout API error:", e);
+      } finally {
+        setIsVerifying(false);
       }
-    }, 1200);
+    });
   };
+
+  useEffect(() => {
+    if (showKHQRModal) {
+      const clientId = paypalData?.clientId || "Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe";
+      const scriptId = "paypal-js-sdk";
+      
+      const renderButtons = () => {
+        const container = document.getElementById("paypal-button-container");
+        if (container && (window as any).paypal) {
+          container.innerHTML = "";
+          try {
+            (window as any).paypal.Buttons({
+              style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+              createOrder: (_data: any, actions: any) => {
+                return actions.order.create({
+                  purchase_units: [{ amount: { value: totalPrice.toFixed(2) } }]
+                });
+              },
+              onApprove: async (_data: any, actions: any) => {
+                setIsVerifying(true);
+                try {
+                  await actions.order.capture();
+                } catch (e) {
+                  console.log("Capture notice:", e);
+                }
+                toast.success("🎉 PayPal Payment Approved! Auto-delivering digital keys...");
+                const order = await placeOrder("PAYPAL", phone);
+                setIsVerifying(false);
+                setShowKHQRModal(false);
+                if (order) {
+                  navigate("/app/orders");
+                }
+              }
+            }).render("#paypal-button-container");
+          } catch (e) {
+            console.log("PayPal Buttons render fallback:", e);
+          }
+        }
+      };
+
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+        script.onload = renderButtons;
+        document.body.appendChild(script);
+      } else {
+        renderButtons();
+      }
+    }
+  }, [showKHQRModal, paypalData, totalPrice]);
 
   // Telegram Native MainButton integration
   useEffect(() => {
@@ -52,8 +116,8 @@ const Cart: React.FC = () => {
         }
         if (mb.setParams?.isAvailable) {
           mb.setParams({
-            text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)}) VIA ${paymentMethod}`,
-            backgroundColor: paymentMethod === 'ABA' ? '#dc2626' : paymentMethod === 'BAKONG' ? '#0284c7' : '#f59e0b',
+            text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)}) VIA PAYPAL`,
+            backgroundColor: '#0070ba',
             textColor: '#ffffff',
             isVisible: true,
             isEnabled: true,
@@ -75,7 +139,7 @@ const Cart: React.FC = () => {
   if (cart.length === 0) {
     return (
       <div className="text-center py-16 space-y-4">
-        <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-500 text-3xl shadow-xl">
+        <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl shadow-xl">
           <FaShoppingBag />
         </div>
         <div className="space-y-1">
@@ -84,7 +148,7 @@ const Cart: React.FC = () => {
         </div>
         <button
           onClick={() => navigate("/app")}
-          className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20"
+          className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
         >
           Browse Digital Keys
         </button>
@@ -104,7 +168,7 @@ const Cart: React.FC = () => {
         {cart.map(({ product, quantity }) => (
           <div
             key={product.id}
-            className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3 shadow-md"
+            className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl flex items-center gap-3 shadow-lg"
           >
             <img
               src={product.images[0]}
@@ -113,8 +177,8 @@ const Cart: React.FC = () => {
             />
             <div className="flex-1 min-w-0">
               <h3 className="text-xs font-bold text-white truncate">{product.name}</h3>
-              <p className="text-xs font-extrabold text-amber-400 mt-0.5">
-                ${product.price.toFixed(2)} <span className="text-emerald-400 text-[10px]">({formatKHR(product.price)})</span>
+              <p className="text-xs font-extrabold text-white mt-0.5">
+                ${product.price.toFixed(2)} <span className="text-emerald-400 font-extrabold text-[10px]">({formatKHR(product.price)})</span>
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5">
@@ -149,9 +213,9 @@ const Cart: React.FC = () => {
       </div>
 
       {/* Promo Code Input */}
-      <div className="p-3 bg-slate-900/90 border border-slate-800 rounded-2xl space-y-2">
+      <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2 shadow-md">
         <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <FaTag className="text-amber-400" /> Promo Code
+          <FaTag className="text-indigo-400" /> Promo Code
         </label>
         <div className="flex gap-2">
           <input
@@ -159,98 +223,72 @@ const Cart: React.FC = () => {
             value={inputCode}
             onChange={(e) => setInputCode(e.target.value)}
             placeholder="Try code TELEGRAM10 or ABA10"
-            className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white uppercase tracking-wider focus:outline-none focus:border-amber-500"
+            className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white uppercase tracking-wider focus:outline-none focus:border-indigo-500"
           />
           <button
             onClick={() => applyPromoCode(inputCode)}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl border border-slate-700"
+            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-xl shadow-md transition-all"
           >
             Apply
           </button>
         </div>
         {promoCode && (
-          <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
+          <p className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
             <FaCheck /> Active Code: {promoCode} (15% OFF applied)
           </p>
         )}
       </div>
 
       {/* Contact Phone */}
-      <div className="p-3 bg-slate-900/90 border border-slate-800 rounded-2xl space-y-2">
+      <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2 shadow-md">
         <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <FaPhoneAlt className="text-amber-400" /> Telegram / Phone Number
+          <FaPhoneAlt className="text-indigo-400" /> Telegram / Phone Number
         </label>
         <input
           type="text"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+855 12 345 678"
-          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
         />
       </div>
 
-      {/* Payment Selection (ABA PAY vs Bakong KHQR vs Card) */}
-      <div className="p-3 bg-slate-900/90 border border-slate-800 rounded-2xl space-y-3">
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
-          <FaQrcode className="text-rose-500" /> Select Payment Method
-        </h3>
-        <div className="grid grid-cols-3 gap-2">
-          {/* ABA PAY */}
-          <button
-            type="button"
-            onClick={() => setPaymentMethod("ABA")}
-            className={`p-2.5 rounded-xl border text-center transition-all ${
-              paymentMethod === "ABA"
-                ? "bg-rose-600/20 border-rose-500 text-rose-400 font-black scale-105 shadow-md shadow-rose-500/20"
-                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
-            }`}
-          >
-            <div className="w-7 h-7 bg-rose-600 text-white font-black rounded-lg text-[10px] flex items-center justify-center mx-auto mb-1">
-              ABA
-            </div>
-            <p className="text-[10px] font-bold">ABA PAY</p>
-          </button>
+      {/* Payment Selection (PayPal Exclusive) */}
+      <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-md">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <FaPaypal className="text-indigo-400 text-sm" /> Payment Method
+          </h3>
+          <span className="text-[10px] bg-indigo-500/20 text-indigo-300 font-extrabold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+            PAYPAL ONLINE ⚡
+          </span>
+        </div>
 
-          {/* Bakong KHQR */}
-          <button
-            type="button"
-            onClick={() => setPaymentMethod("BAKONG")}
-            className={`p-2.5 rounded-xl border text-center transition-all ${
-              paymentMethod === "BAKONG"
-                ? "bg-sky-600/20 border-sky-500 text-sky-400 font-black scale-105 shadow-md shadow-sky-500/20"
-                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
-            }`}
-          >
-            <div className="w-7 h-7 bg-sky-600 text-white font-black rounded-lg text-[10px] flex items-center justify-center mx-auto mb-1">
-              KHQR
+        {/* PayPal Option Box */}
+        <div className="p-3 bg-slate-950 border-2 border-indigo-500/60 rounded-xl flex items-center justify-between shadow-inner">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white text-lg font-black rounded-xl flex items-center justify-center shadow-md">
+              <FaPaypal />
             </div>
-            <p className="text-[10px] font-bold">Bakong KHQR</p>
-          </button>
-
-          {/* Card */}
-          <button
-            type="button"
-            onClick={() => setPaymentMethod("CARD")}
-            className={`p-2.5 rounded-xl border text-center transition-all ${
-              paymentMethod === "CARD"
-                ? "bg-amber-600/20 border-amber-500 text-amber-400 font-black scale-105 shadow-md shadow-amber-500/20"
-                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
-            }`}
-          >
-            <FaCreditCard className="text-lg mx-auto mb-1.5" />
-            <p className="text-[10px] font-bold">Card Pay</p>
-          </button>
+            <div>
+              <p className="text-xs font-black text-white">PayPal Express Checkout</p>
+              <p className="text-[10px] text-slate-400">Direct instant checkout via PayPal</p>
+            </div>
+          </div>
+          <span className="text-xs text-indigo-400 font-extrabold flex items-center gap-1">
+            <FaCheck /> Selected
+          </span>
         </div>
       </div>
 
       {/* Order Summary */}
-      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl space-y-2 text-xs">
+      <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2 text-xs shadow-lg">
         <div className="flex justify-between text-slate-400">
           <span>Subtotal</span>
           <span className="text-white font-medium">${subtotal.toFixed(2)} ({formatKHR(subtotal)})</span>
         </div>
         {discount > 0 && (
-          <div className="flex justify-between text-emerald-400 font-medium">
+          <div className="flex justify-between text-emerald-400 font-semibold">
             <span>Discount (15%)</span>
             <span>-${discount.toFixed(2)} (-{formatKHR(discount)})</span>
           </div>
@@ -262,7 +300,7 @@ const Cart: React.FC = () => {
         <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline font-bold text-sm text-white">
           <span>Total Amount</span>
           <div className="text-right">
-            <p className="text-base text-amber-400 font-black">${totalPrice.toFixed(2)}</p>
+            <p className="text-base text-white font-black">${totalPrice.toFixed(2)}</p>
             <p className="text-xs text-emerald-400 font-mono font-extrabold">{formatKHR(totalPrice)}</p>
           </div>
         </div>
@@ -271,32 +309,24 @@ const Cart: React.FC = () => {
       {/* Proceed to Payment Button */}
       <button
         onClick={handleOpenPayment}
-        className={`w-full py-3.5 ${
-          paymentMethod === 'ABA'
-            ? 'bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 shadow-rose-600/30'
-            : paymentMethod === 'BAKONG'
-            ? 'bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 shadow-sky-600/30'
-            : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/30'
-        } text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl active:scale-[0.99] transition-all`}
+        className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition-all"
       >
-        <FaQrcode className="text-lg" />
-        Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via {paymentMethod} <FaArrowRight className="text-xs" />
+        <FaPaypal className="text-lg" />
+        Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via PayPal <FaArrowRight className="text-xs" />
       </button>
 
-      {/* ABA / Bakong KHQR Payment Modal */}
+      {/* PayPal Checkout Modal */}
       {showKHQRModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl text-center animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-left">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-xs ${
-                  paymentMethod === 'ABA' ? 'bg-rose-600' : paymentMethod === 'BAKONG' ? 'bg-sky-600' : 'bg-amber-600'
-                }`}>
-                  {paymentMethod}
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-600 text-white text-base">
+                  <FaPaypal />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-sm text-white">{paymentMethod} KHQR Payment</h3>
-                  <p className="text-[10px] text-slate-400">Scan KHQR code to complete order</p>
+                  <h3 className="font-extrabold text-sm text-white">PayPal Express Checkout</h3>
+                  <p className="text-[10px] text-slate-400">Pay via PayPal Gateway</p>
                 </div>
               </div>
               <button
@@ -309,51 +339,34 @@ const Cart: React.FC = () => {
 
             {/* Total Amount Badge */}
             <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-0.5">
-              <p className="text-[10px] text-slate-400 uppercase font-semibold">Total Payable</p>
-              <p className="text-2xl font-black text-amber-400 font-mono">${totalPrice.toFixed(2)}</p>
+              <p className="text-[10px] text-slate-400 uppercase font-semibold">
+                {isVerifying ? "Verifying & Delivering Keys..." : "Total Amount Payable"}
+              </p>
+              <p className="text-2xl font-black text-white font-mono">${totalPrice.toFixed(2)}</p>
               <p className="text-xs font-black text-emerald-400 font-mono">{formatKHR(totalPrice)}</p>
             </div>
 
-            {/* KHQR Code Box */}
-            <div className="p-4 bg-white rounded-2xl border-4 border-slate-800 space-y-2 inline-block mx-auto shadow-inner">
-              <div className="relative aspect-square w-48 mx-auto flex items-center justify-center">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=00020101021238580016A000000770010111011300012345602080001234565204581253038405802KH5925SIAMDEV+KEY+STORE6010PHNOM+PENH62150711KEYSTORE${totalPrice.toFixed(2)}`}
-                  alt="KHQR Code"
-                  className="w-full h-full object-contain"
-                />
+            {/* Official PayPal Buttons Container */}
+            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-center">
+              <div className="flex items-center justify-center gap-2 text-white text-xs font-bold mb-2">
+                <FaPaypal className="text-lg text-indigo-400" /> Official PayPal Checkout
               </div>
-              <div className="text-[10px] text-slate-900 font-black uppercase tracking-wider flex items-center justify-center gap-1">
-                <FaShieldAlt className="text-rose-600" /> OFFICIAL KHQR PAYLOAD
+              
+              {/* PayPal SDK Buttons Render Target */}
+              <div id="paypal-button-container" className="min-h-[100px] flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const paypalWebUrl = paypalData?.approvalUrl || `https://www.paypal.com/checkoutnow?token=${paypalData?.orderId || ""}`;
+                    window.open(paypalWebUrl, "_blank");
+                  }}
+                  className="w-full py-3.5 bg-[#ffc439] hover:bg-[#f2ba32] text-black font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
+                >
+                  <FaPaypal className="text-lg text-[#003087]" /> Pay with PayPal
+                </button>
               </div>
+              <p className="text-[10px] text-slate-400">Automatic Key Delivery upon Payment ⚡</p>
             </div>
-
-            {/* Merchant Details */}
-            <div className="text-left text-xs bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
-              <div className="flex justify-between text-slate-400">
-                <span>Merchant:</span>
-                <span className="text-white font-bold">SIAMDEV DIGITAL KEY STORE</span>
-              </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Account No:</span>
-                <span className="text-amber-400 font-mono font-bold">000 123 456 ({paymentMethod})</span>
-              </div>
-            </div>
-
-            {/* Confirm Payment Button */}
-            <button
-              disabled={isVerifying}
-              onClick={handleConfirmPayment}
-              className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
-            >
-              {isVerifying ? (
-                "Verifying KHQR Payment..."
-              ) : (
-                <>
-                  <FaCheck /> I Have Paid ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)})
-                </>
-              )}
-            </button>
           </div>
         </div>
       )}

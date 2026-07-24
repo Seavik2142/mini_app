@@ -3,67 +3,53 @@ import { initData } from '@telegram-apps/sdk';
 const Leaderboard = () => {
     initData.restore()
 
-    function rndColor() {
-        const randomNum = Math.random() * 3;
-        switch (Math.round(randomNum)) {
-            case 0:
-                return `bg-cyan-300`;
-            case 1:
-                return `bg-yellow-300`;
-            case 2:
-                return `bg-blue-300`;
-            default:
-                return `bg-purple-300`;
-        }
-    }
-
     return (
         <div>
-            <img src={initData.user()?.photo_url} alt="photo picture" className='size-20 rounded-full mx-auto mt-5' />
+            <img src={initData.user()?.photo_url} alt="photo picture" className='size-20 rounded-full mx-auto mt-5 border-2 border-indigo-500/50 shadow-lg shadow-indigo-600/20' />
             <p className="text-2xl text-center font-monda font-bold text-white mt-1">3,000</p>
-            <p className='font-montserrat text-center mt-1 opacity-70 text-xs'>Level 1 - 🌟 1 Place</p>
+            <p className='font-montserrat text-center mt-1 text-indigo-300 font-semibold text-xs'>Level 1 - 🌟 1st Place</p>
             <div className="flex items-center justify-center mt-4">
-                <button className='text-sm bg-white/10 px-3 py-1 rounded-md border border-yellow-500/50 font-monda'>✨ Invite Friends</button>
+                <button className='text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-4 py-1.5 rounded-xl border border-indigo-500/40 font-monda text-white shadow-md shadow-indigo-600/20 transition-all'>✨ Invite Friends</button>
             </div>
 
-            <div className="flex items-center justify-between mt-4">
-                <p className='font-roboto font-medium'>All Leaderboards</p>
-                <p className='text-sm font-montserrat text-blue-400'>See all</p>
+            <div className="flex items-center justify-between mt-6">
+                <p className='font-roboto font-bold text-white'>All Leaderboards</p>
+                <p className='text-sm font-montserrat text-indigo-400 font-semibold cursor-pointer hover:underline'>See all</p>
             </div>
 
-            <div className="bg-white/10 p-3 rounded-xl mt-2 flex items-center justify-between gap-3">
+            <div className="bg-slate-900/80 border border-slate-800/80 p-3 rounded-2xl mt-3 flex items-center justify-between gap-3 shadow-md">
                 <div className="flex items-center gap-3">
-                    <div className={`size-10 rounded-full mx-auto text-black flex items-center justify-center ${rndColor()}`}>
+                    <div className={`size-10 rounded-full text-slate-950 flex items-center justify-center font-bold bg-amber-400 shadow-md`}>
                         SA
                     </div>
                     <div>
-                        <p className='font-monda'>Siam Sheikh</p>
-                        <p className='text-xs opacity-50'>1231 - Lvl 10</p>
+                        <p className='font-monda text-white font-bold'>Siam Sheikh</p>
+                        <p className='text-xs text-slate-400'>1231 - Lvl 10</p>
                     </div>
                 </div>
-                <p className='text-2xl font-opensans'>#1</p>
+                <p className='text-2xl font-opensans text-amber-400 font-black'>#1</p>
             </div>
 
-            <div className="bg-white/10 p-3 rounded-xl mt-2 flex items-center justify-between gap-3">
+            <div className="bg-slate-900/80 border border-slate-800/80 p-3 rounded-2xl mt-2 flex items-center justify-between gap-3 shadow-md">
                 <div className="flex items-center gap-3">
-                    <img src={initData.user()?.photo_url} alt="photo picture" className='size-10 rounded-full mx-auto' />
+                    <img src={initData.user()?.photo_url} alt="photo picture" className='size-10 rounded-full border border-slate-600' />
                     <div>
-                        <p className='font-monda'>Iqbal Labit</p>
-                        <p className='text-xs opacity-50'>1231 - Lvl 10</p>
+                        <p className='font-monda text-white font-bold'>Iqbal Labit</p>
+                        <p className='text-xs text-slate-400'>1231 - Lvl 10</p>
                     </div>
                 </div>
-                <p className='text-2xl font-opensans'>#2</p>
+                <p className='text-2xl font-opensans text-slate-300 font-black'>#2</p>
             </div>
 
-            <div className="bg-white/10 p-3 rounded-xl mt-2 flex items-center justify-between gap-3">
+            <div className="bg-slate-900/80 border border-slate-800/80 p-3 rounded-2xl mt-2 flex items-center justify-between gap-3 shadow-md">
                 <div className="flex items-center gap-3">
-                    <img src={initData.user()?.photo_url} alt="photo picture" className='size-10 rounded-full mx-auto' />
+                    <img src={initData.user()?.photo_url} alt="photo picture" className='size-10 rounded-full border border-slate-600' />
                     <div>
-                        <p className='font-monda'>Karim jannat</p>
-                        <p className='text-xs opacity-50'>1231 - Lvl 10</p>
+                        <p className='font-monda text-white font-bold'>Karim jannat</p>
+                        <p className='text-xs text-slate-400'>1231 - Lvl 10</p>
                     </div>
                 </div>
-                <p className='text-2xl font-opensans'>#3</p>
+                <p className='text-2xl font-opensans text-amber-600 font-black'>#3</p>
             </div>
         </div>
     );

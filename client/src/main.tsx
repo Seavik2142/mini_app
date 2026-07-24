@@ -8,6 +8,8 @@ import Routes from './routes.tsx'
 import { init } from '@telegram-apps/sdk'
 import { Toaster } from 'sonner'
 
+import { CartProvider } from './context/CartContext'
+
 try {
   init();
 } catch (e) {
@@ -18,8 +20,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <Provider store={Store}>
-        <Toaster position="top-center" richColors theme="dark" />
-        <RouterProvider router={Routes} />
+        <CartProvider>
+          <Toaster position="top-center" richColors theme="dark" />
+          <RouterProvider router={Routes} />
+        </CartProvider>
       </Provider>
     </div>
   </React.StrictMode>,

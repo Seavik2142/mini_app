@@ -1,106 +1,141 @@
+/**
+ * Telegram Bot — OTP via Deep Link
+ *
+ * Flow:
+ *   1. Mini App backend creates a sessionId and returns deepLink:
+ *      https://t.me/Sik_mybot?start=SESSION_ID
+ *
+ *   2. User opens that link in Telegram → triggers /start SESSION_ID
+ *
+ *   3. Bot:
+ *      a. Looks up sessionId in otpStore
+ *      b. Stores user's chatId on the session
+ *      c. Sends the OTP code to the user's chat
+ *
+ *   4. User enters the code in the Mini App → POST /user/otp/verify
+ */
+
 import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
+import {
+  getSession,
+  attachTelegramUser,
+  getSecondsUntilExpiry,
+} from './utils/otpStore';
 
 dotenv.config();
 
-const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
+const token = process.env.BOT_TOKEN!;
 const webAppUrl = process.env.MINI_APP_URL || 'https://mini-app1-one.vercel.app/app';
+const BOT_USERNAME = 'Sik_mybot';
+
+let botInstance: TelegramBot | null = null;
+
+export const getBot = (): TelegramBot | null => botInstance;
 
 export const initBot = () => {
   try {
     const bot = new TelegramBot(token, { polling: true });
+    botInstance = bot;
 
-    console.log(`🤖 Telegram Bot listener initialized for bot @Sik_mybot (ID: 8833845544)...`);
+    console.log(`🤖 Telegram Bot @${BOT_USERNAME} initialized`);
 
     bot.on('polling_error', (err) => {
-      if (err.message && !err.message.includes('EFATAL')) {
-        return;
-      }
-      console.log('Bot Polling info:', err.message);
+      if (err.message && !err.message.includes('EFATAL')) return;
+      console.log('Bot Polling error:', err.message);
     });
 
-    // Set Telegram Bot persistent Menu Button
-    (bot as any)
-      ._request('setChatMenuButton', {
-        form: {
-          menu_button: JSON.stringify({
-            type: 'web_app',
-            text: '🔑 Open Key Vault',
-            web_app: { url: webAppUrl }
-          })
-        }
-      })
-      .then(() => {
-        console.log('✅ Bot Menu Button successfully updated to point to E-Commerce Mini App!');
-      })
-      .catch((err: any) => {
-        console.log('Bot Menu Button setup info:', err?.message || err);
-      });
-
-    // Setup Bot Commands
-    bot
-      .setMyCommands([
-        { command: 'shop', description: '🔑 Open Digital Key Marketplace' },
-        { command: 'vault', description: '📦 View My Purchased Keys' },
-        { command: 'profile', description: '👤 My Profile & Balances' },
-        { command: 'help', description: '💡 Shop Help & Support' }
-      ])
-      .catch(() => {});
-
-    // Handle any message sent to bot
-    bot.on('message', (msg) => {
+    // ──────────────────────────────────────────────────
+    // /start SESSION_ID  — OTP Deep Link Handler
+    // ──────────────────────────────────────────────────
+    bot.onText(/\/start (.+)/, async (msg, match) => {
       const chatId = msg.chat.id;
-      const firstName = msg.from?.first_name || 'Shopper';
-      const text = msg.text || '';
+      const firstName = msg.from?.first_name || 'User';
+      const sessionId = match?.[1]?.trim();
 
-      if (text.startsWith('/help')) return;
+      if (!sessionId) {
+        // Plain /start without session — show welcome
+        return sendWelcome(bot, chatId, firstName);
+      }
 
-      bot.sendMessage(
+      const session = getSession(sessionId);
+
+      if (!session) {
+        await bot.sendMessage(
+          chatId,
+          `⚠️ *This verification link has expired.*\n\nPlease go back to the Mini App and request a new code.`,
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      // Attach this user's chatId and real Telegram identity to the session
+      if (msg.from) {
+        attachTelegramUser(sessionId, chatId, {
+          id: msg.from.id,
+          first_name: msg.from.first_name,
+          last_name: msg.from.last_name,
+          username: msg.from.username,
+          language_code: msg.from.language_code
+        });
+      }
+
+      const expiresIn = getSecondsUntilExpiry(sessionId);
+      const minutes = Math.floor(expiresIn / 60);
+      const seconds = expiresIn % 60;
+
+      // Send the OTP code to the user
+      await bot.sendMessage(
         chatId,
-        `🔑 *Welcome to Key Vault Store*, ${firstName}!\n\n` +
-        `Instant redeemable activation keys for Telegram Premium, Steam, VPN passes, and Software licenses.\n\n` +
-        `💰 *Pay in USD ($) or Khmer Riel (៛)*\n` +
-        `🎁 *Use promo code TELEGRAM10 for 15% OFF!*`,
+        `🔐 *Your Mini App Login Code*\n\n` +
+        `Hello ${firstName}! Here is your 6-digit verification code:\n\n` +
+        `\`${session.otp}\`\n\n` +
+        `⏳ Expires in *${minutes}m ${seconds}s*\n` +
+        `🔒 Do not share this code with anyone.`,
         {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '🔑 Open Digital Key Store',
-                  web_app: { url: webAppUrl }
-                }
-              ],
-              [
-                {
-                  text: '📦 My Key Vault',
-                  web_app: { url: `${webAppUrl}/orders` }
-                },
-                {
-                  text: '👤 Balances & Profile',
-                  web_app: { url: `${webAppUrl}/profile` }
-                }
-              ]
-            ]
+            inline_keyboard: [[
+              { text: '↩️ Back to Mini App', web_app: { url: webAppUrl } }
+            ]]
           }
         }
-      ).catch((err) => {
-        console.error('Failed to send bot message:', err.message);
-      });
+      );
+
+      console.log(`[OTP SENT] Session: ${sessionId} | ChatId: ${chatId} | Code: ${session.otp}`);
     });
 
-    bot.onText(/\/help/, (msg) => {
-      const chatId = msg.chat.id;
-      bot.sendMessage(
-        chatId,
-        `💡 *Key Vault Store Help*\n\n` +
-        `• Send any message or /start to launch the Key Vault Store.\n` +
-        `• Pay in USD ($) or Riel Khmer (៛).\n` +
-        `• Use code TELEGRAM10 at checkout for 15% discount!\n\n` +
-        `Need support? Contact @Sik_mybot`,
-        { parse_mode: 'Markdown' }
-      );
+    // ──────────────────────────────────────────────────
+    // Plain /start (no session)
+    // ──────────────────────────────────────────────────
+    bot.onText(/^\/start$/, (msg) => {
+      sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User');
     });
+
+    // ──────────────────────────────────────────────────
+    // All other messages
+    // ──────────────────────────────────────────────────
+    bot.on('message', (msg) => {
+      if (msg.text?.startsWith('/')) return;
+      sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User');
+    });
+
+    // Setup Bot Commands & Menu
+    bot.setMyCommands([
+      { command: 'start', description: '🚀 Open Mini App' },
+      { command: 'shop', description: '🔑 Digital Key Marketplace' },
+      { command: 'help', description: '💡 Help & Support' }
+    ]).catch(() => {});
+
+    (bot as any)._request('setChatMenuButton', {
+      form: {
+        menu_button: JSON.stringify({
+          type: 'web_app',
+          text: '🔑 Open Key Vault',
+          web_app: { url: webAppUrl }
+        })
+      }
+    }).catch(() => {});
 
     return bot;
   } catch (error) {
@@ -108,3 +143,25 @@ export const initBot = () => {
     return null;
   }
 };
+
+function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
+  bot.sendMessage(
+    chatId,
+    `👋 *Welcome to Key Vault Store, ${firstName}!*\n\n` +
+    `🔑 Buy instant activation keys for:\n` +
+    `• Telegram Premium\n• Steam Games\n• VPN Passes\n• Software Licenses\n\n` +
+    `💰 Pay in *USD ($)* or *Khmer Riel (៛)*`,
+    {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🔑 Open Key Vault Store', web_app: { url: webAppUrl } }],
+          [
+            { text: '📦 My Orders', web_app: { url: `${webAppUrl}/orders` } },
+            { text: '👤 Profile', web_app: { url: `${webAppUrl}/profile` } }
+          ]
+        ]
+      }
+    }
+  ).catch(console.error);
+}

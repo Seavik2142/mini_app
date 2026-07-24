@@ -7,9 +7,14 @@ import Home from "./page/Home";
 import Cart from "./page/Cart";
 import Orders from "./page/Orders";
 import Profile from "./page/Profile";
+import AuthLogin from "./page/AuthLogin";
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 const Routes = createBrowserRouter([
+    {
+        path: '/auth',
+        element: <AuthLogin />
+    },
     {
         path: '/app',
         element: (
