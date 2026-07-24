@@ -273,7 +273,7 @@ export const createAbaPayment: RequestHandler = (req, res): void => {
     const payment_option = "abapay";
     
     // Success Return and Callback URLs
-    const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app1-one.vercel.app/app";
+    const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app-one-flax.vercel.app/app";
     const continue_success_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
     const return_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
 

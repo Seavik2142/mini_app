@@ -26,7 +26,7 @@ const BOT_USERNAME = 'Sik_mybot';
 
 // Helper to construct exact, clean Mini App URLs for subpages (/app, /app/orders, /app/profile)
 export const getMiniAppUrl = (path: string = ''): string => {
-  let baseUrl = (process.env.MINI_APP_URL || 'https://mini-app1-one.vercel.app/app').trim();
+  let baseUrl = (process.env.MINI_APP_URL || 'https://mini-app-one-flax.vercel.app/app').trim();
   baseUrl = baseUrl.replace(/\/+$/, '');
   
   if (!baseUrl.endsWith('/app')) {

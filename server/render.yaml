@@ -11,7 +11,7 @@ services:
       - key: BOT_USERNAME
         value: Sik_mybot
       - key: MINI_APP_URL
-        value: https://mini-app1-one.vercel.app/app
+        value: https://mini-app-one-flax.vercel.app/app
       - key: DATABASE_URL
         sync: false
       - key: SECRET
