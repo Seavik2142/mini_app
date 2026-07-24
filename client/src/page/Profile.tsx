@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 
 const Profile: React.FC = () => {
-  const { orders, telegramUser, isPhoneVerified, verifiedPhone, verifyPhone, sendOtpCode, updateVerifiedPhone, logout, requireAuth } = useCart();
+  const navigate = useNavigate();
+  const { orders, telegramUser, isPhoneVerified, verifiedPhone, verifyPhone, sendOtpCode, updateVerifiedPhone, logout } = useCart();
   const [copied, setCopied] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [inputPhone, setInputPhone] = useState(verifiedPhone || "");
@@ -14,6 +16,20 @@ const Profile: React.FC = () => {
 
   const { id: tgId } = telegramUser;
   const referralLink = `https://t.me/Sik_mybot/shop?startapp=ref_${tgId || verifiedPhone}`;
+
+  const handleQuickTelegramLogin = () => {
+    if (telegramUser.id || telegramUser.firstName) {
+      updateVerifiedPhone(String(telegramUser.id || "tg_user"), {
+        tgId: String(telegramUser.id || "tg_user"),
+        name: `${telegramUser.firstName || ''} ${telegramUser.lastName || ''}`.trim() || "Telegram User",
+        username: telegramUser.username || null
+      });
+      toast.success(`🎉 Welcome, ${telegramUser.firstName || 'Telegram User'}!`);
+    } else {
+      navigate("/auth");
+    }
+  };
+
   const copyReferral = () => {
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
@@ -81,17 +97,31 @@ const Profile: React.FC = () => {
           <div className="space-y-1 max-w-xs mx-auto">
             <h2 className="text-base font-extrabold text-white">Telegram Account Verification</h2>
             <p className="text-xs text-slate-400 leading-relaxed font-medium">
-              Log in with Telegram OTP to create your profile, activate your key vault, and earn referral rewards.
+              Connect your Telegram account to activate your Key Vault, unlock digital purchases, and earn referral rewards.
             </p>
           </div>
 
-          <button
-            onClick={() => requireAuth(() => {})}
-            className="w-full py-3 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
-          >
-            <FaTelegram className="text-base" />
-            ⚡ Log In via Telegram OTP
-          </button>
+          <div className="space-y-2 pt-1">
+            {/* Option 1: Quick 1-Tap Login if inside Telegram */}
+            {telegramUser.firstName && (
+              <button
+                onClick={handleQuickTelegramLogin}
+                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <FaBolt className="text-sm" />
+                Quick Login as {telegramUser.firstName}
+              </button>
+            )}
+
+            {/* Option 2: Verify via Bot OTP */}
+            <button
+              onClick={() => navigate("/auth")}
+              className="w-full py-3 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
+            >
+              <FaTelegram className="text-base" />
+              ⚡ Verify via Telegram Bot OTP
+            </button>
+          </div>
         </div>
       ) : (
 
