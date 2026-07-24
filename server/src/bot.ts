@@ -186,6 +186,40 @@ export const initBot = () => {
       );
     });
 
+    // ──────────────────────────────────────────────────
+    // 7. Callback Query Handler (Inline Button Clicks)
+    // ──────────────────────────────────────────────────
+    bot.on('callback_query', async (query) => {
+      const chatId = query.message?.chat.id;
+      if (!chatId) return;
+
+      try {
+        if (query.data === 'refresh') {
+          await updateBotMenu(bot);
+          await bot.answerCallbackQuery(query.id, { text: '🔄 Bot Menu Refreshed!' });
+          await bot.sendMessage(
+            chatId,
+            `✅ *Bot Menu Refreshed!*\n\nCommands and menu buttons updated for chat.`,
+            { parse_mode: 'Markdown' }
+          );
+        } else if (query.data === 'help' || query.data === 'commands') {
+          await bot.answerCallbackQuery(query.id);
+          await bot.sendMessage(
+            chatId,
+            `💡 *All Available Bot Commands:*\n\n` +
+            `• /start - 🚀 Open Mini App & Welcome\n` +
+            `• /update - 🔄 Refresh Bot Menu & Config\n` +
+            `• /clear - 🧹 Reset & Clear Sessions\n` +
+            `• /shop - 🔑 Digital Key Marketplace\n` +
+            `• /help - 💡 Show Help & Support`,
+            { parse_mode: 'Markdown' }
+          );
+        }
+      } catch (e) {
+        console.log('Callback query error:', e);
+      }
+    });
+
     // Register Menu Commands & Button
     updateBotMenu(bot);
 
@@ -198,13 +232,17 @@ export const initBot = () => {
 
 async function updateBotMenu(bot: TelegramBot) {
   try {
-    await bot.setMyCommands([
+    const commands = [
       { command: 'start', description: '🚀 Open Mini App & Welcome' },
       { command: 'update', description: '🔄 Refresh Bot Menu & Config' },
       { command: 'clear', description: '🧹 Clear & Reset Sessions' },
       { command: 'shop', description: '🔑 Digital Key Marketplace' },
-      { command: 'help', description: '💡 Help & Support' }
-    ]);
+      { command: 'help', description: '💡 Show Help & Support' }
+    ];
+
+    // Set commands for default and all_private_chats scope
+    await bot.setMyCommands(commands, { scope: JSON.stringify({ type: 'default' }) } as any);
+    await bot.setMyCommands(commands, { scope: JSON.stringify({ type: 'all_private_chats' }) } as any);
 
     await (bot as any)._request('setChatMenuButton', {
       form: {
@@ -215,7 +253,7 @@ async function updateBotMenu(bot: TelegramBot) {
         })
       }
     });
-    console.log('✅ Bot menu & commands registered successfully');
+    console.log('✅ Bot menu & commands registered for Telegram chat menu!');
   } catch (e) {
     console.log('Bot menu setup notice:', e);
   }
