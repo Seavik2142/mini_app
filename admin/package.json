@@ -1,0 +1,8 @@
+{
+  "name": "mini-app-admin",
+  "version": "1.0.0",
+  "description": "Standalone Admin Dashboard for Mini App",
+  "scripts": {
+    "build": "echo 'Static Admin Build Complete'"
+  }
+}

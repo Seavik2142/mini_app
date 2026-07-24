@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/html/index.html" },
+    { "source": "/products", "destination": "/html/products.html" },
+    { "source": "/banners", "destination": "/html/banners.html" },
+    { "source": "/users", "destination": "/html/users.html" },
+    { "source": "/promos", "destination": "/html/promos.html" },
+    { "source": "/payments", "destination": "/html/payments.html" },
+    { "source": "/(.*)", "destination": "/html/$1" }
+  ]
+}
