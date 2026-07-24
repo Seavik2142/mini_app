@@ -1,15 +1,11 @@
 {
-  "version": 2,
   "cleanUrls": true,
-  "buildCommand": "echo 'Static Admin'",
-  "outputDirectory": ".",
-  "rewrites": [
-    { "source": "/", "destination": "/html/index.html" },
-    { "source": "/products", "destination": "/html/products.html" },
-    { "source": "/banners", "destination": "/html/banners.html" },
-    { "source": "/users", "destination": "/html/users.html" },
-    { "source": "/promos", "destination": "/html/promos.html" },
-    { "source": "/payments", "destination": "/html/payments.html" },
-    { "source": "/(.*)", "destination": "/html/$1" }
+  "routes": [
+    { "src": "^/$", "dest": "/html/index.html" },
+    { "src": "^/products$", "dest": "/html/products.html" },
+    { "src": "^/banners$", "dest": "/html/banners.html" },
+    { "src": "^/users$", "dest": "/html/users.html" },
+    { "src": "^/promos$", "dest": "/html/promos.html" },
+    { "src": "^/payments$", "dest": "/html/payments.html" }
   ]
 }
