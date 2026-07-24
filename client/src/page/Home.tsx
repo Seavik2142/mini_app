@@ -1,7 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaStar, FaKey, FaBolt, FaTimes, FaShieldAlt } from "react-icons/fa";
+import { FaSearch, FaStar, FaKey, FaBolt, FaTimes, FaShieldAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Product } from "../type";
 import { useCart } from "../context/CartContext";
+
+const BANNER_SLIDES = [
+  {
+    id: 1,
+    badge: "Instant Digital Delivery ⚡",
+    title: "Digital Keys & License Store",
+    desc: "Telegram Premium, Steam Gift Cards, VPN & Software License keys instantly in USD ($) & Khmer Riel (៛)!",
+    tag: "⚡ Auto-Delivered to Vault",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-indigo-950 via-purple-900/80 to-slate-950"
+  },
+  {
+    id: 2,
+    badge: "Telegram Premium Keys 🚀",
+    title: "Unlock 4GB Uploads & Speed",
+    desc: "Instant 1-Year & 6-Month Telegram Premium activation codes with 15% bonus discount!",
+    tag: "🔥 15% OFF TODAY",
+    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-blue-950 via-indigo-900/80 to-slate-950"
+  },
+  {
+    id: 3,
+    badge: "Gaming & Software Licenses 🔑",
+    title: "Steam, VPN & Windows Keys",
+    desc: "Global activation keys with instant delivery. Pay easily via KHQR Bakong, ABA or Card!",
+    tag: "💳 KHQR & ABA Supported",
+    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-violet-950 via-fuchsia-950/80 to-slate-950"
+  }
+];
 
 const DEFAULT_PRODUCTS: Product[] = [
   {
@@ -131,6 +161,17 @@ const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Smooth Auto Scroll Animation every 3.5s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const activeSlide = BANNER_SLIDES[currentSlide];
 
   useEffect(() => {
     fetch("http://localhost:3000/shop/products")
@@ -152,23 +193,78 @@ const Home: React.FC = () => {
     );
   });
 
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length);
+
   return (
     <div className="space-y-4">
-      {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/90 via-purple-950/80 to-slate-950 p-5 text-white shadow-xl border border-indigo-500/30">
-        <div className="relative z-10 space-y-2.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold backdrop-blur-md border border-indigo-400/30 shadow-inner">
-            <FaBolt className="animate-pulse text-amber-300" /> Instant Digital Delivery ⚡
+      {/* Smooth Auto-Scrolling Animated Hero Banner Box */}
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${activeSlide.gradient} p-5 text-white shadow-2xl border border-indigo-500/30 transition-all duration-700 ease-in-out group min-h-[175px] flex flex-col justify-between`}>
+        {/* Background Image with Ambient Overlay */}
+        <div className="absolute right-0 top-0 w-1/2 h-full overflow-hidden opacity-35 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none">
+          <img
+            src={activeSlide.image}
+            alt={activeSlide.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0b0f17] via-[#0b0f17]/80 to-transparent" />
+        </div>
+
+        {/* Ambient Radial Glows */}
+        <div className="absolute -left-10 -top-10 w-44 h-44 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-8 -bottom-8 w-44 h-44 bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Content */}
+        <div className="relative z-10 space-y-2 max-w-[82%] transition-all duration-500">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-500/25 text-indigo-300 text-[11px] font-black backdrop-blur-md border border-indigo-400/40 shadow-inner tracking-wide">
+            <FaBolt className="animate-pulse text-amber-300" /> {activeSlide.badge}
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
-            Digital Keys & License Store
+          <h2 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md leading-tight">
+            {activeSlide.title}
           </h2>
-          <p className="text-xs text-slate-300 max-w-[88%] leading-relaxed font-medium">
-            Telegram Premium, Steam Gift Cards, VPN & Software License keys instantly in <span className="font-bold text-emerald-400">USD ($)</span> & <span className="font-bold text-indigo-300">Khmer Riel (៛)</span>!
+          <p className="text-xs text-slate-300 leading-relaxed font-medium">
+            {activeSlide.desc}
           </p>
         </div>
-        <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute right-10 top-0 w-24 h-24 bg-violet-500/20 rounded-full blur-xl pointer-events-none" />
+
+        {/* Controls & Dots Bar */}
+        <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/10 mt-2">
+          {/* Navigation Arrows */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={prevSlide}
+              className="p-1.5 rounded-xl bg-slate-900/80 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs"
+            >
+              <FaChevronLeft />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="p-1.5 rounded-xl bg-slate-900/80 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs"
+            >
+              <FaChevronRight />
+            </button>
+          </div>
+
+          {/* Dots Indicator */}
+          <div className="flex items-center gap-1.5">
+            {BANNER_SLIDES.map((slide, idx) => (
+              <button
+                key={slide.id}
+                onClick={() => setCurrentSlide(idx)}
+                className={`h-2 rounded-full transition-all duration-500 ${
+                  idx === currentSlide
+                    ? "w-6 bg-indigo-400 shadow-md shadow-indigo-500/50"
+                    : "w-2 bg-slate-700 hover:bg-slate-500"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Tag */}
+          <span className="text-[10px] font-black text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-lg border border-amber-400/30">
+            {activeSlide.tag}
+          </span>
+        </div>
       </div>
 
       {/* Search Bar */}
