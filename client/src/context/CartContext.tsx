@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product, CartItem, Order } from "../type";
 import { toast } from "sonner";
-import { initData } from "@telegram-apps/sdk";
+import { initData, openTelegramLink } from "@telegram-apps/sdk";
 import { FaTimes, FaShieldAlt, FaLock, FaCheck, FaTelegram } from "react-icons/fa";
 
 interface CartContextType {
@@ -404,7 +404,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Step 2: Open the Telegram deep link
   const handleModalOpenBot = () => {
-    window.open(modalDeepLink, "_blank");
+    const targetUrl = modalDeepLink || "https://t.me/Sik_mybot";
+    try {
+      if (openTelegramLink.isAvailable()) {
+        openTelegramLink(targetUrl);
+      } else {
+        window.location.href = targetUrl;
+      }
+    } catch {
+      window.location.href = targetUrl;
+    }
     setTimeout(() => setModalStep("CODE"), 600);
   };
 

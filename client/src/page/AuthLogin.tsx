@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import logoImg from "../assets/logo.jpeg";
 
+import { openTelegramLink } from "@telegram-apps/sdk";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const AuthLogin: React.FC = () => {
@@ -78,8 +80,16 @@ const AuthLogin: React.FC = () => {
 
   // Open the Telegram deep link
   const handleOpenBot = () => {
-    window.open(deepLink, "_blank");
-    // Move to code entry step after opening
+    const targetUrl = deepLink || "https://t.me/Sik_mybot";
+    try {
+      if (openTelegramLink.isAvailable()) {
+        openTelegramLink(targetUrl);
+      } else {
+        window.location.href = targetUrl;
+      }
+    } catch {
+      window.location.href = targetUrl;
+    }
     setTimeout(() => setStep("CODE"), 800);
   };
 
