@@ -41,7 +41,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const KHR_RATE = 4000;
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export const formatKHR = (usdAmount: number): string => {
   return (Math.round(usdAmount * KHR_RATE)).toLocaleString() + " ៛";

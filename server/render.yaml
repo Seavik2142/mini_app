@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: mini-app-backend
+    env: node
+    rootDir: server
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: BOT_USERNAME
+        value: Sik_mybot
+      - key: MINI_APP_URL
+        value: https://mini-app1-one.vercel.app/app
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET
+        generateValue: true
