@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promo Codes Management | Mini App Admin</title>
+  <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/vendors/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-header">
+        <a class="brand-mark" href="index.html">
+          <span class="brand-icon"><i class="bi bi-shield-lock-fill"></i></span>
+          <span class="brand-copy">
+            <span class="brand-title">Mini App Admin</span>
+            <span class="brand-subtitle">Key Vault Control Panel</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="index.html">
+          <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a class="nav-link" href="products.html">
+          <span class="nav-icon"><i class="bi bi-box-seam"></i></span>
+          <span class="nav-text">Products Catalog</span>
+        </a>
+        <a class="nav-link" href="banners.html">
+          <span class="nav-icon"><i class="bi bi-images"></i></span>
+          <span class="nav-text">Hero Banners</span>
+        </a>
+        <a class="nav-link" href="users.html">
+          <span class="nav-icon"><i class="bi bi-people"></i></span>
+          <span class="nav-text">Users & Admin Roles</span>
+        </a>
+        <a class="nav-link active" href="promos.html">
+          <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
+          <span class="nav-text">Promo Codes</span>
+        </a>
+        <a class="nav-link" href="payments.html">
+          <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
+          <span class="nav-text">Payment History</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="main-header pb-3 mb-4 border-bottom">
+        <h1 class="h3 font-weight-bold mb-0">🎟️ Promo Code Management</h1>
+        <p class="text-muted small mb-0">Add & manage discount promo codes for cart checkout</p>
+      </header>
+
+      <div class="card bg-dark text-white border-secondary mb-4 p-4">
+        <h5 class="font-weight-bold mb-3">+ Create New Promo Code</h5>
+        <form class="row g-3" onsubmit="addPromo(event)">
+          <div class="col-md-6">
+            <label class="form-label text-muted small font-weight-bold">PROMO CODE</label>
+            <input type="text" id="promoCodeInput" class="form-control bg-secondary text-white border-0 font-weight-bold" placeholder="e.g. SIK10" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small font-weight-bold">DISCOUNT PERCENT (%)</label>
+            <input type="number" id="promoPercentInput" class="form-control bg-secondary text-white border-0 font-weight-bold" value="10" min="1" max="100" required>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-success w-100 font-weight-bold">Create Code</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card bg-dark text-white border-secondary p-4">
+        <h5 class="font-weight-bold mb-3">Active Promo Codes</h5>
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0">
+            <thead>
+              <tr class="text-muted small">
+                <th>PROMO CODE</th>
+                <th>DISCOUNT</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="promosTableBody">
+              <!-- Promos JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let promos = JSON.parse(localStorage.getItem('mini_app_promos')) || [
+      { id: 1, code: "SIK10", discountPercent: 10, isActive: true },
+      { id: 2, code: "WELCOME20", discountPercent: 20, isActive: true }
+    ];
+
+    function renderPromos() {
+      const tbody = document.getElementById('promosTableBody');
+      tbody.innerHTML = '';
+      promos.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td class="font-weight-bold text-warning font-monospace">${p.code}</td>
+            <td class="text-success font-weight-bold">${p.discountPercent}% OFF</td>
+            <td><span class="badge bg-success">ACTIVE</span></td>
+            <td><button class="btn btn-sm btn-outline-danger" onclick="deletePromo(${p.id})"><i class="bi bi-trash"></i> Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function addPromo(e) {
+      e.preventDefault();
+      const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const percent = parseInt(document.getElementById('promoPercentInput').value) || 10;
+      if (!code) return;
+
+      promos.unshift({ id: Date.now(), code, discountPercent: percent, isActive: true });
+      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
+      document.getElementById('promoCodeInput').value = '';
+      renderPromos();
+    }
+
+    function deletePromo(id) {
+      promos = promos.filter(p => p.id !== id);
+      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
+      renderPromos();
+    }
+
+    renderPromos();
+  </script>
+</body>
+</html>

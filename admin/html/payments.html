@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment History | Mini App Admin</title>
+  <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/vendors/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="sidebar-header">
+        <a class="brand-mark" href="index.html">
+          <span class="brand-icon"><i class="bi bi-shield-lock-fill"></i></span>
+          <span class="brand-copy">
+            <span class="brand-title">Mini App Admin</span>
+            <span class="brand-subtitle">Key Vault Control Panel</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="index.html">
+          <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a class="nav-link" href="products.html">
+          <span class="nav-icon"><i class="bi bi-box-seam"></i></span>
+          <span class="nav-text">Products Catalog</span>
+        </a>
+        <a class="nav-link" href="banners.html">
+          <span class="nav-icon"><i class="bi bi-images"></i></span>
+          <span class="nav-text">Hero Banners</span>
+        </a>
+        <a class="nav-link" href="users.html">
+          <span class="nav-icon"><i class="bi bi-people"></i></span>
+          <span class="nav-text">Users & Admin Roles</span>
+        </a>
+        <a class="nav-link" href="promos.html">
+          <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
+          <span class="nav-text">Promo Codes</span>
+        </a>
+        <a class="nav-link active" href="payments.html">
+          <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
+          <span class="nav-text">Payment History</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="main-header pb-3 mb-4 border-bottom">
+        <h1 class="h3 font-weight-bold mb-0">💳 User Payment Transactions & Order History</h1>
+        <p class="text-muted small mb-0">Track completed digital key orders, KHQR Bakong payments, & TON transactions</p>
+      </header>
+
+      <div class="card bg-dark text-white border-secondary p-4">
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0">
+            <thead>
+              <tr class="text-muted small">
+                <th>ORDER ID</th>
+                <th>CUSTOMER</th>
+                <th>TELEGRAM ID</th>
+                <th>PAYMENT METHOD</th>
+                <th>AMOUNT (USD / KHR)</th>
+                <th>STATUS</th>
+                <th>DATE</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTableBody">
+              <!-- Orders JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const KHR_RATE = 4000;
+    let orders = JSON.parse(localStorage.getItem('mini_app_orders')) || [
+      { id: 101, orderNumber: "ORD-99812", userName: "Seavik Mao", tgId: "5326192741", totalAmount: 1.00, paymentMethod: "KHQR Bakong", paymentStatus: "PAID", createdAt: "2026-07-24 14:22" },
+      { id: 102, orderNumber: "ORD-99813", userName: "Alex Johnson", tgId: "982736154", totalAmount: 2.00, paymentMethod: "TON Connect", paymentStatus: "PAID", createdAt: "2026-07-24 16:45" }
+    ];
+
+    function renderPayments() {
+      const tbody = document.getElementById('paymentsTableBody');
+      tbody.innerHTML = '';
+      orders.forEach(o => {
+        const riel = Math.round(o.totalAmount * KHR_RATE).toLocaleString();
+        tbody.innerHTML += `
+          <tr>
+            <td class="font-weight-bold font-monospace text-info">${o.orderNumber}</td>
+            <td class="font-weight-bold">${o.userName}</td>
+            <td class="text-muted small">${o.tgId}</td>
+            <td><span class="badge bg-primary">${o.paymentMethod}</span></td>
+            <td class="text-success font-weight-bold">$${o.totalAmount.toFixed(2)} <span class="text-muted small">(${riel} ៛)</span></td>
+            <td><span class="badge bg-success">${o.paymentStatus}</span></td>
+            <td class="text-muted small">${o.createdAt}</td>
+          </tr>
+        `;
+      });
+    }
+
+    renderPayments();
+  </script>
+</body>
+</html>
