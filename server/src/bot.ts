@@ -3,9 +3,11 @@
  *
  * Commands:
  *   /start    - New User Welcome & Mini App Launcher
+ *   /orders   - Open My Orders & Key Vault
+ *   /profile  - Open Profile & Account Settings
+ *   /shop     - Open Key Vault Marketplace
  *   /update   - Refresh bot configuration & menu buttons
  *   /clear    - Reset/Clear active OTP verification sessions
- *   /shop     - Open Key Vault Marketplace
  *   /help     - Show command list & help support
  */
 
@@ -20,8 +22,21 @@ import {
 dotenv.config();
 
 const token = process.env.BOT_TOKEN!;
-const webAppUrl = process.env.MINI_APP_URL || 'https://mini-app1-one.vercel.app/app';
 const BOT_USERNAME = 'Sik_mybot';
+
+// Helper to construct exact, clean Mini App URLs for subpages (/app, /app/orders, /app/profile)
+export const getMiniAppUrl = (path: string = ''): string => {
+  let baseUrl = (process.env.MINI_APP_URL || 'https://mini-app1-one.vercel.app/app').trim();
+  baseUrl = baseUrl.replace(/\/+$/, '');
+  
+  if (!baseUrl.endsWith('/app')) {
+    baseUrl = `${baseUrl}/app`;
+  }
+
+  if (!path) return baseUrl;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl}${cleanPath}`;
+};
 
 let botInstance: TelegramBot | null = null;
 
@@ -61,7 +76,7 @@ export const initBot = () => {
             parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [[
-                { text: '🚀 Open Mini App', web_app: { url: webAppUrl } }
+                { text: '🚀 Open Mini App', web_app: { url: getMiniAppUrl() } }
               ]]
             }
           }
@@ -96,7 +111,7 @@ export const initBot = () => {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [[
-              { text: '↩️ Open Mini App to Verify', web_app: { url: webAppUrl } }
+              { text: '↩️ Open Mini App to Verify', web_app: { url: getMiniAppUrl() } }
             ]]
           }
         }
@@ -113,7 +128,51 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 3. /update — Update/Refresh Bot Config & Menu
+    // 3. /orders — Direct Orders & Vault Link
+    // ──────────────────────────────────────────────────
+    bot.onText(/\/orders/, (msg) => {
+      const chatId = msg.chat.id;
+      const firstName = msg.from?.first_name || 'User';
+      bot.sendMessage(
+        chatId,
+        `📦 *My Orders & Digital Key Vault*\n\n` +
+        `Hello ${firstName}! Tap below to view your purchased activation keys:`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '📦 View My Orders & Keys', web_app: { url: getMiniAppUrl('/orders') } }],
+              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    // ──────────────────────────────────────────────────
+    // 4. /profile — Direct Account Profile Link
+    // ──────────────────────────────────────────────────
+    bot.onText(/\/profile/, (msg) => {
+      const chatId = msg.chat.id;
+      const firstName = msg.from?.first_name || 'User';
+      bot.sendMessage(
+        chatId,
+        `👤 *My Account Profile*\n\n` +
+        `Hello ${firstName}! Tap below to manage your account and referral link:`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '👤 Open Profile & Rewards', web_app: { url: getMiniAppUrl('/profile') } }],
+              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    // ──────────────────────────────────────────────────
+    // 5. /update — Update/Refresh Bot Config & Menu
     // ──────────────────────────────────────────────────
     bot.onText(/\/update|\/refresh/, async (msg) => {
       const chatId = msg.chat.id;
@@ -123,16 +182,17 @@ export const initBot = () => {
 
       await bot.sendMessage(
         chatId,
-        `🔄 *Bot Configuration & Menu Refreshed!*\n\n` +
-        `Hello ${firstName}, the bot menu and links have been updated to the latest version.\n\n` +
-        `• Web App URL: \`${webAppUrl}\`\n` +
-        `• Menu Button: *🔑 Open Key Vault*\n` +
-        `• All commands active.`,
+        `🔄 *Bot Configuration & Links Refreshed!*\n\n` +
+        `Hello ${firstName}, all links and menu buttons have been updated:\n\n` +
+        `• Base URL: \`${getMiniAppUrl()}\`\n` +
+        `• Orders URL: \`${getMiniAppUrl('/orders')}\`\n` +
+        `• Profile URL: \`${getMiniAppUrl('/profile')}\`\n\n` +
+        `Menu buttons are fully synced.`,
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🚀 Open Key Vault Store', web_app: { url: webAppUrl } }]
+              [{ text: '🚀 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -140,7 +200,7 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 4. /clear — Clear Session & Reset Bot State
+    // 6. /clear — Clear Session & Reset Bot State
     // ──────────────────────────────────────────────────
     bot.onText(/\/clear|\/reset/, async (msg) => {
       const chatId = msg.chat.id;
@@ -155,7 +215,7 @@ export const initBot = () => {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🔑 Open Key Vault Store', web_app: { url: webAppUrl } }]
+              [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -163,14 +223,14 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 5. /shop — Marketplace Launcher
+    // 7. /shop — Marketplace Launcher
     // ──────────────────────────────────────────────────
     bot.onText(/\/shop/, (msg) => {
       sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User');
     });
 
     // ──────────────────────────────────────────────────
-    // 6. /help — Command Guide
+    // 8. /help — Command Guide
     // ──────────────────────────────────────────────────
     bot.onText(/\/help/, (msg) => {
       bot.sendMessage(
@@ -178,16 +238,18 @@ export const initBot = () => {
         `💡 *Key Vault Bot Help Guide*\n\n` +
         `Available Commands:\n` +
         `• /start - 🚀 Open Mini App & Welcome\n` +
-        `• /update - 🔄 Refresh Bot Menu & Config\n` +
-        `• /clear - 🧹 Reset & Clear Sessions\n` +
+        `• /orders - 📦 My Orders & Digital Keys\n` +
+        `• /profile - 👤 My Account & Profile\n` +
         `• /shop - 🔑 Digital Key Marketplace\n` +
-        `• /help - 💡 Show this help guide`,
+        `• /update - 🔄 Refresh Bot Menu & Links\n` +
+        `• /clear - 🧹 Reset & Clear Sessions\n` +
+        `• /help - 💡 Show Help & Support Guide`,
         { parse_mode: 'Markdown' }
       );
     });
 
     // ──────────────────────────────────────────────────
-    // 7. Callback Query Handler (Inline Button Clicks)
+    // 9. Callback Query Handler (Inline Button Clicks)
     // ──────────────────────────────────────────────────
     bot.on('callback_query', async (query) => {
       const chatId = query.message?.chat.id;
@@ -208,9 +270,11 @@ export const initBot = () => {
             chatId,
             `💡 *All Available Bot Commands:*\n\n` +
             `• /start - 🚀 Open Mini App & Welcome\n` +
+            `• /orders - 📦 My Orders & Keys\n` +
+            `• /profile - 👤 My Account Profile\n` +
+            `• /shop - 🔑 Digital Key Marketplace\n` +
             `• /update - 🔄 Refresh Bot Menu & Config\n` +
             `• /clear - 🧹 Reset & Clear Sessions\n` +
-            `• /shop - 🔑 Digital Key Marketplace\n` +
             `• /help - 💡 Show Help & Support`,
             { parse_mode: 'Markdown' }
           );
@@ -234,9 +298,11 @@ async function updateBotMenu(bot: TelegramBot) {
   try {
     const commands = [
       { command: 'start', description: '🚀 Open Mini App & Welcome' },
+      { command: 'orders', description: '📦 My Orders & Key Vault' },
+      { command: 'profile', description: '👤 My Account Profile' },
+      { command: 'shop', description: '🔑 Digital Key Marketplace' },
       { command: 'update', description: '🔄 Refresh Bot Menu & Config' },
       { command: 'clear', description: '🧹 Clear & Reset Sessions' },
-      { command: 'shop', description: '🔑 Digital Key Marketplace' },
       { command: 'help', description: '💡 Show Help & Support' }
     ];
 
@@ -249,11 +315,11 @@ async function updateBotMenu(bot: TelegramBot) {
         menu_button: JSON.stringify({
           type: 'web_app',
           text: '🔑 Open Key Vault',
-          web_app: { url: webAppUrl }
+          web_app: { url: getMiniAppUrl() }
         })
       }
     });
-    console.log('✅ Bot menu & commands registered for Telegram chat menu!');
+    console.log(`✅ Bot menu & commands registered for URL: ${getMiniAppUrl()}`);
   } catch (e) {
     console.log('Bot menu setup notice:', e);
   }
@@ -271,10 +337,10 @@ function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🔑 Open Key Vault Store', web_app: { url: webAppUrl } }],
+          [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }],
           [
-            { text: '📦 My Orders', web_app: { url: `${webAppUrl}/orders` } },
-            { text: '👤 Profile', web_app: { url: `${webAppUrl}/profile` } }
+            { text: '📦 My Orders', web_app: { url: getMiniAppUrl('/orders') } },
+            { text: '👤 Profile', web_app: { url: getMiniAppUrl('/profile') } }
           ],
           [
             { text: '🔄 Refresh Bot Menu', callback_data: 'refresh' },
