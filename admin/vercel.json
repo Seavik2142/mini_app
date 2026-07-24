@@ -1,6 +1,8 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "buildCommand": "echo 'Static Admin'",
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/", "destination": "/html/index.html" },
     { "source": "/products", "destination": "/html/products.html" },
