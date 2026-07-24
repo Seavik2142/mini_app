@@ -340,6 +340,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [modalCode, setModalCode] = useState("");
   const [modalCountdown, setModalCountdown] = useState(180);
 
+  // Auto-resume OTP modal if user requested code and reopened Mini App from Telegram
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem("mini_app_otp_session_id");
+    if (!isPhoneVerified && savedSessionId) {
+      setModalSessionId(savedSessionId);
+      setModalStep("CODE");
+      setShowAuthModal(true);
+    }
+  }, [isPhoneVerified]);
+
   // Countdown timer for modal
   useEffect(() => {
     if (!showAuthModal || modalStep === "REQUEST") return;
@@ -348,6 +358,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (prev <= 1) {
           clearInterval(t);
           toast.error("Code expired. Please request a new one.");
+          localStorage.removeItem("mini_app_otp_session_id");
           setModalStep("REQUEST");
           return 0;
         }
@@ -361,9 +372,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isPhoneVerified) {
       onSuccess();
     } else {
-      setModalStep("REQUEST");
+      const savedSessionId = localStorage.getItem("mini_app_otp_session_id");
+      if (savedSessionId) {
+        setModalSessionId(savedSessionId);
+        setModalStep("CODE");
+      } else {
+        setModalStep("REQUEST");
+      }
       setModalCode("");
-      setModalSessionId("");
       setModalDeepLink("");
       setModalCountdown(180);
       setPendingCallback(() => onSuccess);
@@ -372,6 +388,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleModalCloseReset = () => {
+    localStorage.removeItem("mini_app_otp_session_id");
     setShowAuthModal(false);
     setModalStep("REQUEST");
     setModalCode("");
@@ -390,6 +407,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setModalLoading(false);
       if (data.success) {
         setModalSessionId(data.sessionId);
+        localStorage.setItem("mini_app_otp_session_id", data.sessionId);
         setModalDeepLink(data.deepLink);
         setModalCountdown(data.expiresInSeconds || 180);
         setModalStep("WAITING");
