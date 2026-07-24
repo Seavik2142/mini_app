@@ -3,33 +3,37 @@ import { FaSearch, FaStar, FaKey, FaBolt, FaTimes, FaShieldAlt, FaChevronLeft, F
 import { Product } from "../type";
 import { useCart } from "../context/CartContext";
 
+import chatGptImg from "../assets/ChatGPT.jpg";
+import geminiImg from "../assets/gemini.jpeg";
+import claudeImg from "../assets/claude.jpg";
+
 const BANNER_SLIDES = [
   {
     id: 1,
-    badge: "Instant Digital Delivery ⚡",
-    title: "Digital Keys & License Store",
-    desc: "Telegram Premium, Steam Gift Cards, VPN & Software License keys instantly in USD ($) & Khmer Riel (៛)!",
-    tag: "⚡ Auto-Delivered to Vault",
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-    gradient: "from-indigo-950 via-purple-900/80 to-slate-950"
+    badge: "ChatGPT Plus & GPT-4o 🤖",
+    title: "ChatGPT Plus Digital Keys",
+    desc: "Get instant activation vouchers for OpenAI ChatGPT Plus with GPT-4o, Sora & DALL-E 3 access!",
+    tag: "⚡ INSTANT AI ACCESS",
+    image: chatGptImg,
+    gradient: "from-emerald-950 via-teal-900/80 to-slate-950"
   },
   {
     id: 2,
-    badge: "Telegram Premium Keys 🚀",
-    title: "Unlock 4GB Uploads & Speed",
-    desc: "Instant 1-Year & 6-Month Telegram Premium activation codes with 15% bonus discount!",
-    tag: "🔥 15% OFF TODAY",
-    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=600&q=80",
+    badge: "Google Gemini Advanced ✨",
+    title: "Gemini Advanced 1.5 Pro Keys",
+    desc: "Unlock Google's 2M token context window & Ultra AI capabilities with instant digital license codes!",
+    tag: "🔥 20% OFF TODAY",
+    image: geminiImg,
     gradient: "from-blue-950 via-indigo-900/80 to-slate-950"
   },
   {
     id: 3,
-    badge: "Gaming & Software Licenses 🔑",
-    title: "Steam, VPN & Windows Keys",
-    desc: "Global activation keys with instant delivery. Pay easily via KHQR Bakong, ABA or Card!",
+    badge: "Anthropic Claude 3.5 Sonnet 🧠",
+    title: "Claude Pro Access Vouchers",
+    desc: "Top-tier AI coding & reasoning intelligence. Instant key redemption in USD ($) & Khmer Riel (៛)!",
     tag: "💳 KHQR & ABA Supported",
-    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
-    gradient: "from-violet-950 via-fuchsia-950/80 to-slate-950"
+    image: claudeImg,
+    gradient: "from-amber-950 via-orange-950/80 to-slate-950"
   }
 ];
 
