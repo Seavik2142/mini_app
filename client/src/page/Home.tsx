@@ -18,7 +18,13 @@ const Home: React.FC = () => {
   const { products, bannerSlides, addToCart, formatKHR, requireAuth } = useCart();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalQuantity, setModalQuantity] = useState<number>(1);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Reset modal quantity whenever product changes
+  useEffect(() => {
+    setModalQuantity(1);
+  }, [selectedProduct]);
 
   const activeSlides = bannerSlides && bannerSlides.length > 0 ? bannerSlides : BANNER_SLIDES;
 
@@ -202,7 +208,7 @@ const Home: React.FC = () => {
 
               <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Price in USD</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Price per Key</p>
                   <p className="text-lg font-black text-white">${selectedProduct.price.toFixed(2)}</p>
                 </div>
                 <div className="text-right">
@@ -212,19 +218,46 @@ const Home: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Interactive Quantity Controller (- Qty +) */}
+              <div className="p-3 bg-slate-950/90 rounded-2xl border border-indigo-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-300 block">Select Quantity:</span>
+                  <span className="text-xs text-indigo-400 font-extrabold">
+                    Total: ${(selectedProduct.price * modalQuantity).toFixed(2)} USD ({formatKHR(selectedProduct.price * modalQuantity)})
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-slate-900 border border-slate-700/80 px-2 py-1 rounded-xl">
+                  <button
+                    onClick={() => setModalQuantity(prev => Math.max(1, prev - 1))}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm active:scale-95 transition-all"
+                  >
+                    -
+                  </button>
+                  <span className="w-8 text-center font-black text-white text-sm font-mono">
+                    {modalQuantity}
+                  </span>
+                  <button
+                    onClick={() => setModalQuantity(prev => Math.min(100, prev + 1))}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm active:scale-95 transition-all shadow"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => {
                   requireAuth(() => {
-                    addToCart(selectedProduct);
+                    addToCart(selectedProduct, modalQuantity);
                     setSelectedProduct(null);
                   });
                 }}
-                className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30"
+                className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition-all"
               >
-                <FaKey /> Add Key to Cart
+                <FaKey /> Add {modalQuantity > 1 ? `${modalQuantity} Keys` : "Key"} to Cart (${(selectedProduct.price * modalQuantity).toFixed(2)})
               </button>
             </div>
           </div>
