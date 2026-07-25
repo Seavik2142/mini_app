@@ -76,7 +76,7 @@ function handleProductFileUpload(input) {
       const dataUrl = e.target.result;
       setField('product-images', dataUrl);
       updateProductImagePreview(dataUrl);
-      showToast('Local image loaded!');
+      showToast('Local image file loaded!');
     };
     reader.readAsDataURL(file);
   }
@@ -86,9 +86,16 @@ function updateProductImagePreview(url) {
   const box = document.getElementById('prod-img-preview-box');
   const img = document.getElementById('prod-img-preview');
   if (!box || !img) return;
-  const firstUrl = (url || '').split(',')[0].trim();
-  if (firstUrl) {
-    img.src = firstUrl;
+  const cleanUrl = (url || '').trim();
+  let targetUrl = '';
+  if (cleanUrl.startsWith('data:image/')) {
+    targetUrl = cleanUrl;
+  } else if (cleanUrl) {
+    targetUrl = cleanUrl.split(',')[0].trim();
+  }
+
+  if (targetUrl && (targetUrl.startsWith('http') || targetUrl.startsWith('data:image'))) {
+    img.src = targetUrl;
     box.style.display = 'block';
   } else {
     box.style.display = 'none';
