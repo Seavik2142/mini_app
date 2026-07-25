@@ -151,11 +151,33 @@ function applyProductCrop() {
   }
 }
 
+function updateKeysCount(val) {
+  const el = document.getElementById('product-keys-count');
+  if (!el) return;
+  const lines = (val || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  el.textContent = `${lines.length} Item${lines.length === 1 ? '' : 's'}`;
+}
+
+function cleanProductKeysFormat() {
+  const textarea = document.getElementById('product-keys');
+  if (!textarea) return;
+  const raw = textarea.value;
+  const cleaned = raw
+    .split(/[\n,\s]+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .join('\n');
+  textarea.value = cleaned;
+  updateKeysCount(cleaned);
+  showToast('✨ Formatted to 1 link per line cleanly!');
+}
+
 function openAddModal() {
   editingId = null;
   document.getElementById('productModalLabel').textContent = 'Add Product';
   document.getElementById('product-form').reset();
   updateProductImagePreview('');
+  updateKeysCount('');
   loadCategoriesForForm();
   const modalEl = document.getElementById('productModal');
   if (modalEl) {
@@ -180,6 +202,7 @@ function openEditModal(id) {
   setField('product-stock', product.stock);
   setField('product-warranty', product.warranty || '30 Days Replacement Warranty');
   setField('product-keys', (product.digitalKeys || []).join('\n'));
+  updateKeysCount((product.digitalKeys || []).join('\n'));
   setField('product-category', product.categoryId);
   setField('product-images', (product.images || []).join(', '));
   updateProductImagePreview((product.images || [])[0] || '');
