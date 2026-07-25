@@ -231,7 +231,8 @@ const verifyOtp = CatchAsync(async (req, res) => {
         }
     });
 
-    const token = jwt.sign(userRecord, process.env.SECRET as string);
+    const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
+    const token = jwt.sign({ id: userRecord.id, tgId: userRecord.tgId }, secret);
 
     res.cookie("auth", token, {
         httpOnly: true,
@@ -289,7 +290,8 @@ const verifySms = CatchAsync(async (req, res) => {
         update: {},
         create: { name: `User ${cleanPhone.slice(-4)}`, tgId: cleanPhone, username: null, referCode: cleanPhone.slice(-6), referBy: "0", balance: 0 }
     });
-    const token = jwt.sign(userRecord, process.env.SECRET as string);
+    const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
+    const token = jwt.sign({ id: userRecord.id, tgId: userRecord.tgId }, secret);
     res.cookie("auth", token, { httpOnly: true, secure: true, maxAge: 1000 * 60 * 60 * 24 * 7, sameSite: "none" })
        .status(200).json({ success: true, message: "Verified!", verifiedPhone: cleanPhone, user: userRecord });
 });

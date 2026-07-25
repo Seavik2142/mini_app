@@ -123,9 +123,10 @@ const AuthLogin: React.FC = () => {
       } else {
         toast.error(data.message || "Invalid code. Please try again.");
       }
-    } catch {
+    } catch (err: any) {
       setIsLoading(false);
-      toast.error("Server offline. Please try again.");
+      console.error("OTP Verification Error:", err);
+      toast.error(err.message || "Connection error. Please try again.");
     }
   };
 
