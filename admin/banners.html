@@ -138,8 +138,24 @@
             <input type="hidden" id="bannerId">
 
             <div class="mb-3">
-              <label class="form-label text-muted small fw-semibold">IMAGE BANNER URL <span class="text-danger">*</span></label>
-              <input type="url" id="bannerImageUrl" class="form-control" placeholder="https://images.unsplash.com/photo-..." oninput="updateModalImagePreview(this.value)" required>
+              <label class="form-label text-muted small fw-semibold">IMAGE BANNER (2 Options: URL or Upload Local File) <span class="text-danger">*</span></label>
+              <ul class="nav nav-pills nav-fill mb-2 border rounded p-1 bg-light" id="banner-img-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active py-1 btn-sm" id="banner-url-tab" data-bs-toggle="tab" data-bs-target="#banner-url-pane" type="button" role="tab"><i class="bi bi-link-45deg"></i> Image URL</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link py-1 btn-sm" id="banner-file-tab" data-bs-toggle="tab" data-bs-target="#banner-file-pane" type="button" role="tab"><i class="bi bi-upload"></i> Upload Local File</button>
+                </li>
+              </ul>
+              <div class="tab-content" id="banner-img-tabContent">
+                <div class="tab-pane fade show active" id="banner-url-pane" role="tabpanel">
+                  <input type="text" id="bannerImageUrl" class="form-control" placeholder="https://images.unsplash.com/photo-..." oninput="updateModalImagePreview(this.value)">
+                </div>
+                <div class="tab-pane fade" id="banner-file-pane" role="tabpanel">
+                  <input type="file" id="bannerFileInput" class="form-control" accept="image/*" onchange="handleBannerLocalUpload(this)">
+                  <small class="text-muted mt-1 d-block">Choose an image file from your computer or mobile device.</small>
+                </div>
+              </div>
               <div class="mt-2 text-center" id="modalImagePreviewContainer" style="display:none;">
                 <img id="modalImagePreview" src="" class="rounded border" style="max-height: 160px; width: 100%; object-fit: cover;">
               </div>
@@ -268,11 +284,26 @@
       modal.show();
     }
 
+    function handleBannerLocalUpload(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const dataUrl = e.target.result;
+          document.getElementById('bannerImageUrl').value = dataUrl;
+          updateModalImagePreview(dataUrl);
+          showToast('Local banner image loaded!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function updateModalImagePreview(url) {
       const container = document.getElementById('modalImagePreviewContainer');
       const img = document.getElementById('modalImagePreview');
-      if (url && url.trim().startsWith('http')) {
-        img.src = url;
+      const cleanUrl = (url || '').trim();
+      if (cleanUrl && (cleanUrl.startsWith('http') || cleanUrl.startsWith('data:image'))) {
+        img.src = cleanUrl;
         container.style.display = 'block';
       } else {
         container.style.display = 'none';

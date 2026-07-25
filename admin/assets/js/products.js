@@ -68,10 +68,39 @@ async function loadCategoriesForForm() {
   }
 }
 
-function openCreateModal() {
+function handleProductFileUpload(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const dataUrl = e.target.result;
+      setField('product-images', dataUrl);
+      updateProductImagePreview(dataUrl);
+      showToast('Local image loaded!');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function updateProductImagePreview(url) {
+  const box = document.getElementById('prod-img-preview-box');
+  const img = document.getElementById('prod-img-preview');
+  if (!box || !img) return;
+  const firstUrl = (url || '').split(',')[0].trim();
+  if (firstUrl) {
+    img.src = firstUrl;
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function openAddModal() {
   editingId = null;
-  document.getElementById('product-form')?.reset();
   document.getElementById('productModalLabel').textContent = 'Add Product';
+  document.getElementById('product-form').reset();
+  updateProductImagePreview('');
+  loadCategoriesForForm();
   const modalEl = document.getElementById('productModal');
   if (modalEl) {
     const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -92,6 +121,7 @@ function openEditModal(id) {
   setField('product-stock', product.stock);
   setField('product-category', product.categoryId);
   setField('product-images', (product.images || []).join(', '));
+  updateProductImagePreview((product.images || [])[0] || '');
   setCheck('product-featured', product.isFeatured);
   setCheck('product-new', product.isNew);
   setCheck('product-sale', product.isOnSale);
