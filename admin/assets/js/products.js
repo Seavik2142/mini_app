@@ -144,15 +144,27 @@ async function saveProduct() {
     return;
   }
 
+  const rawImages = getField('product-images').trim();
+  let imagesArray = [];
+  if (rawImages) {
+    if (rawImages.startsWith('data:image/')) {
+      imagesArray = [rawImages];
+    } else {
+      imagesArray = rawImages.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+
+  const catVal = parseInt(getField('product-category'));
+
   const body = {
     name,
     slug: getField('product-slug') || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-    description: getField('product-description'),
+    description: getField('product-description') || name,
     price: parseFloat(getField('product-price')) || 0,
     stock: parseInt(getField('product-stock')) || 0,
     warranty: getField('product-warranty') || '30 Days Replacement Warranty',
-    categoryId: parseInt(getField('product-category')) || 1,
-    images: getField('product-images').split(',').map(s => s.trim()).filter(Boolean),
+    categoryId: !isNaN(catVal) ? catVal : 1,
+    images: imagesArray,
     isFeatured: getCheck('product-featured'),
     isNew: getCheck('product-new'),
     isOnSale: getCheck('product-sale'),

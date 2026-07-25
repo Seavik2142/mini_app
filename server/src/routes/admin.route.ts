@@ -159,8 +159,10 @@ AdminRoute.post("/products", Utility.CatchAsync(async (req, res) => {
     return;
   }
 
-  // Ensure category exists
-  let targetCategoryId = categoryId ? parseInt(categoryId) : null;
+  // Ensure category exists & prevent NaN
+  let parsedCatId = categoryId ? parseInt(categoryId) : NaN;
+  let targetCategoryId: number | null = !isNaN(parsedCatId) ? parsedCatId : null;
+  
   if (targetCategoryId) {
     const catExists = await prisma.category.findUnique({ where: { id: targetCategoryId } });
     if (!catExists) targetCategoryId = null;
@@ -188,21 +190,25 @@ AdminRoute.post("/products", Utility.CatchAsync(async (req, res) => {
     uniqueSlug = `${baseSlug}-${count++}`;
   }
 
+  const parsedPrice = parseFloat(price);
+  const parsedStock = parseInt(stock);
+  const parsedDiscount = parseInt(discount);
+
   const product = await prisma.product.create({
     data: {
       name,
       slug: uniqueSlug,
       description: description || name,
-      price: parseFloat(price) || 0,
-      tonPrice: tonPrice ? parseFloat(tonPrice) : null,
-      starsPrice: starsPrice ? parseInt(starsPrice) : null,
+      price: !isNaN(parsedPrice) ? parsedPrice : 0,
+      tonPrice: tonPrice && !isNaN(parseFloat(tonPrice)) ? parseFloat(tonPrice) : null,
+      starsPrice: starsPrice && !isNaN(parseInt(starsPrice)) ? parseInt(starsPrice) : null,
       images: Array.isArray(images) ? images : (images ? [images] : []),
       categoryId: targetCategoryId,
-      stock: stock !== undefined && stock !== null ? parseInt(stock) : 100,
+      stock: !isNaN(parsedStock) ? parsedStock : 100,
       isFeatured: Boolean(isFeatured),
       isNew: Boolean(isNew),
       isOnSale: Boolean(isOnSale),
-      discount: discount ? parseInt(discount) : 0,
+      discount: !isNaN(parsedDiscount) ? parsedDiscount : 0,
       warranty: warranty ? String(warranty).trim() : "30 Days Warranty",
     },
   });
