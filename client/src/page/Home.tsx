@@ -161,15 +161,15 @@ const Home: React.FC = () => {
 
       {/* Product Detail Modal */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 shadow-2xl">
-            <div className="flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5 space-y-4 max-h-[88vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 shadow-2xl relative">
+            <div className="flex items-center justify-between sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 py-1 -mt-1">
               <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider flex items-center gap-1">
                 <FaShieldAlt /> {selectedProduct.categoryName}
               </span>
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/80"
+                className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/80 active:scale-95 transition-all"
               >
                 <FaTimes />
               </button>
@@ -247,7 +247,7 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-md pt-2 pb-1 -mb-1 z-10 border-t border-slate-800/80">
               <button
                 onClick={() => {
                   requireAuth(() => {
@@ -255,7 +255,7 @@ const Home: React.FC = () => {
                     setSelectedProduct(null);
                   });
                 }}
-                className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition-all"
+                className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/30 active:scale-[0.98] transition-all"
               >
                 <FaKey /> Add {modalQuantity > 1 ? `${modalQuantity} Keys` : "Key"} to Cart (${(selectedProduct.price * modalQuantity).toFixed(2)})
               </button>
