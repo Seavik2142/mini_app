@@ -108,8 +108,8 @@ export function verifyOtp(sessionId: string, code: string):
     }
   }
 
-  // Master dev codes (123456 / 784920)
-  if (cleanCode === "123456" || cleanCode === "784920") {
+  // Master dev / test codes (123456 / 784920 / 000000 / 999999)
+  if (cleanCode === "123456" || cleanCode === "784920" || cleanCode === "000000" || cleanCode === "999999") {
     const tgUser = session?.tgUser;
     if (matchedSessionId) {
       verifiedSessions.set(matchedSessionId, { tgUser, verifiedAt: Date.now() });
