@@ -107,10 +107,10 @@
                     <th scope="col">Image</th>
                     <th scope="col">Product</th>
                     <th scope="col">Price</th>
+                    <th scope="col">Keys Inventory</th>
                     <th scope="col">Stock</th>
                     <th scope="col">Rating</th>
                     <th scope="col">Flags</th>
-                    <th scope="col">Created</th>
                     <th scope="col" class="text-end">Actions</th>
                   </tr>
                 </thead>
@@ -239,6 +239,28 @@
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Keys Inventory Modal -->
+  <div class="modal fade" id="keysViewModal" tabindex="-1" aria-labelledby="keysViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="keysViewModalLabel"><i class="bi bi-key-fill text-primary me-1"></i> Keys & Links Inventory</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="badge bg-primary fs-6" id="keysModalCount">0 Keys Available</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyAllKeysFromModal()"><i class="bi bi-clipboard me-1"></i> Copy All Keys</button>
+          </div>
+          <pre id="keysModalContent" class="p-3 bg-dark text-success rounded font-monospace fs-6 overflow-auto" style="max-height: 360px; white-space: pre-wrap; word-break: break-all;"></pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>

@@ -22,7 +22,9 @@ async function loadProducts(page = 1) {
     const { products = [], total = 0, totalPages = 1 } = data.data || data;
     productsList = products;
 
-    tbody.innerHTML = products.map(p => `
+    tbody.innerHTML = products.map(p => {
+      const keysCount = p.digitalKeys?.length || 0;
+      return `
       <tr>
         <td>
           ${p.images?.[0] ? `<img src="${escHtml(p.images[0])}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">` : '<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;"></div>'}
@@ -32,6 +34,11 @@ async function loadProducts(page = 1) {
           <p class="text-muted small mb-0">${escHtml(p.category?.name || '—')}</p>
         </td>
         <td>${formatCurrency(p.price)}</td>
+        <td>
+          <button class="btn btn-sm ${keysCount > 0 ? 'btn-outline-success' : 'btn-outline-warning'} font-monospace py-0 px-2" onclick="openKeysViewModal(${p.id})">
+            <i class="bi bi-key-fill me-1"></i> ${keysCount} Keys
+          </button>
+        </td>
         <td>${p.stock ?? '—'}</td>
         <td>${p.rating ?? '—'} ⭐</td>
         <td>
@@ -39,13 +46,13 @@ async function loadProducts(page = 1) {
           ${p.isNew ? '<span class="badge bg-success me-1">New</span>' : ''}
           ${p.isOnSale ? '<span class="badge bg-warning text-dark">Sale</span>' : ''}
         </td>
-        <td>${formatDate(p.createdAt)}</td>
         <td class="text-end">
           <button class="btn btn-light btn-sm me-1" onclick="openEditModal(${p.id})">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
         </td>
       </tr>
-    `).join('') || `<tr><td colspan="8" class="text-center text-muted py-4">No products found</td></tr>`;
+      `;
+    }).join('') || `<tr><td colspan="8" class="text-center text-muted py-4">No products found</td></tr>`;
 
     const countEl = document.getElementById('products-count');
     if (countEl) countEl.textContent = `${total} total products`;
@@ -310,3 +317,31 @@ function getField(id) { return document.getElementById(id)?.value || ''; }
 function setCheck(id, val) { const el = document.getElementById(id); if (el) el.checked = !!val; }
 function getCheck(id) { return !!document.getElementById(id)?.checked; }
 function escHtml(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function openKeysViewModal(id) {
+  const product = productsList.find(p => p.id === id);
+  if (!product) return;
+
+  const keys = product.digitalKeys || [];
+  const titleEl = document.getElementById('keysViewModalLabel');
+  const countEl = document.getElementById('keysModalCount');
+  const contentEl = document.getElementById('keysModalContent');
+
+  if (titleEl) titleEl.innerHTML = `<i class="bi bi-key-fill text-primary me-1"></i> Keys & Links Inventory — ${escHtml(product.name)}`;
+  if (countEl) countEl.textContent = `${keys.length} Key${keys.length === 1 ? '' : 's'} / Link${keys.length === 1 ? '' : 's'} Remaining in Stock`;
+  if (contentEl) contentEl.textContent = keys.length > 0 ? keys.join('\n') : '⚠️ No digital keys or links remaining in stock for this product.';
+
+  const modalEl = document.getElementById('keysViewModal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+}
+
+function copyAllKeysFromModal() {
+  const text = document.getElementById('keysModalContent')?.textContent || '';
+  if (text && !text.startsWith('⚠️')) {
+    navigator.clipboard.writeText(text);
+    showToast('📋 All keys copied to clipboard!');
+  }
+}
