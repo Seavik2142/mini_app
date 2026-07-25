@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPhoneAlt, FaLock, FaShieldAlt, FaCheck, FaTelegram, FaExternalLinkAlt, FaRedo } from "react-icons/fa";
+import { FaPhoneAlt, FaLock, FaShieldAlt, FaCheck, FaTelegram, FaExternalLinkAlt, FaRedo, FaRocket } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import logoImg from "../assets/logo.jpeg";
@@ -13,8 +13,8 @@ const AuthLogin: React.FC = () => {
   const navigate = useNavigate();
   const { isPhoneVerified, verifiedPhone, updateVerifiedPhone } = useCart();
 
-  // Step: "REQUEST" → "WAITING" → "CODE"
-  const [step, setStep] = useState<"REQUEST" | "WAITING" | "CODE">(() => {
+  // Step: "REQUEST" → "WAITING" → "CODE" → "VERIFIED_SUCCESS"
+  const [step, setStep] = useState<"REQUEST" | "WAITING" | "CODE" | "VERIFIED_SUCCESS">(() => {
     return localStorage.getItem("mini_app_otp_session_id") ? "CODE" : "REQUEST";
   });
   const [phone, setPhone] = useState(verifiedPhone || "");
@@ -26,8 +26,10 @@ const AuthLogin: React.FC = () => {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (isPhoneVerified) navigate("/app", { replace: true });
-  }, [isPhoneVerified, navigate]);
+    if (isPhoneVerified && step !== "VERIFIED_SUCCESS") {
+      navigate("/app", { replace: true });
+    }
+  }, [isPhoneVerified, navigate, step]);
 
   // Countdown timer when waiting for user to open Telegram
   useEffect(() => {
@@ -116,8 +118,8 @@ const AuthLogin: React.FC = () => {
         clearInterval(timerRef.current!);
         localStorage.removeItem("mini_app_otp_session_id");
         updateVerifiedPhone(data.verifiedPhone || phone, data.user);
-        toast.success("🎉 Verified! Welcome to Key Vault!");
-        navigate("/app", { replace: true });
+        toast.success("🎉 Code Verified! Account Activated!");
+        setStep("VERIFIED_SUCCESS");
       } else {
         toast.error(data.message || "Invalid code. Please try again.");
       }
@@ -164,19 +166,19 @@ const AuthLogin: React.FC = () => {
 
           {/* Step indicator */}
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800">
-            {(["REQUEST", "WAITING", "CODE"] as const).map((s, i) => (
+            {(["REQUEST", "WAITING", "CODE", "VERIFIED_SUCCESS"] as const).map((s, i) => (
               <div key={s} className="flex items-center gap-1.5">
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black border transition-all ${
                   step === s ? "bg-indigo-600 border-indigo-400 text-white" :
-                  (["REQUEST", "WAITING", "CODE"].indexOf(step) > i) ? "bg-emerald-500 border-emerald-400 text-slate-950" :
+                  (["REQUEST", "WAITING", "CODE", "VERIFIED_SUCCESS"].indexOf(step) > i) ? "bg-emerald-500 border-emerald-400 text-slate-950" :
                   "bg-slate-800 border-slate-700 text-slate-500"
                 }`}>
-                  {(["REQUEST", "WAITING", "CODE"].indexOf(step) > i) ? <FaCheck /> : i + 1}
+                  {(["REQUEST", "WAITING", "CODE", "VERIFIED_SUCCESS"].indexOf(step) > i) ? <FaCheck /> : i + 1}
                 </div>
                 <span className={`text-[10px] font-bold hidden sm:block ${step === s ? "text-white" : "text-slate-500"}`}>
-                  {s === "REQUEST" ? "Request" : s === "WAITING" ? "Open Bot" : "Enter Code"}
+                  {s === "REQUEST" ? "Request" : s === "WAITING" ? "Open Bot" : s === "CODE" ? "Enter Code" : "Done"}
                 </span>
-                {i < 2 && <div className="w-4 h-px bg-slate-700 mx-1" />}
+                {i < 3 && <div className="w-3 h-px bg-slate-700 mx-0.5" />}
               </div>
             ))}
             {(step === "WAITING" || step === "CODE") && (
@@ -297,6 +299,52 @@ const AuthLogin: React.FC = () => {
                 </button>
               </div>
             </form>
+          )}
+
+          {/* ── STEP 4: Success Screen — Open Bot & Start Key ── */}
+          {step === "VERIFIED_SUCCESS" && (
+            <div className="space-y-4 text-center">
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-3">
+                <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-3xl flex items-center justify-center text-3xl mx-auto border border-emerald-500/30 shadow-lg shadow-emerald-500/20">
+                  <FaCheck />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-white">Account Verified!</h2>
+                  <p className="text-xs text-slate-300 mt-1">
+                    Your account is now active. Tap below to start your bot key or enter the store.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                <button
+                  onClick={() => {
+                    const botUrl = "https://t.me/Sik_mybot?start=vault";
+                    try {
+                      if (openTelegramLink.isAvailable()) {
+                        openTelegramLink(botUrl);
+                      } else {
+                        window.location.href = botUrl;
+                      }
+                    } catch {
+                      window.location.href = botUrl;
+                    }
+                  }}
+                  className="w-full py-3.5 bg-[#2AABEE] hover:bg-[#229ED9] text-white font-black text-sm rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <FaTelegram className="text-lg" />
+                  Open @Sik_mybot to Start Key
+                  <FaExternalLinkAlt className="text-xs opacity-70" />
+                </button>
+
+                <button
+                  onClick={() => navigate("/app", { replace: true })}
+                  className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <FaRocket /> Continue to Web App
+                </button>
+              </div>
+            </div>
           )}
 
           {/* Footer */}
