@@ -1,15 +1,5 @@
 {
-  "version": 2,
-  "framework": null,
-  "buildCommand": "echo 'Static Admin Build Complete'",
-  "outputDirectory": ".",
   "cleanUrls": true,
-  "routes": [
-    { "src": "^/$", "dest": "/html/index.html" },
-    { "src": "^/products$", "dest": "/html/products.html" },
-    { "src": "^/banners$", "dest": "/html/banners.html" },
-    { "src": "^/users$", "dest": "/html/users.html" },
-    { "src": "^/promos$", "dest": "/html/promos.html" },
-    { "src": "^/payments$", "dest": "/html/payments.html" }
-  ]
+  "buildCommand": "echo 'Static Admin Build Complete'",
+  "outputDirectory": "."
 }
