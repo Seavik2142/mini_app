@@ -271,9 +271,9 @@
         if (!sessionStr) return;
         var session = JSON.parse(sessionStr);
         var rawName = session.username || 'Seavik';
-        // Strip any legacy "Admin: " or " (Super Admin)" text
         var cleanName = rawName.replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/, '').trim();
         if (!cleanName) cleanName = 'Seavik';
+        var roleLabel = session.role === 'SUPER_ADMIN' ? 'Super Admin' : (session.role || 'Admin');
 
         var actions = document.querySelector('.navbar-actions');
         if (actions) {
@@ -282,8 +282,25 @@
 
           var badge = document.createElement('div');
           badge.id = 'admin-profile-badge';
-          badge.className = 'd-inline-flex align-items-center gap-2 me-3';
-          badge.innerHTML = '<span class="badge bg-primary font-monospace py-1 px-2.5" style="font-size:12px;"><i class="bi bi-person-fill me-1"></i> <strong>' + cleanName + '</strong></span><a href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')" class="btn btn-sm btn-outline-danger py-0 px-2" title="Logout" style="font-size:11px;"><i class="bi bi-box-arrow-right"></i> Logout</a>';
+          badge.className = 'dropdown d-inline-block me-3';
+          badge.innerHTML = `
+            <button class="btn p-0 border-0 d-flex align-items-center gap-2 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="${cleanName} (${roleLabel})">
+              <div class="rounded-circle bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 d-flex align-items-center justify-content-center shadow-sm" style="width:38px;height:38px;font-size:17px;cursor:pointer;">
+                <i class="bi bi-person-fill"></i>
+              </div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 p-2" style="min-width:180px;">
+              <li class="px-3 py-2 border-bottom">
+                <p class="fw-bold mb-0 text-primary font-monospace small">👑 ${cleanName}</p>
+                <span class="badge bg-primary bg-opacity-10 text-primary small mt-1">${roleLabel}</span>
+              </li>
+              <li class="mt-1">
+                <a class="dropdown-item text-danger py-2 rounded-2 d-flex align-items-center gap-2 small font-semibold" href="login.html" onclick="window.localStorage.removeItem('mini_app_admin_session')">
+                  <i class="bi bi-box-arrow-right"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          `;
           actions.insertBefore(badge, actions.firstChild);
         }
       } catch (e) {}
