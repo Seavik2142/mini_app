@@ -270,12 +270,20 @@
         var sessionStr = window.localStorage.getItem('mini_app_admin_session');
         if (!sessionStr) return;
         var session = JSON.parse(sessionStr);
+        var rawName = session.username || 'Seavik';
+        // Strip any legacy "Admin: " or " (Super Admin)" text
+        var cleanName = rawName.replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/, '').trim();
+        if (!cleanName) cleanName = 'Seavik';
+
         var actions = document.querySelector('.navbar-actions');
-        if (actions && !document.getElementById('admin-profile-badge')) {
+        if (actions) {
+          var existing = document.getElementById('admin-profile-badge');
+          if (existing) existing.remove();
+
           var badge = document.createElement('div');
           badge.id = 'admin-profile-badge';
           badge.className = 'd-inline-flex align-items-center gap-2 me-3';
-          badge.innerHTML = '<span class="badge bg-primary font-monospace py-1 px-2.5" style="font-size:12px;"><i class="bi bi-person-fill me-1"></i> <strong>' + (session.username || 'Seavik') + '</strong></span><a href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')" class="btn btn-sm btn-outline-danger py-0 px-2" title="Logout" style="font-size:11px;"><i class="bi bi-box-arrow-right"></i> Logout</a>';
+          badge.innerHTML = '<span class="badge bg-primary font-monospace py-1 px-2.5" style="font-size:12px;"><i class="bi bi-person-fill me-1"></i> <strong>' + cleanName + '</strong></span><a href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')" class="btn btn-sm btn-outline-danger py-0 px-2" title="Logout" style="font-size:11px;"><i class="bi bi-box-arrow-right"></i> Logout</a>';
           actions.insertBefore(badge, actions.firstChild);
         }
       } catch (e) {}
