@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: mini-app-backend
+    env: node
+    region: singapore
+    rootDir: server
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: BOT_TOKEN
+        value: 8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94
+      - key: MINI_APP_URL
+        value: https://mini-app-one-flax.vercel.app/app
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_FyNGs6iA2ZIv@ep-steep-heart-azr8c40s.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      - key: ABA_PAYWAY_MERCHANT_ID
+        value: ec477129
+      - key: ABA_PAYWAY_PUBLIC_KEY
+        value: 78445715560c048d3e0db4ced5167311a5817dfa
+      - key: ABA_PAYWAY_API_URL
+        value: https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase
+      - key: PAYPAL_CLIENT_ID
+        value: Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe
+      - key: PAYPAL_CLIENT_SECRET
+        value: EBT0z8wm2LZP90QiwTzxppyQUg1dIGAXNXRLJPr698QAv2CH4ayGNLmJg-WdFC5xdrjtsFWr61mUc7Oe
+      - key: PAYPAL_API_URL
+        value: https://api-m.paypal.com
+      - key: SECRET
+        generateValue: true
