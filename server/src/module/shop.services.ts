@@ -251,19 +251,46 @@ export const seedDatabaseIfEmpty = async () => {
     const categoryCount = await prisma.category.count();
     if (categoryCount === 0) {
       for (const cat of MOCK_CATEGORIES) {
-        await prisma.category.create({ data: cat }).catch(() => {});
+        await prisma.category.create({
+          data: {
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug,
+            icon: cat.icon,
+            image: cat.image,
+            description: cat.description,
+          }
+        }).catch(() => {});
       }
     }
     const productCount = await prisma.product.count();
     if (productCount === 0) {
       for (const prod of MOCK_PRODUCTS) {
-        const { categoryName, ...prodData } = prod;
-        await prisma.product.create({ data: prodData }).catch(() => {});
+        await prisma.product.create({
+          data: {
+            id: prod.id,
+            name: prod.name,
+            slug: prod.slug,
+            description: prod.description,
+            price: prod.price,
+            tonPrice: prod.tonPrice || null,
+            starsPrice: prod.starsPrice || null,
+            images: prod.images || [],
+            categoryId: prod.categoryId,
+            stock: prod.stock || 100,
+            rating: prod.rating || 4.8,
+            reviewCount: prod.reviewCount || 12,
+            isFeatured: Boolean(prod.isFeatured),
+            isNew: Boolean(prod.isNew),
+            isOnSale: Boolean(prod.isOnSale),
+            discount: prod.discount || 0,
+          }
+        }).catch(() => {});
       }
       console.log("✅ Seeded initial products into Prisma DB");
     }
   } catch (e) {
-    console.error("Seed error notice:", e);
+    console.error("Seed notice:", e);
   }
 };
 seedDatabaseIfEmpty();
