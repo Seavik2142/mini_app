@@ -1,0 +1,12 @@
+# Root-level .dockerignore (build context = mini_app/)
+server/node_modules
+server/dist
+server/.env
+server/.env.*
+server/*.log
+server/render.yaml
+admin/.vs
+admin/.git
+.git
+.DS_Store
+*.log
