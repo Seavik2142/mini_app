@@ -122,6 +122,7 @@ function openEditModal(id) {
   setField('product-description', product.description);
   setField('product-price', product.price);
   setField('product-stock', product.stock);
+  setField('product-warranty', product.warranty || '30 Days Replacement Warranty');
   setField('product-category', product.categoryId);
   setField('product-images', (product.images || []).join(', '));
   updateProductImagePreview((product.images || [])[0] || '');
@@ -149,6 +150,7 @@ async function saveProduct() {
     description: getField('product-description'),
     price: parseFloat(getField('product-price')) || 0,
     stock: parseInt(getField('product-stock')) || 0,
+    warranty: getField('product-warranty') || '30 Days Replacement Warranty',
     categoryId: parseInt(getField('product-category')) || 1,
     images: getField('product-images').split(',').map(s => s.trim()).filter(Boolean),
     isFeatured: getCheck('product-featured'),

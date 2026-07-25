@@ -264,6 +264,7 @@ export const seedDatabaseIfEmpty = async () => {
             isNew: Boolean(prod.isNew),
             isOnSale: Boolean(prod.isOnSale),
             discount: prod.discount || 0,
+            warranty: (prod as any).warranty || "30 Days Replacement Warranty",
           }
         }).catch(() => {});
       }

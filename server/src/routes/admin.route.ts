@@ -152,7 +152,7 @@ AdminRoute.get("/products", Utility.CatchAsync(async (req, res) => {
 }));
 
 AdminRoute.post("/products", Utility.CatchAsync(async (req, res) => {
-  let { name, slug, description, price, tonPrice, starsPrice, images, categoryId, stock, isFeatured, isNew, isOnSale, discount } = req.body;
+  let { name, slug, description, price, tonPrice, starsPrice, images, categoryId, stock, isFeatured, isNew, isOnSale, discount, warranty } = req.body;
 
   if (!name || String(name).trim() === "") {
     res.status(400).json({ code: 400, msg: "Product name is required" });
@@ -203,6 +203,7 @@ AdminRoute.post("/products", Utility.CatchAsync(async (req, res) => {
       isNew: Boolean(isNew),
       isOnSale: Boolean(isOnSale),
       discount: discount ? parseInt(discount) : 0,
+      warranty: warranty ? String(warranty).trim() : "30 Days Warranty",
     },
   });
 

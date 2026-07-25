@@ -185,6 +185,12 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+                  <FaShieldAlt /> {selectedProduct.warranty || "30 Days Replacement Warranty"}
+                </span>
+              </div>
+
               <p className="text-xs text-slate-300 leading-relaxed font-medium">{selectedProduct.description}</p>
 
               {selectedProduct.keyFormat && (

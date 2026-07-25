@@ -17,6 +17,7 @@ export interface Product {
   isOnSale?: boolean;
   discount?: number;
   isDigital?: boolean;
+  warranty?: string;
   keyFormat?: string;
   activationInstructions?: string;
 }
