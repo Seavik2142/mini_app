@@ -247,6 +247,40 @@
     </div>
   </div>
 
+  <!-- Super Admin Edit Credentials Modal (Email / Gmail & Password) -->
+  <div class="modal fade" id="editAdminCredentialsModal" tabindex="-1" aria-labelledby="editAdminCredentialsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="editAdminCredentialsModalLabel"><i class="bi bi-key-fill text-warning me-1"></i> Super Admin: Update Email & Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="edit-credentials-form" onsubmit="saveAdminCredentials(event)">
+          <input type="hidden" id="edit-admin-id">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Target Account Username</label>
+              <input type="text" id="edit-admin-username" class="form-control bg-light font-monospace" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="edit-admin-email">New Email / Gmail Address <span class="text-danger">*</span></label>
+              <input type="email" id="edit-admin-email" class="form-control" placeholder="e.g. user@gmail.com" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="edit-admin-password">New Password <span class="text-danger">*</span></label>
+              <input type="password" id="edit-admin-password" class="form-control" placeholder="Enter new password" minlength="4" required>
+              <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i> As Super Admin (Seavik), you can reset password and Gmail for any account role.</small>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-warning fw-bold"><i class="bi bi-shield-check me-1"></i> Save Updated Credentials</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/config.js"></script>

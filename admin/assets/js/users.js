@@ -112,7 +112,7 @@ function escHtml(str) {
 }
 
 let adminStaffList = [
-  { id: 1, username: 'seavik', email: 'seavik@miniapp.com', role: 'SUPER_ADMIN', status: 'ACTIVE', createdAt: '2026-01-01' },
+  { id: 1, username: 'Seavik', email: 'seavik@miniapp.com', role: 'SUPER_ADMIN', status: 'ACTIVE', createdAt: '2026-01-01' },
   { id: 2, username: 'admin', email: 'admin@miniapp.com', role: 'ADMIN', status: 'ACTIVE', createdAt: '2026-01-15' }
 ];
 
@@ -149,7 +149,8 @@ function loadAdminStaff() {
         <td><span class="badge bg-success">ACTIVE</span></td>
         <td>${a.createdAt || '2026-01-01'}</td>
         <td class="text-end">
-          ${a.username === 'seavik' ? '<span class="text-muted small fw-semibold">Primary Root</span>' : `<button class="btn btn-sm btn-outline-danger" onclick="deleteAdminStaff(${a.id})"><i class="bi bi-trash me-1"></i> Remove</button>`}
+          <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditCredentialsModal(${a.id})"><i class="bi bi-key-fill me-1"></i> Change Gmail & Password</button>
+          ${a.username === 'Seavik' ? '<span class="text-muted small fw-semibold">Primary Root</span>' : `<button class="btn btn-sm btn-outline-danger" onclick="deleteAdminStaff(${a.id})"><i class="bi bi-trash me-1"></i> Remove</button>`}
         </td>
       </tr>
     `;
@@ -169,11 +170,55 @@ function openAddAdminModal() {
   }
 }
 
+function openEditCredentialsModal(id) {
+  const staff = adminStaffList.find(a => a.id === id);
+  if (!staff) return;
+
+  const idEl = document.getElementById('edit-admin-id');
+  const userEl = document.getElementById('edit-admin-username');
+  const emailEl = document.getElementById('edit-admin-email');
+  const passEl = document.getElementById('edit-admin-password');
+
+  if (idEl) idEl.value = staff.id;
+  if (userEl) userEl.value = staff.username;
+  if (emailEl) emailEl.value = staff.email;
+  if (passEl) passEl.value = '';
+
+  const modalEl = document.getElementById('editAdminCredentialsModal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+}
+
+function saveAdminCredentials(event) {
+  event.preventDefault();
+  const id = Number(document.getElementById('edit-admin-id').value);
+  const email = document.getElementById('edit-admin-email').value.trim();
+  const password = document.getElementById('edit-admin-password').value;
+
+  const staff = adminStaffList.find(a => a.id === id);
+  if (staff) {
+    staff.email = email;
+    staff.password = password;
+    localStorage.setItem('mini_app_admin_staff_list', JSON.stringify(adminStaffList));
+    showToast(`🔑 Super Admin (Seavik) updated Gmail & Password for ${staff.username}!`, 'success');
+    loadAdminStaff();
+  }
+
+  const modalEl = document.getElementById('editAdminCredentialsModal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
+}
+
 function saveAdminStaff(event) {
   event.preventDefault();
   const username = document.getElementById('new-admin-username').value.trim();
   const email = document.getElementById('new-admin-email').value.trim();
   const role = document.getElementById('new-admin-role').value;
+  const password = document.getElementById('new-admin-password').value;
 
   if (!username || !email) {
     showToast('Please fill in username and email', 'error');
@@ -184,6 +229,7 @@ function saveAdminStaff(event) {
     id: Date.now(),
     username,
     email,
+    password,
     role,
     status: 'ACTIVE',
     createdAt: new Date().toISOString().split('T')[0]
