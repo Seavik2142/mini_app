@@ -56,6 +56,7 @@ model product {
   isOnSale    Boolean      @default(false)
   discount    Int?         @default(0)
   warranty    String?      @default("30 Days Warranty")
+  digitalKeys String[]     @default([])
   createdAt   DateTime     @default(now())
   cartItems   cart_item[]
   orderItems  order_item[]

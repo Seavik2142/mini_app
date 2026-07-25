@@ -179,6 +179,7 @@ function openEditModal(id) {
   setField('product-price', product.price);
   setField('product-stock', product.stock);
   setField('product-warranty', product.warranty || '30 Days Replacement Warranty');
+  setField('product-keys', (product.digitalKeys || []).join('\n'));
   setField('product-category', product.categoryId);
   setField('product-images', (product.images || []).join(', '));
   updateProductImagePreview((product.images || [])[0] || '');
@@ -215,6 +216,9 @@ async function saveProduct() {
 
   const catVal = parseInt(getField('product-category'));
 
+  const rawKeys = getField('product-keys').trim();
+  const digitalKeysArray = rawKeys ? rawKeys.split(/[\n,]+/).map(k => k.trim()).filter(Boolean) : [];
+
   const body = {
     name,
     slug: getField('product-slug').trim() || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
@@ -222,6 +226,7 @@ async function saveProduct() {
     price: parseFloat(getField('product-price')) || 0,
     stock: parseInt(getField('product-stock')) || 100,
     warranty: getField('product-warranty').trim() || '30 Days Replacement Warranty',
+    digitalKeys: digitalKeysArray,
     categoryId: !isNaN(catVal) ? catVal : 1,
     images: imagesArray,
     isFeatured: getCheck('product-featured'),

@@ -535,7 +535,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       items: newOrderItems
     };
 
-    // Try posting real order to Express backend DB
+    // Try posting real order to Express backend DB & trigger Telegram Bot delivery
     try {
       const response = await fetch(`${API_BASE_URL}/shop/orders`, {
         method: "POST",
@@ -544,14 +544,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           items: newOrderItems,
           totalAmount: totalPrice,
           paymentMethod,
-          telegramUserId: telegramUser.id,
-          telegramUsername: telegramUser.username,
+          telegramUserId: telegramUser?.id,
+          telegramChatId: telegramUser?.id,
+          telegramUsername: telegramUser?.username,
           contactPhone: phone
         })
       });
       const data = await response.json();
       if (data.success && data.data) {
-        console.log("Real Order created on backend database:", data.data);
+        console.log("Real Order created on backend & keys sent to Telegram Bot:", data.data);
+        setOrders((prev) => [data.data, ...prev]);
+        clearCart();
+        setPromoCode("");
+        setDiscountPercent(0);
+        toast.success("🎉 Payment Successful! Digital Keys delivered to your Telegram Bot & Vault");
+        return data.data;
       }
     } catch (e) {
       console.log("Offline mode: Order saved locally", e);
@@ -561,7 +568,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearCart();
     setPromoCode("");
     setDiscountPercent(0);
-    toast.success("🎉 KHQR Payment Verified! Digital Keys delivered to your Vault");
+    toast.success("🎉 Payment Successful! Digital Keys delivered to your Vault");
     return localOrder;
   };
 

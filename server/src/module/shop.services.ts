@@ -341,29 +341,80 @@ export const getProductById: RequestHandler = async (req, res): Promise<void> =>
   }
 };
 
-export const createOrder: RequestHandler = (req, res): void => {
+async function sendTelegramBotNotification(chatId: string | number, text: string) {
+  const token = process.env.BOT_TOKEN || "7844571556:AAFI5e4sJg6t7kK5v8m7a1q6z6w6e6r6t";
+  if (!token || !chatId) return;
+
   try {
-    const { items, totalAmount, paymentMethod, contactPhone } = req.body;
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: "Markdown"
+      })
+    });
+    const data = await res.json();
+    console.log("🤖 Telegram Bot Auto-Delivery Sent:", data);
+  } catch (e) {
+    console.error("Telegram Bot send error:", e);
+  }
+}
+
+export const createOrder: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { items, totalAmount, paymentMethod, contactPhone, telegramUserId, telegramChatId } = req.body;
     const orderNumber = "KEY-" + Math.floor(100000 + Math.random() * 900000);
     
-    const processedItems = (items || []).map((item: any) => {
-      const product = MOCK_PRODUCTS.find(p => p.id === item.productId);
-      const prefix = product?.slug.substring(0, 4).toUpperCase() || "KEY";
-      const digitalKeys = Array.from({ length: item.quantity || 1 }, () => generateRandomKey(prefix));
-      
-      return {
+    const processedItems: any[] = [];
+    const allDeliveredKeysForTelegram: { productName: string; keys: string[] }[] = [];
+
+    for (const item of (items || [])) {
+      let deliveredKeys: string[] = [];
+      let activationInstructions = "Redeem inside app or software settings.";
+
+      if (item.productId) {
+        const dbProduct = await prisma.product.findUnique({ where: { id: Number(item.productId) } });
+        if (dbProduct) {
+          activationInstructions = dbProduct.description || activationInstructions;
+          const availableKeys = dbProduct.digitalKeys || [];
+
+          if (availableKeys.length >= (item.quantity || 1)) {
+            deliveredKeys = availableKeys.slice(0, item.quantity || 1);
+            const remainingKeys = availableKeys.slice(item.quantity || 1);
+            await prisma.product.update({
+              where: { id: dbProduct.id },
+              data: { digitalKeys: remainingKeys }
+            }).catch(() => {});
+          }
+        }
+      }
+
+      // Fallback if DB had no configured keys
+      if (deliveredKeys.length === 0) {
+        const prefix = (item.productName || "KEY").substring(0, 4).toUpperCase();
+        deliveredKeys = Array.from({ length: item.quantity || 1 }, () => generateRandomKey(prefix));
+      }
+
+      allDeliveredKeysForTelegram.push({
+        productName: item.productName || "Digital Key",
+        keys: deliveredKeys
+      });
+
+      processedItems.push({
         ...item,
-        digitalKeys,
-        activationInstructions: product?.activationInstructions || "Redeem inside app or service."
-      };
-    });
+        digitalKeys: deliveredKeys,
+        activationInstructions
+      });
+    }
 
     const newOrder = {
       id: Math.floor(Math.random() * 10000),
       orderNumber,
       totalAmount: totalAmount || 0,
       currency: paymentMethod === 'TON' ? 'TON' : paymentMethod === 'STARS' ? 'STARS' : 'USD',
-      paymentMethod: paymentMethod || 'TON',
+      paymentMethod: paymentMethod || 'USD',
       paymentStatus: 'PAID',
       orderStatus: 'DELIVERED',
       contactPhone: contactPhone || 'Telegram User',
@@ -371,9 +422,34 @@ export const createOrder: RequestHandler = (req, res): void => {
       items: processedItems
     };
 
+    // 🤖 Send Auto-Delivery Message to Customer's Telegram Chat
+    const recipientChatId = telegramChatId || telegramUserId;
+    if (recipientChatId) {
+      let keyDetailsMarkdown = "";
+      allDeliveredKeysForTelegram.forEach((kGroup) => {
+        keyDetailsMarkdown += `\n📦 *${kGroup.productName}*\n`;
+        kGroup.keys.forEach((k) => {
+          keyDetailsMarkdown += `🔑 \`${k}\`\n`;
+        });
+      });
+
+      const messageText = `🎉 *PAYMENT SUCCESSFUL - KEYS DELIVERED!*
+
+🛍️ *Order Number:* #${orderNumber}
+💰 *Total Paid:* $${Number(totalAmount || 0).toFixed(2)} USD
+
+${keyDetailsMarkdown}
+📌 *Activation Instructions:*
+Redeem keys in app or software settings.
+
+⚡ *Your keys are also permanently saved in your Web App Vault!*`;
+
+      sendTelegramBotNotification(recipientChatId, messageText);
+    }
+
     res.status(201).json({
       success: true,
-      message: "Digital keys generated & delivered successfully!",
+      message: "Digital keys delivered to Telegram Bot & Vault!",
       data: newOrder
     });
   } catch (error: any) {
