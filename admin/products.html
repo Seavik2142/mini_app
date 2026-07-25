@@ -3,33 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Catalog Management | Mini App Admin</title>
+  <meta name="description" content="Manage products — Mini App Admin">
+  <title>Products | Mini App Admin</title>
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <style>
-    .khr-preview-badge {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
-      border: 1px border rgba(99, 102, 241, 0.3);
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-weight: 800;
-    }
-  </style>
 </head>
 <body>
   <div class="admin-shell">
     <div class="sidebar-backdrop" data-sidebar-close></div>
 
-    <!-- Sidebar Navigation -->
-    <aside class="admin-sidebar" id="adminSidebar">
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
       <div class="sidebar-header">
-        <a class="brand-mark" href="index.html">
-          <span class="brand-icon"><i class="bi bi-shield-lock-fill"></i></span>
+        <a class="brand-mark" href="index.html" aria-label="Mini App Admin">
+          <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
           <span class="brand-copy">
-            <span class="brand-title">Mini App Admin</span>
-            <span class="brand-subtitle">Key Vault Control Panel</span>
+            <span class="brand-title">Mini App</span>
+            <span class="brand-subtitle">Admin Panel</span>
           </span>
         </a>
       </div>
@@ -39,7 +29,7 @@
           <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
           <span class="nav-text">Dashboard</span>
         </a>
-        <a class="nav-link active" href="products.html">
+        <a class="nav-link active" href="products.html" aria-current="page">
           <span class="nav-icon"><i class="bi bi-box-seam"></i></span>
           <span class="nav-text">Products Catalog</span>
         </a>
@@ -49,202 +39,169 @@
         </a>
         <a class="nav-link" href="users.html">
           <span class="nav-icon"><i class="bi bi-people"></i></span>
-          <span class="nav-text">Users & Admin Roles</span>
+          <span class="nav-text">Users</span>
         </a>
         <a class="nav-link" href="promos.html">
           <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
           <span class="nav-text">Promo Codes</span>
         </a>
         <a class="nav-link" href="payments.html">
-          <span class="nav-icon"><i class="bi bi-[#2AABEE] bi-credit-card"></i></span>
+          <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
           <span class="nav-text">Payment History</span>
         </a>
       </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span class="sidebar-footer-text">System running smoothly</span>
+      </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="admin-main">
-      <header class="main-header d-flex align-items-center justify-content-between pb-3 mb-4 border-bottom">
-        <div>
-          <h1 class="h3 font-weight-bold mb-0">🛍️ Product Catalog Control</h1>
-          <p class="text-muted small mb-0">Add products, edit names, auto-convert USD ($) to Khmer Riel (៛), & manage images</p>
+    <div class="admin-main">
+      <nav class="navbar admin-navbar navbar-expand bg-white">
+        <div class="container-fluid px-3 px-lg-4">
+          <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="adminSidebar" aria-expanded="true" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="navbar-actions ms-auto">
+            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme">
+              <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
-        <button class="btn btn-primary font-weight-bold" data-bs-toggle="modal" data-bs-target="#addProductModal" onclick="prepareAddModal()">
-          <i class="bi bi-plus-lg me-1"></i> Add New Product
-        </button>
-      </header>
+      </nav>
 
-      <div class="row g-4" id="productsGrid">
-        <!-- Products populated via JS -->
-      </div>
-    </main>
+      <main class="dashboard-content">
+        <div class="container-fluid px-3 px-lg-4 py-4">
+
+          <!-- Page Heading -->
+          <div class="page-heading">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Catalog</p>
+                <h1 class="h3 mb-1">Products</h1>
+                <p class="text-muted mb-0">Add, edit and delete products from your store catalog.</p>
+              </div>
+            </div>
+            <div class="heading-actions">
+              <button class="btn btn-primary btn-sm" onclick="openCreateModal()">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Product
+              </button>
+            </div>
+          </div>
+
+          <!-- Products Table -->
+          <section class="panel mt-3">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-table"></i><span>Product List</span></h2>
+                <p class="text-muted mb-0" id="products-count">Loading...</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Image</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Rating</th>
+                    <th scope="col">Flags</th>
+                    <th scope="col">Created</th>
+                    <th scope="col" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="products-tbody">
+                  <tr><td colspan="8" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      </main>
+
+      <footer class="admin-footer">
+        <div class="container-fluid px-3 px-lg-4">
+          <span>Mini App Admin Panel &copy; 2026</span>
+        </div>
+      </footer>
+    </div>
   </div>
 
-  <!-- Add/Edit Product Modal -->
-  <div class="modal fade" id="addProductModal" tabindex="-1">
+  <!-- Product Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content bg-dark text-white border-secondary">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title font-weight-bold" id="modalTitle">Add New Digital Key Product</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalLabel">Add Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="productForm">
-            <input type="hidden" id="prodId">
-            <div class="mb-3">
-              <label class="form-label text-muted small font-weight-bold">PRODUCT NAME</label>
-              <input type="text" id="prodName" class="form-control bg-secondary text-white border-0" placeholder="e.g. Telegram Premium 1-Year Key" required>
-            </div>
-
-            <!-- Price USD & Auto Khmer Riel -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label text-muted small font-weight-bold">PRICE IN USD ($)</label>
-                <input type="number" step="0.01" id="prodPriceUsd" class="form-control bg-secondary text-white border-0 font-weight-bold" value="1.00" oninput="calcKhmerRiel()" required>
+          <form id="product-form">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Product Name <span class="text-danger">*</span></label>
+                <input type="text" id="product-name" class="form-control" placeholder="e.g. Telegram Premium 1-Year Key" required>
               </div>
               <div class="col-md-6">
-                <label class="form-label text-info small font-weight-bold">AUTO KHMER RIEL (៛)</label>
-                <div class="khr-preview-badge" id="khrPreview">4,000 ៛</div>
+                <label class="form-label fw-semibold">Slug</label>
+                <input type="text" id="product-slug" class="form-control" placeholder="auto-generated if empty">
               </div>
-            </div>
-
-            <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label text-muted small font-weight-bold">CATEGORY</label>
-                <select id="prodCategory" class="form-select bg-secondary text-white border-0">
-                  <option value="Telegram & Bot Keys">Telegram & Bot Keys</option>
-                  <option value="Gaming & Gift Cards">Gaming & Gift Cards</option>
-                  <option value="Software & VPN Licenses">Software & VPN Licenses</option>
-                  <option value="Crypto & AI Subscriptions">Crypto & AI Subscriptions</option>
+                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                <select id="product-category" class="form-select">
+                  <option value="">Loading categories...</option>
                 </select>
               </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small font-weight-bold">STOCK QUANTITY</label>
-                <input type="number" id="prodStock" class="form-control bg-secondary text-white border-0" value="100" required>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Price (USD) <span class="text-danger">*</span></label>
+                <input type="number" id="product-price" class="form-control" step="0.01" min="0" placeholder="1.00">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Stock</label>
+                <input type="number" id="product-stock" class="form-control" min="0" placeholder="100">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Image URLs</label>
+                <input type="text" id="product-images" class="form-control" placeholder="https://... (comma separated)">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Description</label>
+                <textarea id="product-description" class="form-control" rows="3" placeholder="Product description..."></textarea>
+              </div>
+              <div class="col-12 d-flex flex-wrap gap-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="product-featured">
+                  <label class="form-check-label" for="product-featured">Featured</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="product-new">
+                  <label class="form-check-label" for="product-new">New</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="product-sale">
+                  <label class="form-check-label" for="product-sale">On Sale</label>
+                </div>
               </div>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label text-muted small font-weight-bold">IMAGE URL</label>
-              <input type="text" id="prodImageUrl" class="form-control bg-secondary text-white border-0" placeholder="https://images.unsplash.com/..." required>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label text-muted small font-weight-bold">DESCRIPTION</label>
-              <textarea id="prodDesc" class="form-control bg-secondary text-white border-0" rows="2" placeholder="Product features & instructions..."></textarea>
-            </div>
-
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="prodIsSale">
-              <label class="form-check-label small" for="prodIsSale">On Sale (Discount %)</label>
-            </div>
-
-            <button type="button" class="btn btn-success w-100 font-weight-bold py-2" onclick="saveProduct()">Save Product</button>
           </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveProduct()">
+            <i class="bi bi-check-lg me-1"></i> Save Product
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const KHR_RATE = 4000;
-    let products = JSON.parse(localStorage.getItem('mini_app_products')) || [
-      { id: 1, name: "Telegram Premium 1-Year Key", price: 1.00, categoryName: "Telegram & Bot Keys", stock: 120, images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"], description: "1-Year Telegram Premium activation key." },
-      { id: 2, name: "Steam $50 Digital Gift Card Key", price: 1.00, categoryName: "Gaming & Gift Cards", stock: 85, images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"], description: "Global Steam Wallet activation code." }
-    ];
-
-    function calcKhmerRiel() {
-      const usd = parseFloat(document.getElementById('prodPriceUsd').value) || 0;
-      const riel = Math.round(usd * KHR_RATE);
-      document.getElementById('khrPreview').innerText = riel.toLocaleString() + ' ៛';
-    }
-
-    function renderProducts() {
-      const grid = document.getElementById('productsGrid');
-      grid.innerHTML = '';
-      products.forEach(p => {
-        const riel = Math.round(p.price * KHR_RATE).toLocaleString();
-        grid.innerHTML += `
-          <div class="col-md-6 col-lg-4">
-            <div class="card bg-dark text-white border-secondary h-100">
-              <img src="${p.images[0]}" class="card-img-top" style="height: 180px; object-fit: cover;">
-              <div class="card-body d-flex flex-column justify-content-between">
-                <div>
-                  <h5 class="card-title font-weight-bold mb-1">${p.name}</h5>
-                  <div class="text-success font-weight-bold mb-2">$${p.price.toFixed(2)} <span class="text-muted small">(${riel} ៛)</span></div>
-                  <p class="card-text text-muted small">${p.description || ''}</p>
-                </div>
-                <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top border-secondary">
-                  <span class="badge bg-secondary">Stock: ${p.stock}</span>
-                  <div>
-                    <button class="btn btn-sm btn-outline-info me-1" onclick="editProduct(${p.id})"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function prepareAddModal() {
-      document.getElementById('modalTitle').innerText = 'Add New Digital Key Product';
-      document.getElementById('prodId').value = '';
-      document.getElementById('prodName').value = '';
-      document.getElementById('prodPriceUsd').value = '1.00';
-      document.getElementById('prodStock').value = '100';
-      document.getElementById('prodImageUrl').value = '';
-      document.getElementById('prodDesc').value = '';
-      calcKhmerRiel();
-    }
-
-    function editProduct(id) {
-      const p = products.find(item => item.id === id);
-      if (!p) return;
-      document.getElementById('modalTitle').innerText = 'Edit Product';
-      document.getElementById('prodId').value = p.id;
-      document.getElementById('prodName').value = p.name;
-      document.getElementById('prodPriceUsd').value = p.price;
-      document.getElementById('prodStock').value = p.stock;
-      document.getElementById('prodImageUrl').value = p.images[0] || '';
-      document.getElementById('prodDesc').value = p.description || '';
-      calcKhmerRiel();
-      const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
-      modal.show();
-    }
-
-    function saveProduct() {
-      const id = document.getElementById('prodId').value;
-      const name = document.getElementById('prodName').value.trim();
-      const price = parseFloat(document.getElementById('prodPriceUsd').value) || 1.0;
-      const stock = parseInt(document.getElementById('prodStock').value) || 100;
-      const img = document.getElementById('prodImageUrl').value.trim() || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80';
-      const desc = document.getElementById('prodDesc').value.trim();
-      const cat = document.getElementById('prodCategory').value;
-
-      if (!name) return alert('Enter product name');
-
-      if (id) {
-        products = products.map(p => p.id == id ? { ...p, name, price, stock, images: [img], description: desc, categoryName: cat } : p);
-      } else {
-        products.unshift({ id: Date.now(), name, price, stock, images: [img], description: desc, categoryName: cat });
-      }
-
-      localStorage.setItem('mini_app_products', JSON.stringify(products));
-      renderProducts();
-      bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-    }
-
-    function deleteProduct(id) {
-      if (!confirm('Delete this product?')) return;
-      products = products.filter(p => p.id !== id);
-      localStorage.setItem('mini_app_products', JSON.stringify(products));
-      renderProducts();
-    }
-
-    renderProducts();
-  </script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
 </body>
 </html>

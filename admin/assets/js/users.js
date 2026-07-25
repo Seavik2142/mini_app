@@ -7,6 +7,7 @@ const PAGE_SIZE = 20;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadUsers(currentPage);
+  loadUserStats();
 
   // Search
   const searchInput = document.getElementById('user-search');
@@ -91,6 +92,18 @@ async function toggleBlock(id, currentlyBlocked) {
   } catch (e) {
     showToast('Error: ' + e.message, 'error');
   }
+}
+
+async function loadUserStats() {
+  try {
+    const data = await apiFetch(API.stats);
+    const s = data.data || data;
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setEl('stat-users',   Number(s.totalUsers).toLocaleString());
+    setEl('stat-active',  Number(s.totalUsers - 0).toLocaleString()); // approximate
+    setEl('stat-blocked', '—');
+    setEl('stat-orders',  Number(s.totalOrders).toLocaleString());
+  } catch (e) { console.error('Stats error:', e); }
 }
 
 function escHtml(str) {
