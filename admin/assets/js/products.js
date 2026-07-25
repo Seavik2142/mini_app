@@ -107,6 +107,9 @@ function openAddModal() {
     modal.show();
   }
 }
+function openCreateModal() {
+  openAddModal();
+}
 
 function openEditModal(id) {
   const product = productsList.find(p => p.id === id);
