@@ -1,6 +1,6 @@
 {
-  "buildCommand": "[ -d client ] && cd client && npm install && npm run build || echo 'Static Admin Build Complete'",
-  "outputDirectory": "client/dist",
+  "buildCommand": "cd client && npm install && npm run build && cd .. && mkdir -p dist && cp -r client/dist/* dist/",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
