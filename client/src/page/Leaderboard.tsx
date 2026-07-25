@@ -8,9 +8,6 @@ const Leaderboard = () => {
             <img src={initData.user()?.photo_url} alt="photo picture" className='size-20 rounded-full mx-auto mt-5 border-2 border-indigo-500/50 shadow-lg shadow-indigo-600/20' />
             <p className="text-2xl text-center font-monda font-bold text-white mt-1">3,000</p>
             <p className='font-montserrat text-center mt-1 text-indigo-300 font-semibold text-xs'>Level 1 - 🌟 1st Place</p>
-            <div className="flex items-center justify-center mt-4">
-                <button className='text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-4 py-1.5 rounded-xl border border-indigo-500/40 font-monda text-white shadow-md shadow-indigo-600/20 transition-all'>✨ Invite Friends</button>
-            </div>
 
             <div className="flex items-center justify-between mt-6">
                 <p className='font-roboto font-bold text-white'>All Leaderboards</p>

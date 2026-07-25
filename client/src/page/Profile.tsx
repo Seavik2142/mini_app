@@ -1,21 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaShareAlt, FaCopy, FaCheck, FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt } from "react-icons/fa";
+import { FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaCheck } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { orders, telegramUser, isPhoneVerified, verifiedPhone, verifyPhone, sendOtpCode, updateVerifiedPhone, logout } = useCart();
-  const [copied, setCopied] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [inputPhone, setInputPhone] = useState(verifiedPhone || "");
   const [otpCode, setOtpCode] = useState("");
   const [step, setStep] = useState<"PHONE" | "OTP">("PHONE");
   const [isSending, setIsSending] = useState(false);
-
-  const { id: tgId } = telegramUser;
-  const referralLink = `https://t.me/Sik_mybot/shop?startapp=ref_${tgId || verifiedPhone}`;
 
   const handleQuickTelegramLogin = () => {
     if (telegramUser.id || telegramUser.firstName) {
@@ -28,13 +24,6 @@ const Profile: React.FC = () => {
     } else {
       navigate("/auth");
     }
-  };
-
-  const copyReferral = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    toast.success("Referral link copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSendOtp = async () => {
@@ -97,7 +86,7 @@ const Profile: React.FC = () => {
           <div className="space-y-1 max-w-xs mx-auto">
             <h2 className="text-base font-extrabold text-white">Telegram Account Verification</h2>
             <p className="text-xs text-slate-400 leading-relaxed font-medium">
-              Connect your Telegram account to activate your Key Vault, unlock digital purchases, and earn referral rewards.
+              Connect your Telegram account to activate your Key Vault and manage your digital key purchases.
             </p>
           </div>
 
@@ -181,33 +170,6 @@ const Profile: React.FC = () => {
               </div>
               <p className="text-sm font-black text-emerald-400 mt-1">VERIFIED PRO</p>
               <p className="text-[10px] text-slate-400">Instant Access</p>
-            </div>
-          </div>
-
-          {/* Real Telegram Referral Link */}
-          <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                <FaShareAlt className="text-indigo-400" /> Invite Friends & Earn Rewards
-              </h3>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed font-medium">
-              Share your referral link with friends to gift them <span className="font-bold text-emerald-400">15% discount</span> on digital key purchases!
-            </p>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                readOnly
-                value={referralLink}
-                className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 font-mono truncate focus:outline-none"
-              />
-              <button
-                onClick={copyReferral}
-                className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all"
-              >
-                {copied ? <FaCheck /> : <FaCopy />}
-              </button>
             </div>
           </div>
 
