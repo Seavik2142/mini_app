@@ -3,22 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hero Banner Control | Mini App Admin</title>
+  <meta name="description" content="Hero Banners — Mini App Admin">
+  <title>Hero Banners | Mini App Admin</title>
+
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
   <div class="admin-shell">
     <div class="sidebar-backdrop" data-sidebar-close></div>
 
-    <aside class="admin-sidebar" id="adminSidebar">
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
       <div class="sidebar-header">
-        <a class="brand-mark" href="index.html">
-          <span class="brand-icon"><i class="bi bi-shield-lock-fill"></i></span>
+        <a class="brand-mark" href="index.html" aria-label="Mini App Admin">
+          <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
           <span class="brand-copy">
-            <span class="brand-title">Mini App Admin</span>
-            <span class="brand-subtitle">Key Vault Control Panel</span>
+            <span class="brand-title">Mini App</span>
+            <span class="brand-subtitle">Admin Panel</span>
           </span>
         </a>
       </div>
@@ -32,43 +35,86 @@
           <span class="nav-icon"><i class="bi bi-box-seam"></i></span>
           <span class="nav-text">Products Catalog</span>
         </a>
-        <a class="nav-link active" href="banners.html">
+        <a class="nav-link active" href="banners.html" aria-current="page">
           <span class="nav-icon"><i class="bi bi-images"></i></span>
           <span class="nav-text">Hero Banners</span>
-        </a>
-        <a class="nav-link" href="users.html">
-          <span class="nav-icon"><i class="bi bi-people"></i></span>
-          <span class="nav-text">Users & Admin Roles</span>
         </a>
         <a class="nav-link" href="promos.html">
           <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
           <span class="nav-text">Promo Codes</span>
+        </a>
+        <a class="nav-link" href="users.html">
+          <span class="nav-icon"><i class="bi bi-people"></i></span>
+          <span class="nav-text">Users</span>
         </a>
         <a class="nav-link" href="payments.html">
           <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
           <span class="nav-text">Payment History</span>
         </a>
       </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span class="sidebar-footer-text">System running smoothly</span>
+      </div>
     </aside>
 
-    <main class="admin-main">
-      <header class="main-header pb-3 mb-4 border-bottom">
-        <h1 class="h3 font-weight-bold mb-0">🖼️ Hero Banner Carousel Control</h1>
-        <p class="text-muted small mb-0">Edit ChatGPT, Gemini, & Claude banner text, change images, and update slide badges</p>
-      </header>
+    <div class="admin-main">
+      <nav class="navbar admin-navbar navbar-expand bg-white">
+        <div class="container-fluid px-3 px-lg-4">
+          <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="adminSidebar" aria-expanded="true" aria-label="Toggle sidebar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
-      <div class="row g-4" id="bannersGrid">
-        <!-- Banners JS -->
-      </div>
-    </main>
+          <div class="navbar-actions ms-auto">
+            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
+              <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="dashboard-content">
+        <div class="container-fluid px-3 px-lg-4 py-4">
+
+          <!-- Page Heading -->
+          <div class="page-heading">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-images" aria-hidden="true"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Content</p>
+                <h1 class="h3 mb-1">Hero Banners</h1>
+                <p class="text-muted mb-0">Manage storefront promo banners, titles, descriptions, and badge text.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Banners Grid -->
+          <div class="row g-4 mt-1" id="bannersGrid">
+            <!-- Rendered by JS -->
+          </div>
+
+        </div>
+      </main>
+
+      <footer class="admin-footer">
+        <div class="container-fluid px-3 px-lg-4">
+          <span>Mini App Admin Panel &copy; 2026</span>
+        </div>
+      </footer>
+    </div>
   </div>
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/config.js"></script>
   <script>
     let banners = JSON.parse(localStorage.getItem('mini_app_banners')) || [
-      { id: 1, badge: "ChatGPT Plus & GPT-4o 🤖", title: "ChatGPT Plus Digital Keys", desc: "Get instant activation vouchers for OpenAI ChatGPT Plus with GPT-4o, Sora & DALL-E 3 access!", tag: "⚡ INSTANT AI ACCESS", image: "assets/images/dasher-ai.png" },
-      { id: 2, badge: "Google Gemini Advanced ✨", title: "Gemini Advanced 1.5 Pro Keys", desc: "Unlock Google's 2M token context window & Ultra AI capabilities!", tag: "🔥 20% OFF TODAY", image: "assets/images/dasher-ui-bootstrap-5.jpg" },
-      { id: 3, badge: "Anthropic Claude 3.5 Sonnet 🧠", title: "Claude Pro Access Vouchers", desc: "Top-tier AI coding & reasoning intelligence.", tag: "💳 KHQR & ABA Supported", image: "assets/images/dasher-ai.png" }
+      { id: 1, badge: "Telegram Premium 🔑", title: "Instant Telegram Keys", desc: "Get 1-year Telegram Premium activation voucher keys with instant delivery!", tag: "⚡ INSTANT ACCESS", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" },
+      { id: 2, badge: "Gaming & Gift Cards 🎮", title: "Steam Wallet Cards", desc: "Redeem $50 global Steam keys directly to your account balance!", tag: "🔥 POPULAR", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80" },
+      { id: 3, badge: "Software & VPN 🛡️", title: "ExpressVPN Pro 1-Year", desc: "High-speed encrypted VPN serial keys with multi-device support.", tag: "💳 KHQR Supported", image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" }
     ];
 
     function renderBanners() {
@@ -77,26 +123,28 @@
       banners.forEach(b => {
         grid.innerHTML += `
           <div class="col-md-6 col-lg-4">
-            <div class="card bg-dark text-white border-secondary h-100 p-3">
-              <img src="${b.image}" class="rounded mb-3" style="height: 140px; object-fit: cover;">
-              <div class="mb-2">
-                <label class="form-label text-muted extra-small">BADGE TEXT</label>
-                <input type="text" class="form-control form-control-sm bg-secondary text-white border-0" value="${b.badge}" onchange="updateBanner(${b.id}, 'badge', this.value)">
-              </div>
-              <div class="mb-2">
-                <label class="form-label text-muted extra-small">TITLE</label>
-                <input type="text" class="form-control form-control-sm bg-secondary text-white border-0 font-weight-bold" value="${b.title}" onchange="updateBanner(${b.id}, 'title', this.value)">
-              </div>
-              <div class="mb-2">
-                <label class="form-label text-muted extra-small">DESCRIPTION</label>
-                <textarea class="form-control form-control-sm bg-secondary text-white border-0" rows="2" onchange="updateBanner(${b.id}, 'desc', this.value)">${b.desc}</textarea>
-              </div>
-              <div class="mb-2">
-                <label class="form-label text-muted extra-small">IMAGE URL / PATH</label>
-                <input type="text" class="form-control form-control-sm bg-secondary text-white border-0" value="${b.image}" onchange="updateBanner(${b.id}, 'image', this.value)">
-              </div>
-              <div class="text-end mt-2">
-                <span class="badge bg-success">Auto-Saved</span>
+            <div class="card h-100 shadow-sm border-0">
+              <img src="${b.image}" class="card-img-top" style="height: 160px; object-fit: cover; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">BADGE TEXT</label>
+                  <input type="text" class="form-control form-control-sm" value="${escHtml(b.badge)}" onchange="updateBanner(${b.id}, 'badge', this.value)">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">TITLE</label>
+                  <input type="text" class="form-control form-control-sm fw-bold" value="${escHtml(b.title)}" onchange="updateBanner(${b.id}, 'title', this.value)">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">DESCRIPTION</label>
+                  <textarea class="form-control form-control-sm" rows="2" onchange="updateBanner(${b.id}, 'desc', this.value)">${escHtml(b.desc)}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted small fw-semibold">IMAGE URL</label>
+                  <input type="text" class="form-control form-control-sm" value="${escHtml(b.image)}" onchange="updateBanner(${b.id}, 'image', this.value)">
+                </div>
+                <div class="d-flex justify-content-end align-items-center">
+                  <span class="badge bg-success">Auto-Saved</span>
+                </div>
               </div>
             </div>
           </div>
@@ -107,9 +155,14 @@
     function updateBanner(id, key, val) {
       banners = banners.map(b => b.id === id ? { ...b, [key]: val } : b);
       localStorage.setItem('mini_app_banners', JSON.stringify(banners));
+      showToast('Banner saved successfully');
     }
 
-    renderBanners();
+    function escHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderBanners);
   </script>
 </body>
 </html>
