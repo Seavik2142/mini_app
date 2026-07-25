@@ -68,72 +68,58 @@ const Home: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Smooth Auto-Scrolling Animated Hero Banner Box */}
-      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${activeSlide.gradient} p-5 text-white shadow-2xl border border-indigo-500/30 transition-all duration-700 ease-in-out group min-h-[175px] flex flex-col justify-between`}>
-        {/* Background Image with Ambient Overlay */}
-        <div className="absolute right-0 top-0 w-1/2 h-full overflow-hidden opacity-35 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none">
-          <img
-            src={activeSlide.image}
-            alt={activeSlide.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0b0f17] via-[#0b0f17]/80 to-transparent" />
-        </div>
+      {/* Pure Full-Image Hero Banner Carousel */}
+      <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-indigo-500/30 group aspect-[21/9] sm:aspect-[24/9] w-full bg-slate-950">
+        {/* Full Image Slide */}
+        <img
+          src={activeSlide.image}
+          alt={`Hero Banner ${currentSlide + 1}`}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+        />
 
-        {/* Ambient Radial Glows */}
-        <div className="absolute -left-10 -top-10 w-44 h-44 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -right-8 -bottom-8 w-44 h-44 bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Content */}
-        <div className="relative z-10 space-y-2 max-w-[82%] transition-all duration-500">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-500/25 text-indigo-300 text-[11px] font-black backdrop-blur-md border border-indigo-400/40 shadow-inner tracking-wide">
-            <FaBolt className="animate-pulse text-amber-300" /> {activeSlide.badge}
-          </div>
-          <h2 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md leading-tight">
-            {activeSlide.title}
-          </h2>
-          <p className="text-xs text-slate-300 leading-relaxed font-medium">
-            {activeSlide.desc}
-          </p>
-        </div>
-
-        {/* Controls & Dots Bar */}
-        <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/10 mt-2">
-          {/* Navigation Arrows */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={prevSlide}
-              className="p-1.5 rounded-xl bg-slate-900/80 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs"
-            >
-              <FaChevronLeft />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="p-1.5 rounded-xl bg-slate-900/80 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs"
-            >
-              <FaChevronRight />
-            </button>
+        {/* Navigation Controls Overlay */}
+        <div className="absolute inset-0 p-3 flex flex-col justify-between pointer-events-none">
+          {/* Top Indicator */}
+          <div className="flex justify-between items-center">
+            {activeSlides.length > 1 && (
+              <span className="text-[10px] font-mono font-black text-white bg-slate-950/70 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 shadow-md">
+                {currentSlide + 1} / {activeSlides.length}
+              </span>
+            )}
           </div>
 
-          {/* Dots Indicator */}
-          <div className="flex items-center gap-1.5">
-            {BANNER_SLIDES.map((slide, idx) => (
+          {/* Bottom Bar: Arrows & Dots */}
+          <div className="flex items-center justify-between pointer-events-auto bg-slate-950/70 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/15 shadow-xl">
+            <div className="flex items-center gap-1.5">
               <button
-                key={slide.id}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  idx === currentSlide
-                    ? "w-6 bg-indigo-400 shadow-md shadow-indigo-500/50"
-                    : "w-2 bg-slate-700 hover:bg-slate-500"
-                }`}
-              />
-            ))}
-          </div>
+                onClick={prevSlide}
+                className="p-1.5 rounded-xl bg-slate-900/90 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs shadow"
+              >
+                <FaChevronLeft />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="p-1.5 rounded-xl bg-slate-900/90 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs shadow"
+              >
+                <FaChevronRight />
+              </button>
+            </div>
 
-          {/* Tag */}
-          <span className="text-[10px] font-black text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-lg border border-amber-400/30">
-            {activeSlide.tag}
-          </span>
+            {/* Dots */}
+            <div className="flex items-center gap-1.5">
+              {activeSlides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-2 rounded-full transition-all duration-500 ${
+                    idx === currentSlide
+                      ? "w-6 bg-indigo-400 shadow-md shadow-indigo-500/50"
+                      : "w-2 bg-slate-600 hover:bg-slate-400"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

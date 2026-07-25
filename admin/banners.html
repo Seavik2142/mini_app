@@ -164,7 +164,7 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-semibold">BANNER TITLE <span class="text-danger">*</span></label>
-                <input type="text" id="bannerTitle" class="form-control fw-bold" placeholder="e.g. ChatGPT Plus Digital Keys" required>
+                <input type="text" id="bannerTitle" class="form-control fw-bold" placeholder="e.g. Hero Banner">
               </div>
               <div class="col-md-6">
                 <label class="form-label text-muted small fw-semibold">BADGE / TAG TEXT</label>
@@ -222,29 +222,20 @@
       banners.forEach((b, index) => {
         grid.innerHTML += `
           <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0 banner-card">
+            <div class="card h-100 shadow-sm border-0 banner-card overflow-hidden">
               <div class="position-relative">
-                <img src="${escHtml(b.image)}" class="card-img-top banner-img-preview" alt="${escHtml(b.title)}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">
-                <span class="position-absolute top-0 start-0 m-2 badge bg-dark opacity-75">Slide #${index + 1}</span>
+                <img src="${escHtml(b.image)}" class="card-img-top banner-img-preview" alt="Banner Slide #${index + 1}" style="height: 180px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">
+                <span class="position-absolute top-0 start-0 m-2 badge bg-dark opacity-85">Slide #${index + 1}</span>
               </div>
-              <div class="card-body d-flex flex-column justify-content-between">
+              <div class="card-body p-3 d-flex align-items-center justify-content-between bg-white border-top">
+                <small class="text-muted fw-bold">Pure Image Banner</small>
                 <div>
-                  <div class="mb-2">
-                    <span class="badge bg-primary-subtle text-primary fw-semibold">${escHtml(b.badge || 'Banner')}</span>
-                  </div>
-                  <h5 class="card-title fw-bold text-body mb-2">${escHtml(b.title)}</h5>
-                  <p class="card-text text-muted small leading-normal mb-3">${escHtml(b.desc)}</p>
-                </div>
-                <div class="pt-3 border-top d-flex align-items-center justify-content-between">
-                  <small class="text-muted text-truncate" style="max-width: 140px;" title="${escHtml(b.image)}">📷 Image URL</small>
-                  <div>
-                    <button class="btn btn-light btn-sm me-1" onclick="openEditBannerModal(${b.id})">
-                      <i class="bi bi-pencil me-1"></i> Edit
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="deleteBanner(${b.id})">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
+                  <button class="btn btn-light btn-sm me-1" onclick="openEditBannerModal(${b.id})">
+                    <i class="bi bi-pencil me-1"></i> Edit Image
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="deleteBanner(${b.id})">
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
               </div>
             </div>
