@@ -219,6 +219,28 @@ export const deleteBanner: RequestHandler = (req, res): void => {
   res.status(200).json({ success: true, message: "Banner deleted" });
 };
 
+export const seedDatabaseIfEmpty = async () => {
+  try {
+    const categoryCount = await prisma.category.count();
+    if (categoryCount === 0) {
+      for (const cat of MOCK_CATEGORIES) {
+        await prisma.category.create({ data: cat }).catch(() => {});
+      }
+    }
+    const productCount = await prisma.product.count();
+    if (productCount === 0) {
+      for (const prod of MOCK_PRODUCTS) {
+        const { categoryName, ...prodData } = prod;
+        await prisma.product.create({ data: prodData }).catch(() => {});
+      }
+      console.log("✅ Seeded initial products into Prisma DB");
+    }
+  } catch (e) {
+    console.error("Seed error notice:", e);
+  }
+};
+seedDatabaseIfEmpty();
+
 export const getProducts: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { category, search, featured } = req.query;
@@ -228,12 +250,10 @@ export const getProducts: RequestHandler = async (req, res): Promise<void> => {
       orderBy: { createdAt: "desc" }
     });
 
-    let products: any[] = dbProducts.length > 0
-      ? dbProducts.map(p => ({
-          ...p,
-          categoryName: p.category?.name || "General"
-        }))
-      : [...MOCK_PRODUCTS];
+    let products: any[] = dbProducts.map(p => ({
+      ...p,
+      categoryName: p.category?.name || "General"
+    }));
 
     if (category) {
       products = products.filter(p => p.categoryId === Number(category) || (p.categoryName && p.categoryName.toLowerCase() === String(category).toLowerCase()));

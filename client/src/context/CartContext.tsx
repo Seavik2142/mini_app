@@ -264,7 +264,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetch(`${API_BASE_URL}/shop/products`)
       .then(res => res.json())
       .then(data => {
-        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+        if (data.data && Array.isArray(data.data)) {
           setProducts(data.data);
         }
       })
@@ -273,7 +273,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetch(`${API_BASE_URL}/shop/banners`)
       .then(res => res.json())
       .then(data => {
-        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+        if (data.data && Array.isArray(data.data)) {
           setBannerSlides(data.data);
         }
       })
