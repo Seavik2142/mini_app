@@ -41,18 +41,18 @@ const Home: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Pure Full-Size Image Hero Banner (Zero Overlays in Front) */}
-      <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl border border-indigo-500/30 bg-slate-950">
-        {/* Full Quality Uncropped Image */}
+      {/* Original Size Hero Banner Carousel (Zero Text Overlays in Front) */}
+      <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl border border-indigo-500/30 bg-slate-950 aspect-[21/9] sm:aspect-[24/9] min-h-[170px]">
+        {/* Full Image Slide in Original Hero Size */}
         <img
           src={activeSlide.image}
           alt={`Hero Banner ${currentSlide + 1}`}
-          className="w-full h-auto block object-contain mx-auto"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out"
         />
 
-        {/* Clean Indicator Bar Below Image */}
+        {/* Minimal Floating Indicator Dots at Bottom Edge */}
         {activeSlides.length > 1 && (
-          <div className="flex items-center justify-center gap-2 py-2 bg-slate-900/90 border-t border-slate-800/80">
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 px-3 py-1 bg-slate-950/75 backdrop-blur-md rounded-full border border-white/15 shadow-xl pointer-events-auto">
             {activeSlides.map((_, idx) => (
               <button
                 key={idx}
@@ -60,8 +60,8 @@ const Home: React.FC = () => {
                 aria-label={`Slide ${idx + 1}`}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   idx === currentSlide
-                    ? "w-6 bg-indigo-500 shadow-sm shadow-indigo-500/50"
-                    : "w-1.5 bg-slate-700 hover:bg-slate-500"
+                    ? "w-5 bg-indigo-400 shadow-sm shadow-indigo-500/50"
+                    : "w-1.5 bg-slate-500 hover:bg-slate-300"
                 }`}
               />
             ))}
