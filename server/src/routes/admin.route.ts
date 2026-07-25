@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../index";
 import Utility from "../utils/Utilite";
+import { getBanners, createBanner, updateBanner, deleteBanner } from "../module/shop.services";
 
 const AdminRoute = Router();
 
@@ -176,5 +177,11 @@ AdminRoute.get("/categories", Utility.CatchAsync(async (req, res) => {
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
   res.json({ code: 200, data: categories });
 }));
+
+// ── Banners ───────────────────────────────────────────────────
+AdminRoute.get("/banners", getBanners);
+AdminRoute.post("/banners", createBanner);
+AdminRoute.patch("/banners/:id", updateBanner);
+AdminRoute.delete("/banners/:id", deleteBanner);
 
 export default AdminRoute;

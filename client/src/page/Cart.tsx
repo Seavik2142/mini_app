@@ -5,6 +5,8 @@ import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, 
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const Cart: React.FC = () => {
   const {
     cart,
@@ -35,7 +37,7 @@ const Cart: React.FC = () => {
       setShowKHQRModal(true);
 
       try {
-        const res = await fetch("http://localhost:3000/shop/paypal-checkout", {
+        const res = await fetch(`${API_BASE_URL}/shop/paypal-checkout`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

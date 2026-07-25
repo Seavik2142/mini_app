@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import crypto from "crypto";
+import { prisma } from "../index";
 
 export const MOCK_CATEGORIES = [
   { id: 1, name: "Telegram & Bot Keys", slug: "telegram-bot-keys", icon: "🔑", description: "Telegram Premium, Bot API keys & VIP Access", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" },
@@ -152,13 +153,90 @@ const generateRandomKey = (prefix: string = "KEY") => {
   return `${prefix}-${part1}-${part2}-${part3}`;
 };
 
-export const getProducts: RequestHandler = (req, res): void => {
+export let MOCK_BANNERS = [
+  {
+    id: 1,
+    badge: "ChatGPT Plus & GPT-4o 🤖",
+    title: "ChatGPT Plus Digital Keys",
+    desc: "Get instant activation vouchers for OpenAI ChatGPT Plus with GPT-4o, Sora & DALL-E 3 access!",
+    tag: "⚡ INSTANT AI ACCESS",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-emerald-950 via-teal-900/80 to-slate-950"
+  },
+  {
+    id: 2,
+    badge: "Google Gemini Advanced ✨",
+    title: "Gemini Advanced 1.5 Pro Keys",
+    desc: "Unlock Google's 2M token context window & Ultra AI capabilities with instant digital license codes!",
+    tag: "🔥 20% OFF TODAY",
+    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-blue-950 via-indigo-900/80 to-slate-950"
+  },
+  {
+    id: 3,
+    badge: "Anthropic Claude 3.5 Sonnet 🧠",
+    title: "Claude Pro Access Vouchers",
+    desc: "Top-tier AI coding & reasoning intelligence. Instant key redemption in USD ($) & Khmer Riel (៛)!",
+    tag: "💳 KHQR & ABA Supported",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-amber-950 via-orange-950/80 to-slate-950"
+  }
+];
+
+export const getBanners: RequestHandler = (_req, res): void => {
+  res.status(200).json({ success: true, data: MOCK_BANNERS });
+};
+
+export const createBanner: RequestHandler = (req, res): void => {
+  const { title, badge, desc, image, tag } = req.body;
+  const newBanner = {
+    id: Date.now(),
+    title,
+    badge: badge || "PROMO",
+    desc: desc || "",
+    tag: tag || "⚡ SPECIAL OFFER",
+    image: image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
+    gradient: "from-indigo-950 via-purple-900/80 to-slate-950"
+  };
+  MOCK_BANNERS.push(newBanner);
+  res.status(201).json({ success: true, data: newBanner });
+};
+
+export const updateBanner: RequestHandler = (req, res): void => {
+  const id = Number(req.params.id);
+  const index = MOCK_BANNERS.findIndex(b => b.id === id);
+  if (index === -1) {
+    res.status(404).json({ success: false, message: "Banner not found" });
+    return;
+  }
+  MOCK_BANNERS[index] = { ...MOCK_BANNERS[index], ...req.body };
+  res.status(200).json({ success: true, data: MOCK_BANNERS[index] });
+};
+
+export const deleteBanner: RequestHandler = (req, res): void => {
+  const id = Number(req.params.id);
+  MOCK_BANNERS = MOCK_BANNERS.filter(b => b.id !== id);
+  res.status(200).json({ success: true, message: "Banner deleted" });
+};
+
+export const getProducts: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { category, search, featured } = req.query;
-    let products = [...MOCK_PRODUCTS];
+
+    const dbProducts = await prisma.product.findMany({
+      include: { category: true },
+      orderBy: { createdAt: "desc" }
+    });
+
+    let products: any[] = dbProducts.length > 0
+      ? dbProducts.map(p => ({
+          ...p,
+          categoryName: p.category?.name || "General"
+        }))
+      : [...MOCK_PRODUCTS];
 
     if (category) {
-      products = products.filter(p => p.categoryId === Number(category) || p.categoryName.toLowerCase() === String(category).toLowerCase());
+      products = products.filter(p => p.categoryId === Number(category) || (p.categoryName && p.categoryName.toLowerCase() === String(category).toLowerCase()));
     }
 
     if (featured === 'true') {
@@ -186,14 +264,26 @@ export const getCategories: RequestHandler = (_req, res): void => {
   });
 };
 
-export const getProductById: RequestHandler = (req, res): void => {
-  const { id } = req.params;
-  const product = MOCK_PRODUCTS.find(p => p.id === Number(id));
-  if (!product) {
-    res.status(404).json({ success: false, message: "Product not found" });
-    return;
+export const getProductById: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const dbProduct = await prisma.product.findUnique({
+      where: { id: Number(id) },
+      include: { category: true }
+    });
+
+    const product = dbProduct
+      ? { ...dbProduct, categoryName: dbProduct.category?.name || "General" }
+      : MOCK_PRODUCTS.find(p => p.id === Number(id));
+
+    if (!product) {
+      res.status(404).json({ success: false, message: "Product not found" });
+      return;
+    }
+    res.status(200).json({ success: true, data: product });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  res.status(200).json({ success: true, data: product });
 };
 
 export const createOrder: RequestHandler = (req, res): void => {

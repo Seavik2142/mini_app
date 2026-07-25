@@ -259,6 +259,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : INITIAL_USERS;
   });
 
+  // Sync Products & Banners from Server API
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/shop/products`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          setProducts(data.data);
+        }
+      })
+      .catch(err => console.log("Products API sync notice:", err));
+
+    fetch(`${API_BASE_URL}/shop/banners`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+          setBannerSlides(data.data);
+        }
+      })
+      .catch(err => console.log("Banners API sync notice:", err));
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("mini_app_products", JSON.stringify(products));
   }, [products]);
