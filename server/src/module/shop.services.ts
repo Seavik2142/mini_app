@@ -379,22 +379,32 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
         if (dbProduct) {
           activationInstructions = dbProduct.description || activationInstructions;
           const availableKeys = dbProduct.digitalKeys || [];
+          const neededQty = item.quantity || 1;
 
-          if (availableKeys.length >= (item.quantity || 1)) {
-            deliveredKeys = availableKeys.slice(0, item.quantity || 1);
-            const remainingKeys = availableKeys.slice(item.quantity || 1);
+          if (availableKeys.length > 0) {
+            const takeQty = Math.min(neededQty, availableKeys.length);
+            deliveredKeys = availableKeys.slice(0, takeQty);
+            const remainingKeys = availableKeys.slice(takeQty);
+            const newStock = Math.max(0, (dbProduct.stock || availableKeys.length) - takeQty);
+
             await prisma.product.update({
               where: { id: dbProduct.id },
-              data: { digitalKeys: remainingKeys }
+              data: {
+                digitalKeys: remainingKeys,
+                stock: newStock
+              }
             }).catch(() => {});
           }
         }
       }
 
-      // Fallback if DB had no configured keys
-      if (deliveredKeys.length === 0) {
+      // Ensure user receives exact requested quantity (e.g. 3 keys for 3 qty)
+      const neededQty = item.quantity || 1;
+      if (deliveredKeys.length < neededQty) {
         const prefix = (item.productName || "KEY").substring(0, 4).toUpperCase();
-        deliveredKeys = Array.from({ length: item.quantity || 1 }, () => generateRandomKey(prefix));
+        const missingCount = neededQty - deliveredKeys.length;
+        const generatedKeys = Array.from({ length: missingCount }, () => generateRandomKey(prefix));
+        deliveredKeys = [...deliveredKeys, ...generatedKeys];
       }
 
       allDeliveredKeysForTelegram.push({

@@ -160,9 +160,13 @@ function applyProductCrop() {
 
 function updateKeysCount(val) {
   const el = document.getElementById('product-keys-count');
-  if (!el) return;
   const lines = (val || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-  el.textContent = `${lines.length} Item${lines.length === 1 ? '' : 's'}`;
+  if (el) {
+    el.textContent = `${lines.length} Item${lines.length === 1 ? '' : 's'}`;
+  }
+  if (lines.length > 0) {
+    setField('product-stock', lines.length);
+  }
 }
 
 function cleanProductKeysFormat() {
