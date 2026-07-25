@@ -237,16 +237,45 @@
       mediaQuery.addListener(handleBreakpointChange);
     }
 
+    function checkAdminAuth() {
+      var path = window.location.pathname.toLowerCase();
+      var isAuthPage = path.indexOf("login.html") !== -1 || path.indexOf("register.html") !== -1 || path.indexOf("forgot-password.html") !== -1;
+      var sessionStr = window.localStorage.getItem("mini_app_admin_session");
+
+      if (!isAuthPage) {
+        if (!sessionStr) {
+          window.location.href = "login.html";
+          return false;
+        }
+        try {
+          var parsed = JSON.parse(sessionStr);
+          if (!parsed || !parsed.username) {
+            window.localStorage.removeItem("mini_app_admin_session");
+            window.location.href = "login.html";
+            return false;
+          }
+        } catch (e) {
+          window.localStorage.removeItem("mini_app_admin_session");
+          window.location.href = "login.html";
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (!checkAdminAuth()) return;
+
     function renderAdminUserInfo() {
       try {
         var sessionStr = window.localStorage.getItem('mini_app_admin_session');
-        var session = sessionStr ? JSON.parse(sessionStr) : { username: 'admin', role: 'SUPER_ADMIN' };
+        if (!sessionStr) return;
+        var session = JSON.parse(sessionStr);
         var actions = document.querySelector('.navbar-actions');
         if (actions && !document.getElementById('admin-profile-badge')) {
           var badge = document.createElement('div');
           badge.id = 'admin-profile-badge';
           badge.className = 'd-inline-flex align-items-center gap-2 me-3';
-          badge.innerHTML = '<span class="badge bg-primary font-monospace py-1 px-2.5" style="font-size:12px;"><i class="bi bi-shield-lock-fill me-1"></i> Admin: <strong>' + (session.username || 'admin') + '</strong> (' + (session.role === 'SUPER_ADMIN' ? 'Super Admin' : session.role) + ')</span><a href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')" class="btn btn-sm btn-outline-danger py-0 px-2" title="Logout" style="font-size:11px;"><i class="bi bi-box-arrow-right"></i> Logout</a>';
+          badge.innerHTML = '<span class="badge bg-primary font-monospace py-1 px-2.5" style="font-size:12px;"><i class="bi bi-shield-lock-fill me-1"></i> Admin: <strong>' + (session.username || 'Admin') + '</strong> (' + (session.role === 'SUPER_ADMIN' ? 'Super Admin' : session.role) + ')</span><a href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')" class="btn btn-sm btn-outline-danger py-0 px-2" title="Logout" style="font-size:11px;"><i class="bi bi-box-arrow-right"></i> Logout</a>';
           actions.insertBefore(badge, actions.firstChild);
         }
       } catch (e) {}
