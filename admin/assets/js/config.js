@@ -15,6 +15,7 @@ const API = {
   products:   `${API_BASE}/admin-api/products`,
   categories: `${API_BASE}/admin-api/categories`,
   banners:    `${API_BASE}/admin-api/banners`,
+  promos:     `${API_BASE}/admin-api/promos`,
 };
 
 /**

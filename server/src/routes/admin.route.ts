@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../index";
 import Utility from "../utils/Utilite";
-import { getBanners, createBanner, updateBanner, deleteBanner } from "../module/shop.services";
+import { getBanners, createBanner, updateBanner, deleteBanner, getPromos, createPromo, deletePromo } from "../module/shop.services";
 
 const AdminRoute = Router();
 
@@ -255,5 +255,10 @@ AdminRoute.get("/banners", getBanners);
 AdminRoute.post("/banners", createBanner);
 AdminRoute.patch("/banners/:id", updateBanner);
 AdminRoute.delete("/banners/:id", deleteBanner);
+
+// ── Promos ────────────────────────────────────────────────────
+AdminRoute.get("/promos", getPromos);
+AdminRoute.post("/promos", createPromo);
+AdminRoute.delete("/promos/:id", deletePromo);
 
 export default AdminRoute;

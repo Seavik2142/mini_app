@@ -278,6 +278,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       })
       .catch(err => console.log("Banners API sync notice:", err));
+
+    fetch(`${API_BASE_URL}/shop/promos`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data)) {
+          setPromoCodesList(data.data);
+        }
+      })
+      .catch(err => console.log("Promos API sync notice:", err));
   }, []);
 
   useEffect(() => {

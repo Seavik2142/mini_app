@@ -153,6 +153,33 @@ const generateRandomKey = (prefix: string = "KEY") => {
   return `${prefix}-${part1}-${part2}-${part3}`;
 };
 
+export let MOCK_PROMOS = [
+  { id: 1, code: "SIK10", discountPercent: 10, isActive: true },
+  { id: 2, code: "WELCOME20", discountPercent: 20, isActive: true }
+];
+
+export const getPromos: RequestHandler = (_req, res): void => {
+  res.status(200).json({ success: true, data: MOCK_PROMOS });
+};
+
+export const createPromo: RequestHandler = (req, res): void => {
+  const { code, discountPercent } = req.body;
+  const newPromo = {
+    id: Date.now(),
+    code: String(code || "").trim().toUpperCase(),
+    discountPercent: parseInt(discountPercent) || 10,
+    isActive: true
+  };
+  MOCK_PROMOS.push(newPromo);
+  res.status(201).json({ success: true, data: newPromo });
+};
+
+export const deletePromo: RequestHandler = (req, res): void => {
+  const id = Number(req.params.id);
+  MOCK_PROMOS = MOCK_PROMOS.filter(p => p.id !== id);
+  res.status(200).json({ success: true, message: "Promo deleted" });
+};
+
 export let MOCK_BANNERS = [
   {
     id: 1,
