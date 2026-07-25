@@ -6,6 +6,7 @@ let currentPage = 1;
 const PAGE_SIZE = 20;
 
 document.addEventListener('DOMContentLoaded', () => {
+  loadAdminStaff();
   loadUsers(currentPage);
   loadUserStats();
 
@@ -108,4 +109,102 @@ async function loadUserStats() {
 
 function escHtml(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let adminStaffList = [
+  { id: 1, username: 'seavik', email: 'seavik@miniapp.com', role: 'SUPER_ADMIN', status: 'ACTIVE', createdAt: '2026-01-01' },
+  { id: 2, username: 'admin', email: 'admin@miniapp.com', role: 'ADMIN', status: 'ACTIVE', createdAt: '2026-01-15' }
+];
+
+function loadAdminStaff() {
+  const tbody = document.getElementById('admins-tbody');
+  if (!tbody) return;
+
+  const saved = localStorage.getItem('mini_app_admin_staff_list');
+  if (saved) {
+    try { adminStaffList = JSON.parse(saved); } catch (e) {}
+  }
+
+  tbody.innerHTML = adminStaffList.map(a => {
+    const roleBadge = a.role === 'SUPER_ADMIN'
+      ? '<span class="badge bg-primary font-monospace"><i class="bi bi-shield-lock-fill me-1"></i> Super Admin</span>'
+      : a.role === 'ADMIN'
+      ? '<span class="badge bg-info text-dark font-monospace"><i class="bi bi-shield-fill me-1"></i> Admin Manager</span>'
+      : '<span class="badge bg-secondary font-monospace"><i class="bi bi-lightning-fill me-1"></i> Operator</span>';
+
+    return `
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-center rounded-circle bg-dark text-warning fw-bold font-monospace" style="width:34px;height:34px;font-size:12px;">
+              👑
+            </div>
+            <div>
+              <p class="fw-bold mb-0 text-primary">${escHtml(a.username)}</p>
+              <p class="text-muted small mb-0">${escHtml(a.email)}</p>
+            </div>
+          </div>
+        </td>
+        <td>${roleBadge}</td>
+        <td><span class="badge bg-success">ACTIVE</span></td>
+        <td>${a.createdAt || '2026-01-01'}</td>
+        <td class="text-end">
+          ${a.username === 'seavik' ? '<span class="text-muted small fw-semibold">Primary Root</span>' : `<button class="btn btn-sm btn-outline-danger" onclick="deleteAdminStaff(${a.id})"><i class="bi bi-trash me-1"></i> Remove</button>`}
+        </td>
+      </tr>
+    `;
+  }).join('') || `<tr><td colspan="5" class="text-center text-muted py-3">No admin staff members registered</td></tr>`;
+
+  const countEl = document.getElementById('admins-count');
+  if (countEl) countEl.textContent = `${adminStaffList.length} Active System Administrators`;
+}
+
+function openAddAdminModal() {
+  const modalEl = document.getElementById('addAdminModal');
+  if (modalEl) {
+    const form = document.getElementById('admin-staff-form');
+    if (form) form.reset();
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+}
+
+function saveAdminStaff(event) {
+  event.preventDefault();
+  const username = document.getElementById('new-admin-username').value.trim();
+  const email = document.getElementById('new-admin-email').value.trim();
+  const role = document.getElementById('new-admin-role').value;
+
+  if (!username || !email) {
+    showToast('Please fill in username and email', 'error');
+    return;
+  }
+
+  const newAdmin = {
+    id: Date.now(),
+    username,
+    email,
+    role,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString().split('T')[0]
+  };
+
+  adminStaffList.push(newAdmin);
+  localStorage.setItem('mini_app_admin_staff_list', JSON.stringify(adminStaffList));
+  showToast(`👑 Issued new Admin credentials for ${username}!`, 'success');
+  loadAdminStaff();
+
+  const modalEl = document.getElementById('addAdminModal');
+  if (modalEl) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
+}
+
+function deleteAdminStaff(id) {
+  if (!confirm('Are you sure you want to remove this Admin Staff member?')) return;
+  adminStaffList = adminStaffList.filter(a => a.id !== id);
+  localStorage.setItem('mini_app_admin_staff_list', JSON.stringify(adminStaffList));
+  showToast('Admin Staff credentials removed', 'info');
+  loadAdminStaff();
 }
