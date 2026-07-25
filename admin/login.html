@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="adminHMD authentication page">
-  <title>Login | adminHMD</title>
+  <meta name="description" content="Admin Authentication — Mini App Admin">
+  <title>Admin Login | Mini App Admin</title>
 
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
@@ -16,26 +16,91 @@
     <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
   </button>
   <main class="auth-page">
-    <section class="auth-card">
-      <a class="auth-brand" href="index.html"><span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span><span><strong>adminHMD</strong><small>Sign in to your admin workspace.</small></span></a>
-      <div class="auth-visual"><img src="assets/images/png/dasher-ui-bootstrap-5.jpg" alt="adminHMD dashboard interface"></div>
-      <form class="needs-validation" novalidate>
+    <section class="auth-card shadow-lg">
+      <a class="auth-brand" href="index.html">
+        <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
+        <span><strong>Mini App Admin</strong><small>Sign in to your admin workspace.</small></span>
+      </a>
+      
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="needs-validation" novalidate>
         <div class="mb-4">
-          <p class="eyebrow mb-1">Secure Access</p>
-          <h1 class="h3 mb-1">Login</h1>
-          <p class="text-muted mb-0">Sign in to your admin workspace.</p>
+          <p class="eyebrow mb-1">Secure Admin Workspace</p>
+          <h1 class="h3 mb-1">Admin Sign In</h1>
+          <p class="text-muted mb-0">Sign in with your Admin Username and Password.</p>
         </div>
-        <div class="mb-3"><label class="form-label" for="loginEmail">Email address</label><input class="form-control" id="loginEmail" type="email" required><div class="invalid-feedback">Enter a valid email.</div></div>
-        <div class="mb-3"><div class="d-flex justify-content-between"><label class="form-label" for="loginPassword">Password</label><a class="small fw-semibold" href="forgot-password.html">Forgot?</a></div><input class="form-control" id="loginPassword" type="password" minlength="6" required><div class="invalid-feedback">Password must be at least 6 characters.</div></div>
-        <div class="form-check mb-4"><input class="form-check-input" type="checkbox" id="rememberMe"><label class="form-check-label" for="rememberMe">Remember me</label></div>
-        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Sign In</button>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="loginUsername">Admin Username or Email <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+            <input class="form-control" id="loginUsername" type="text" placeholder="e.g. admin or boss" required>
+          </div>
+          <div class="invalid-feedback">Please enter your Admin Username or Email.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="adminRole">Admin Role</label>
+          <select class="form-select" id="adminRole">
+            <option value="SUPER_ADMIN" selected>👑 Super Admin (Full Access)</option>
+            <option value="ADMIN">🛡️ Admin Manager</option>
+            <option value="OPERATOR">⚡ Catalog Operator</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-semibold" for="loginPassword">Password <span class="text-danger">*</span></label>
+            <a class="small fw-semibold" href="forgot-password.html">Forgot?</a>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+            <input class="form-control" id="loginPassword" type="password" minlength="4" placeholder="••••••••" required>
+          </div>
+          <div class="invalid-feedback">Password is required.</div>
+        </div>
+
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+          <label class="form-check-label" for="rememberMe">Remember login session</label>
+        </div>
+
+        <button class="btn btn-primary w-100 fw-bold py-2" type="submit">
+          <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Sign In as Admin
+        </button>
       </form>
       
-      <div class="auth-footer">New here? <a href="register.html">Create an account</a></div>
+      <div class="auth-footer text-center mt-3">New admin? <a href="register.html">Create an admin account</a></div>
     </section>
   </main>
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/main.js"></script>
+  <script>
+    function handleAdminLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const role = document.getElementById('adminRole').value;
+
+      if (!username || !password) {
+        showToast('Please enter your Admin Username and Password', 'error');
+        return;
+      }
+
+      const adminSession = {
+        username: username,
+        role: role,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('mini_app_admin_session', JSON.stringify(adminSession));
+      showToast(`Welcome back, Admin ${username}! Directing to workspace...`, 'success');
+
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 700);
+    }
+  </script>
 </body>
 </html>
