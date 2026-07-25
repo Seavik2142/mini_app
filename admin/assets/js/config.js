@@ -6,7 +6,7 @@
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3000'
-  : ''; // empty = same origin (served by Express at /admin)
+  : 'https://mini-app-mzu6.onrender.com';
 
 const API = {
   stats:      `${API_BASE}/admin-api/stats`,

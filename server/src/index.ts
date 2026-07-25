@@ -10,7 +10,13 @@ export const app = express();
 export const prisma = new PrismaClient();
 
 app.use(cors({
-    origin: true,
+    origin: [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://mini-app-3c2e.vercel.app",
+        "https://mini-app-one-flax.vercel.app",
+        "https://mini-app-mzu6.onrender.com",
+    ],
     credentials: true
 }));
 
