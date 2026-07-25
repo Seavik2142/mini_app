@@ -127,34 +127,34 @@ function loadAdminStaff() {
 
   tbody.innerHTML = adminStaffList.map(a => {
     const roleBadge = a.role === 'SUPER_ADMIN'
-      ? '<span class="badge bg-primary font-monospace"><i class="bi bi-shield-lock-fill me-1"></i> Super Admin</span>'
+      ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 font-monospace py-1.5 px-2.5"><i class="bi bi-shield-lock-fill me-1"></i> Super Admin</span>'
       : a.role === 'ADMIN'
-      ? '<span class="badge bg-info text-dark font-monospace"><i class="bi bi-shield-fill me-1"></i> Admin Manager</span>'
-      : '<span class="badge bg-secondary font-monospace"><i class="bi bi-lightning-fill me-1"></i> Operator</span>';
+      ? '<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 font-monospace py-1.5 px-2.5"><i class="bi bi-shield-fill me-1"></i> Admin Manager</span>'
+      : '<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary font-monospace py-1.5 px-2.5"><i class="bi bi-lightning-fill me-1"></i> Operator</span>';
 
     return `
       <tr>
-        <td>
-          <div class="d-flex align-items-center gap-2">
-            <div class="d-flex align-items-center justify-content-center rounded-circle bg-dark text-warning fw-bold font-monospace" style="width:34px;height:34px;font-size:12px;">
-              👑
+        <td class="ps-3">
+          <div class="d-flex align-items-center gap-2.5">
+            <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-bold font-monospace border border-primary border-opacity-25" style="width:36px;height:36px;font-size:13px;">
+              ${a.role === 'SUPER_ADMIN' ? '👑' : '🛡️'}
             </div>
             <div>
-              <p class="fw-bold mb-0 text-primary">${escHtml(a.username)}</p>
+              <p class="fw-bold mb-0 text-dark dark-text-white">${escHtml(a.username)}</p>
               <p class="text-muted small mb-0">${escHtml(a.email)}</p>
             </div>
           </div>
         </td>
         <td>${roleBadge}</td>
-        <td><span class="badge bg-success">ACTIVE</span></td>
-        <td>${a.createdAt || '2026-01-01'}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditCredentialsModal(${a.id})"><i class="bi bi-key-fill me-1"></i> Change Gmail & Password</button>
-          ${a.username === 'Seavik' ? '<span class="text-muted small fw-semibold">Primary Root</span>' : `<button class="btn btn-sm btn-outline-danger" onclick="deleteAdminStaff(${a.id})"><i class="bi bi-trash me-1"></i> Remove</button>`}
+        <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">ACTIVE</span></td>
+        <td><span class="small text-muted">${a.createdAt || '2026-01-01'}</span></td>
+        <td class="text-end pe-3">
+          <button class="btn btn-sm btn-light border me-1 fw-semibold" onclick="openEditCredentialsModal(${a.id})"><i class="bi bi-key-fill text-warning me-1"></i> Change Gmail & Password</button>
+          ${a.username === 'Seavik' ? '<span class="badge bg-secondary bg-opacity-25 text-muted small fw-bold">Primary Root</span>' : `<button class="btn btn-sm btn-outline-danger" onclick="deleteAdminStaff(${a.id})"><i class="bi bi-trash me-1"></i> Remove</button>`}
         </td>
       </tr>
     `;
-  }).join('') || `<tr><td colspan="5" class="text-center text-muted py-3">No admin staff members registered</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="text-center text-muted py-4">No admin staff members registered</td></tr>`;
 
   const countEl = document.getElementById('admins-count');
   if (countEl) countEl.textContent = `${adminStaffList.length} Active System Administrators`;
