@@ -429,7 +429,11 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
       allDeliveredKeysForTelegram.forEach((kGroup) => {
         keyDetailsMarkdown += `\n📦 *${kGroup.productName}*\n`;
         kGroup.keys.forEach((k) => {
-          keyDetailsMarkdown += `🔑 \`${k}\`\n`;
+          if (k.startsWith("http://") || k.startsWith("https://")) {
+            keyDetailsMarkdown += `🔗 [Click to Open Link](${k})\n\`${k}\`\n`;
+          } else {
+            keyDetailsMarkdown += `🔑 \`${k}\`\n`;
+          }
         });
       });
 

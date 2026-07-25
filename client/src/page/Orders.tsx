@@ -113,6 +113,16 @@ const Orders: React.FC = () => {
                                 >
                                   {isRevealed ? <FaEyeSlash className="text-xs" /> : <FaEye className="text-xs" />}
                                 </button>
+                                {digitalKey.startsWith("http://") || digitalKey.startsWith("https://") ? (
+                                  <a
+                                    href={digitalKey}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg flex items-center gap-1 shadow-md transition-all"
+                                  >
+                                    🚀 Open Link
+                                  </a>
+                                ) : null}
                                 <button
                                   onClick={() => copyToClipboard(digitalKey)}
                                   className="px-2.5 py-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-[10px] rounded-lg flex items-center gap-1 shadow-md transition-all"
