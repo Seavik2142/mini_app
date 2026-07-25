@@ -152,19 +152,91 @@ AdminRoute.get("/products", Utility.CatchAsync(async (req, res) => {
 }));
 
 AdminRoute.post("/products", Utility.CatchAsync(async (req, res) => {
-  const { name, slug, description, price, tonPrice, starsPrice, images, categoryId, stock, isFeatured, isNew, isOnSale, discount } = req.body;
+  let { name, slug, description, price, tonPrice, starsPrice, images, categoryId, stock, isFeatured, isNew, isOnSale, discount } = req.body;
+
+  if (!name || String(name).trim() === "") {
+    res.status(400).json({ code: 400, msg: "Product name is required" });
+    return;
+  }
+
+  // Ensure category exists
+  let targetCategoryId = categoryId ? parseInt(categoryId) : null;
+  if (targetCategoryId) {
+    const catExists = await prisma.category.findUnique({ where: { id: targetCategoryId } });
+    if (!catExists) targetCategoryId = null;
+  }
+
+  if (!targetCategoryId) {
+    const firstCat = await prisma.category.findFirst();
+    if (firstCat) {
+      targetCategoryId = firstCat.id;
+    } else {
+      const newCat = await prisma.category.create({
+        data: { name: "General", slug: "general", icon: "🔑", description: "General Category" },
+      });
+      targetCategoryId = newCat.id;
+    }
+  }
+
+  // Ensure unique slug
+  let baseSlug = (slug || name).toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  if (!baseSlug) baseSlug = "product-" + Date.now();
+
+  let uniqueSlug = baseSlug;
+  let count = 1;
+  while (await prisma.product.findUnique({ where: { slug: uniqueSlug } })) {
+    uniqueSlug = `${baseSlug}-${count++}`;
+  }
+
   const product = await prisma.product.create({
-    data: { name, slug, description, price, tonPrice, starsPrice, images: images || [], categoryId, stock: stock ?? 100, isFeatured: isFeatured ?? false, isNew: isNew ?? false, isOnSale: isOnSale ?? false, discount: discount ?? 0 },
+    data: {
+      name,
+      slug: uniqueSlug,
+      description: description || name,
+      price: parseFloat(price) || 0,
+      tonPrice: tonPrice ? parseFloat(tonPrice) : null,
+      starsPrice: starsPrice ? parseInt(starsPrice) : null,
+      images: Array.isArray(images) ? images : (images ? [images] : []),
+      categoryId: targetCategoryId,
+      stock: stock !== undefined && stock !== null ? parseInt(stock) : 100,
+      isFeatured: Boolean(isFeatured),
+      isNew: Boolean(isNew),
+      isOnSale: Boolean(isOnSale),
+      discount: discount ? parseInt(discount) : 0,
+    },
   });
-  res.status(201).json({ code: 201, data: product });
+
+  res.status(201).json({ code: 201, data: product, msg: "Product created successfully" });
 }));
 
 AdminRoute.patch("/products/:id", Utility.CatchAsync(async (req, res) => {
+  const id = parseInt(req.params.id);
+  const existing = await prisma.product.findUnique({ where: { id } });
+  if (!existing) {
+    res.status(404).json({ code: 404, msg: "Product not found" });
+    return;
+  }
+
+  const updateData: any = { ...req.body };
+  if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
+  if (updateData.stock !== undefined) updateData.stock = parseInt(updateData.stock) || 0;
+  if (updateData.categoryId !== undefined) updateData.categoryId = parseInt(updateData.categoryId);
+
+  if (updateData.slug && updateData.slug !== existing.slug) {
+    let baseSlug = updateData.slug.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    let uniqueSlug = baseSlug;
+    let count = 1;
+    while (await prisma.product.findFirst({ where: { slug: uniqueSlug, NOT: { id } } })) {
+      uniqueSlug = `${baseSlug}-${count++}`;
+    }
+    updateData.slug = uniqueSlug;
+  }
+
   const product = await prisma.product.update({
-    where: { id: parseInt(req.params.id) },
-    data:  req.body,
+    where: { id },
+    data:  updateData,
   });
-  res.json({ code: 200, data: product });
+  res.json({ code: 200, data: product, msg: "Product updated successfully" });
 }));
 
 AdminRoute.delete("/products/:id", Utility.CatchAsync(async (req, res) => {

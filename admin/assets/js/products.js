@@ -133,7 +133,7 @@ async function saveProduct() {
     }
     const modalEl = document.getElementById('productModal');
     if (modalEl) {
-      const modal = bootstrap.Modal.getInstance(modalEl);
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       if (modal) modal.hide();
     }
     loadProducts(currentPage);
