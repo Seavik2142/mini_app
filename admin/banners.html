@@ -161,22 +161,6 @@
               </div>
             </div>
 
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-semibold">BANNER TITLE <span class="text-danger">*</span></label>
-                <input type="text" id="bannerTitle" class="form-control fw-bold" placeholder="e.g. Hero Banner">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted small fw-semibold">BADGE / TAG TEXT</label>
-                <input type="text" id="bannerBadge" class="form-control" placeholder="e.g. 🤖 ChatGPT Plus & GPT-4o">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label text-muted small fw-semibold">DESCRIPTION</label>
-              <textarea id="bannerDesc" class="form-control" rows="3" placeholder="Short promo description displayed on the banner slide..."></textarea>
-            </div>
-
             <div class="modal-footer px-0 pb-0">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-check-lg me-1"></i> Save Image Banner</button>
@@ -264,9 +248,6 @@
       document.getElementById('bannerModalLabel').textContent = 'Edit Image Banner';
       document.getElementById('bannerId').value = banner.id;
       document.getElementById('bannerImageUrl').value = banner.image;
-      document.getElementById('bannerTitle').value = banner.title;
-      document.getElementById('bannerBadge').value = banner.badge || '';
-      document.getElementById('bannerDesc').value = banner.desc || '';
 
       updateModalImagePreview(banner.image);
 
@@ -304,16 +285,13 @@
     async function saveBanner(e) {
       e.preventDefault();
       const image = document.getElementById('bannerImageUrl').value.trim();
-      const title = document.getElementById('bannerTitle').value.trim();
-      const badge = document.getElementById('bannerBadge').value.trim();
-      const desc = document.getElementById('bannerDesc').value.trim();
 
-      if (!image || !title) {
-        showToast('Image URL and Title are required', 'error');
+      if (!image) {
+        showToast('Image URL or Local Image File is required', 'error');
         return;
       }
 
-      const body = { image, title, badge: badge || 'PROMO', desc, tag: '⚡ SPECIAL OFFER' };
+      const body = { image };
 
       try {
         if (editingBannerId) {
@@ -331,12 +309,13 @@
           banners.push({ id: Date.now(), ...body });
         }
         localStorage.setItem('mini_app_banners', JSON.stringify(banners));
-        showToast('Saved to local storage');
+        showToast('Banner saved locally');
       }
 
       const modalEl = document.getElementById('bannerModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.hide();
+
       loadBanners();
     }
 

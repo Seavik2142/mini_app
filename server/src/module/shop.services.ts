@@ -183,30 +183,15 @@ export const deletePromo: RequestHandler = (req, res): void => {
 export let MOCK_BANNERS = [
   {
     id: 1,
-    badge: "ChatGPT Plus & GPT-4o 🤖",
-    title: "ChatGPT Plus Digital Keys",
-    desc: "Get instant activation vouchers for OpenAI ChatGPT Plus with GPT-4o, Sora & DALL-E 3 access!",
-    tag: "⚡ INSTANT AI ACCESS",
     image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-    gradient: "from-emerald-950 via-teal-900/80 to-slate-950"
   },
   {
     id: 2,
-    badge: "Google Gemini Advanced ✨",
-    title: "Gemini Advanced 1.5 Pro Keys",
-    desc: "Unlock Google's 2M token context window & Ultra AI capabilities with instant digital license codes!",
-    tag: "🔥 20% OFF TODAY",
     image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
-    gradient: "from-blue-950 via-indigo-900/80 to-slate-950"
   },
   {
     id: 3,
-    badge: "Anthropic Claude 3.5 Sonnet 🧠",
-    title: "Claude Pro Access Vouchers",
-    desc: "Top-tier AI coding & reasoning intelligence. Instant key redemption in USD ($) & Khmer Riel (៛)!",
-    tag: "💳 KHQR & ABA Supported",
     image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80",
-    gradient: "from-amber-950 via-orange-950/80 to-slate-950"
   }
 ];
 
@@ -215,15 +200,10 @@ export const getBanners: RequestHandler = (_req, res): void => {
 };
 
 export const createBanner: RequestHandler = (req, res): void => {
-  const { title, badge, desc, image, tag } = req.body;
+  const { image } = req.body;
   const newBanner = {
     id: Date.now(),
-    title,
-    badge: badge || "PROMO",
-    desc: desc || "",
-    tag: tag || "⚡ SPECIAL OFFER",
     image: image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-    gradient: "from-indigo-950 via-purple-900/80 to-slate-950"
   };
   MOCK_BANNERS.push(newBanner);
   res.status(201).json({ success: true, data: newBanner });

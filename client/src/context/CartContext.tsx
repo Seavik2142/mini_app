@@ -10,12 +10,12 @@ import claudeImg from "../assets/claude.jpg";
 
 export interface BannerSlide {
   id: number;
-  badge: string;
-  title: string;
-  desc: string;
-  tag: string;
   image: string;
-  gradient: string;
+  badge?: string;
+  title?: string;
+  desc?: string;
+  tag?: string;
+  gradient?: string;
 }
 
 export interface PromoCodeItem {
@@ -101,33 +101,9 @@ const generateRandomKey = (prefix: string = "KEY") => {
 };
 
 const DEFAULT_BANNER_SLIDES: BannerSlide[] = [
-  {
-    id: 1,
-    badge: "ChatGPT Plus & GPT-4o 🤖",
-    title: "ChatGPT Plus Digital Keys",
-    desc: "Get instant activation vouchers for OpenAI ChatGPT Plus with GPT-4o, Sora & DALL-E 3 access!",
-    tag: "⚡ INSTANT AI ACCESS",
-    image: chatGptImg,
-    gradient: "from-emerald-950 via-teal-900/80 to-slate-950"
-  },
-  {
-    id: 2,
-    badge: "Google Gemini Advanced ✨",
-    title: "Gemini Advanced 1.5 Pro Keys",
-    desc: "Unlock Google's 2M token context window & Ultra AI capabilities with instant digital license codes!",
-    tag: "🔥 20% OFF TODAY",
-    image: geminiImg,
-    gradient: "from-blue-950 via-indigo-900/80 to-slate-950"
-  },
-  {
-    id: 3,
-    badge: "Anthropic Claude 3.5 Sonnet 🧠",
-    title: "Claude Pro Access Vouchers",
-    desc: "Top-tier AI coding & reasoning intelligence. Instant key redemption in USD ($) & Khmer Riel (៛)!",
-    tag: "💳 KHQR & ABA Supported",
-    image: claudeImg,
-    gradient: "from-amber-950 via-orange-950/80 to-slate-950"
-  }
+  { id: 1, image: chatGptImg },
+  { id: 2, image: geminiImg },
+  { id: 3, image: claudeImg }
 ];
 
 const INITIAL_PRODUCTS: Product[] = [
