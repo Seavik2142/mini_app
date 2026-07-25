@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaStar, FaKey, FaBolt, FaTimes, FaShieldAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaSearch, FaStar, FaKey, FaTimes, FaShieldAlt } from "react-icons/fa";
 import { Product } from "../type";
 import { useCart } from "../context/CartContext";
 
@@ -38,9 +38,6 @@ const Home: React.FC = () => {
       p.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + activeSlides.length) % activeSlides.length);
 
   return (
     <div className="space-y-4">
