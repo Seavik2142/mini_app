@@ -68,6 +68,8 @@ async function loadCategoriesForForm() {
   }
 }
 
+let productCropper = null;
+
 function handleProductFileUpload(input) {
   if (input.files && input.files[0]) {
     const file = input.files[0];
@@ -76,7 +78,7 @@ function handleProductFileUpload(input) {
       const dataUrl = e.target.result;
       setField('product-images', dataUrl);
       updateProductImagePreview(dataUrl);
-      showToast('Local image file loaded!');
+      showToast('Local image loaded into cropper!');
     };
     reader.readAsDataURL(file);
   }
@@ -86,6 +88,12 @@ function updateProductImagePreview(url) {
   const box = document.getElementById('prod-img-preview-box');
   const img = document.getElementById('prod-img-preview');
   if (!box || !img) return;
+
+  if (productCropper) {
+    productCropper.destroy();
+    productCropper = null;
+  }
+
   const cleanUrl = (url || '').trim();
   let targetUrl = '';
   if (cleanUrl.startsWith('data:image/')) {
@@ -95,10 +103,51 @@ function updateProductImagePreview(url) {
   }
 
   if (targetUrl && (targetUrl.startsWith('http') || targetUrl.startsWith('data:image'))) {
+    img.crossOrigin = "anonymous";
     img.src = targetUrl;
     box.style.display = 'block';
+
+    img.onload = function() {
+      if (productCropper) productCropper.destroy();
+      if (window.Cropper) {
+        productCropper = new Cropper(img, {
+          viewMode: 1,
+          autoCropArea: 0.95,
+          responsive: true,
+          background: false,
+        });
+      }
+    };
   } else {
     box.style.display = 'none';
+  }
+}
+
+function rotateProductCrop(degree) {
+  if (productCropper) {
+    productCropper.rotate(degree);
+  }
+}
+
+function applyProductCrop() {
+  if (!productCropper) {
+    showToast('Image loaded');
+    return;
+  }
+  try {
+    const canvas = productCropper.getCroppedCanvas({
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageSmoothingQuality: 'high',
+    });
+    if (canvas) {
+      const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      setField('product-images', croppedDataUrl);
+      showToast('✂️ Image cropped & applied successfully!');
+    }
+  } catch (err) {
+    console.warn('Canvas cropper notice:', err);
+    showToast('Image applied');
   }
 }
 

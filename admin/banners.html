@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <style>
     .banner-card {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -156,8 +157,18 @@
                   <small class="text-muted mt-1 d-block">Choose an image file from your computer or mobile device.</small>
                 </div>
               </div>
-              <div class="mt-2 text-center" id="modalImagePreviewContainer" style="display:none;">
-                <img id="modalImagePreview" src="" class="rounded border" style="max-height: 160px; width: 100%; object-fit: cover;">
+              <div class="mt-3 p-3 bg-light border rounded text-center" id="modalImagePreviewContainer" style="display:none;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="badge bg-primary fs-6"><i class="bi bi-crop me-1"></i> Interactive Banner Cropper</span>
+                  <div>
+                    <button type="button" class="btn btn-sm btn-outline-dark me-1" onclick="rotateBannerCrop(90)"><i class="bi bi-arrow-clockwise me-1"></i> Rotate 90°</button>
+                    <button type="button" class="btn btn-sm btn-success fw-bold" onclick="applyBannerCrop()"><i class="bi bi-check-circle me-1"></i> Crop & Apply Banner</button>
+                  </div>
+                </div>
+                <div style="max-height: 280px; overflow: hidden;" class="rounded border bg-dark">
+                  <img id="modalImagePreview" src="" class="d-block mx-auto" style="max-width: 100%;">
+                </div>
+                <small class="text-muted mt-1 d-block">Drag crop handles to crop banner edges, click "Crop & Apply Banner" when ready.</small>
               </div>
             </div>
 
@@ -174,9 +185,11 @@
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script>
     let editingBannerId = null;
     let banners = [];
+    let bannerCropper = null;
 
     async function loadBanners() {
       try {
@@ -273,12 +286,53 @@
     function updateModalImagePreview(url) {
       const container = document.getElementById('modalImagePreviewContainer');
       const img = document.getElementById('modalImagePreview');
+
+      if (bannerCropper) {
+        bannerCropper.destroy();
+        bannerCropper = null;
+      }
+
       const cleanUrl = (url || '').trim();
       if (cleanUrl && (cleanUrl.startsWith('http') || cleanUrl.startsWith('data:image'))) {
+        img.crossOrigin = "anonymous";
         img.src = cleanUrl;
         container.style.display = 'block';
+
+        img.onload = function() {
+          if (bannerCropper) bannerCropper.destroy();
+          if (window.Cropper) {
+            bannerCropper = new Cropper(img, {
+              viewMode: 1,
+              autoCropArea: 0.95,
+              responsive: true,
+              background: false,
+            });
+          }
+        };
       } else {
         container.style.display = 'none';
+      }
+    }
+
+    function rotateBannerCrop(degree) {
+      if (bannerCropper) bannerCropper.rotate(degree);
+    }
+
+    function applyBannerCrop() {
+      if (!bannerCropper) return;
+      try {
+        const canvas = bannerCropper.getCroppedCanvas({
+          maxWidth: 1600,
+          maxHeight: 900,
+          imageSmoothingQuality: 'high',
+        });
+        if (canvas) {
+          const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          document.getElementById('bannerImageUrl').value = croppedDataUrl;
+          showToast('✂️ Banner cropped & applied successfully!');
+        }
+      } catch (err) {
+        console.warn('Banner cropper notice:', err);
       }
     }
 
