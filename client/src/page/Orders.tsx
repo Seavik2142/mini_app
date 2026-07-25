@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
-import { FaKey, FaCopy, FaCheck, FaEye, FaEyeSlash, FaShieldAlt } from "react-icons/fa";
+import { FaKey, FaCopy, FaCheck, FaEye, FaEyeSlash, FaShieldAlt, FaStar, FaTimes } from "react-icons/fa";
 import { toast } from "sonner";
 
 const Orders: React.FC = () => {
   const { orders } = useCart();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [revealedKeys, setRevealedKeys] = useState<{ [key: string]: boolean }>({});
+  const [ratingProduct, setRatingProduct] = useState<{ id: number; name: string } | null>(null);
+  const [selectedRating, setSelectedRating] = useState<number>(5);
+  const [ratedProducts, setRatedProducts] = useState<{ [productId: number]: boolean }>({});
 
   const copyToClipboard = (keyStr: string) => {
     navigator.clipboard.writeText(keyStr);
@@ -17,6 +20,26 @@ const Orders: React.FC = () => {
 
   const toggleReveal = (keyStr: string) => {
     setRevealedKeys((prev) => ({ ...prev, [keyStr]: !prev[keyStr] }));
+  };
+
+  const submitRating = async () => {
+    if (!ratingProduct) return;
+    try {
+      const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:3000/shop"
+        : "https://mini-app-mzu6.onrender.com/shop";
+
+      await fetch(`${API_BASE_URL}/products/${ratingProduct.id}/rate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: selectedRating })
+      });
+      toast.success(`⭐ Thank you for rating ${ratingProduct.name} ${selectedRating}/5 stars!`);
+      setRatedProducts(prev => ({ ...prev, [ratingProduct.id]: true }));
+    } catch (e) {
+      toast.success("Thank you for your rating!");
+    }
+    setRatingProduct(null);
   };
 
   return (
@@ -81,7 +104,21 @@ const Orders: React.FC = () => {
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{item.productName}</p>
+                        <div className="flex items-center justify-between gap-1">
+                          <p className="text-xs font-bold text-white truncate">{item.productName}</p>
+                          {ratedProducts[item.productId] ? (
+                            <span className="text-[10px] text-amber-400 font-extrabold flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-md">
+                              <FaStar /> Rated
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => setRatingProduct({ id: item.productId, name: item.productName })}
+                              className="text-[10px] text-amber-300 hover:text-amber-200 font-extrabold flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 px-2 py-0.5 rounded-md active:scale-95 transition-all"
+                            >
+                              <FaStar /> Rate
+                            </button>
+                          )}
+                        </div>
                         <p className="text-[10px] text-emerald-400 font-extrabold">
                           Price: ${item.price.toFixed(2)}
                         </p>
@@ -146,6 +183,52 @@ const Orders: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Interactive Rating Modal */}
+      {ratingProduct && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 animate-in fade-in duration-200 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                <FaStar /> Rate Purchased Product
+              </span>
+              <button
+                onClick={() => setRatingProduct(null)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-full bg-slate-800"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div>
+              <h3 className="font-extrabold text-white text-sm">{ratingProduct.name}</h3>
+              <p className="text-xs text-slate-400 mt-0.5">How was your digital key delivery experience?</p>
+            </div>
+
+            {/* 5-Star Selection */}
+            <div className="flex items-center justify-center gap-2 py-3 bg-slate-950 rounded-2xl border border-slate-800">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setSelectedRating(star)}
+                  className={`text-2xl transition-transform active:scale-125 ${
+                    star <= selectedRating ? "text-amber-400 drop-shadow-md" : "text-slate-700 hover:text-slate-500"
+                  }`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={submitRating}
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all"
+            >
+              <FaStar /> Submit {selectedRating}-Star Rating
+            </button>
+          </div>
         </div>
       )}
     </div>

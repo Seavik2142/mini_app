@@ -637,3 +637,38 @@ export const createPaypalPayment: RequestHandler = async (req, res): Promise<voi
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const rateProduct: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+    const numRating = Math.min(5, Math.max(1, Number(rating) || 5));
+
+    const dbProduct = await prisma.product.findUnique({ where: { id: Number(id) } });
+    if (!dbProduct) {
+      res.status(404).json({ success: false, message: "Product not found" });
+      return;
+    }
+
+    const currentCount = dbProduct.reviewCount || 0;
+    const currentRating = dbProduct.rating || 5.0;
+    const newCount = currentCount + 1;
+    const newRating = Number((((currentRating * currentCount) + numRating) / newCount).toFixed(1));
+
+    const updated = await prisma.product.update({
+      where: { id: dbProduct.id },
+      data: {
+        rating: newRating,
+        reviewCount: newCount
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Thank you for rating!",
+      data: updated
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

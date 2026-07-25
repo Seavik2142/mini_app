@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { getProducts, getCategories, getProductById, createOrder, createAbaPayment, abaWebhook, createPaypalPayment, getBanners, createBanner, updateBanner, deleteBanner, getPromos, createPromo, deletePromo } from "../module/shop.services";
+import { getProducts, getCategories, getProductById, createOrder, createAbaPayment, abaWebhook, createPaypalPayment, getBanners, createBanner, updateBanner, deleteBanner, getPromos, createPromo, deletePromo, rateProduct } from "../module/shop.services";
 
 const ShopRoute = Router();
 
 ShopRoute.get("/products", getProducts);
 ShopRoute.get("/products/:id", getProductById);
+ShopRoute.post("/products/:id/rate", rateProduct);
 ShopRoute.get("/categories", getCategories);
 ShopRoute.get("/banners", getBanners);
 ShopRoute.post("/banners", createBanner);
