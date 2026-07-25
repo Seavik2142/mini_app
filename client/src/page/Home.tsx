@@ -44,59 +44,32 @@ const Home: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Pure Full-Image Hero Banner Carousel */}
-      <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-indigo-500/30 group aspect-[21/9] sm:aspect-[24/9] w-full bg-slate-950">
-        {/* Full Image Slide */}
+      {/* Pure Full-Size Image Hero Banner (Zero Overlays in Front) */}
+      <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl border border-indigo-500/30 bg-slate-950">
+        {/* Full Quality Uncropped Image */}
         <img
           src={activeSlide.image}
           alt={`Hero Banner ${currentSlide + 1}`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          className="w-full h-auto block object-contain mx-auto"
         />
 
-        {/* Navigation Controls Overlay */}
-        <div className="absolute inset-0 p-3 flex flex-col justify-between pointer-events-none">
-          {/* Top Indicator */}
-          <div className="flex justify-between items-center">
-            {activeSlides.length > 1 && (
-              <span className="text-[10px] font-mono font-black text-white bg-slate-950/70 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 shadow-md">
-                {currentSlide + 1} / {activeSlides.length}
-              </span>
-            )}
-          </div>
-
-          {/* Bottom Bar: Arrows & Dots */}
-          <div className="flex items-center justify-between pointer-events-auto bg-slate-950/70 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/15 shadow-xl">
-            <div className="flex items-center gap-1.5">
+        {/* Clean Indicator Bar Below Image */}
+        {activeSlides.length > 1 && (
+          <div className="flex items-center justify-center gap-2 py-2 bg-slate-900/90 border-t border-slate-800/80">
+            {activeSlides.map((_, idx) => (
               <button
-                onClick={prevSlide}
-                className="p-1.5 rounded-xl bg-slate-900/90 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs shadow"
-              >
-                <FaChevronLeft />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="p-1.5 rounded-xl bg-slate-900/90 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700/80 transition-all active:scale-95 text-xs shadow"
-              >
-                <FaChevronRight />
-              </button>
-            </div>
-
-            {/* Dots */}
-            <div className="flex items-center gap-1.5">
-              {activeSlides.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`h-2 rounded-full transition-all duration-500 ${
-                    idx === currentSlide
-                      ? "w-6 bg-indigo-400 shadow-md shadow-indigo-500/50"
-                      : "w-2 bg-slate-600 hover:bg-slate-400"
-                  }`}
-                />
-              ))}
-            </div>
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`Slide ${idx + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentSlide
+                    ? "w-6 bg-indigo-500 shadow-sm shadow-indigo-500/50"
+                    : "w-1.5 bg-slate-700 hover:bg-slate-500"
+                }`}
+              />
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Search Bar */}

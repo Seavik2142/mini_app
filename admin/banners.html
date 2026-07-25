@@ -208,7 +208,7 @@
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm border-0 banner-card overflow-hidden">
               <div class="position-relative">
-                <img src="${escHtml(b.image)}" class="card-img-top banner-img-preview" alt="Banner Slide #${index + 1}" style="height: 180px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">
+                <img src="${escHtml(b.image)}" class="card-img-top banner-img-preview" alt="Banner Slide #${index + 1}" style="max-height: 240px; width: 100%; object-fit: contain; background: #0b0f17;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">
                 <span class="position-absolute top-0 start-0 m-2 badge bg-dark opacity-85">Slide #${index + 1}</span>
               </div>
               <div class="card-body p-3 d-flex align-items-center justify-content-between bg-white border-top">
