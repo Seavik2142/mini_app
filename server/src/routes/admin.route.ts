@@ -64,14 +64,14 @@ AdminRoute.get("/users/:id", Utility.CatchAsync(async (req, res) => {
       cartItems: { include: { product: true } },
     },
   });
-  if (!user) return res.status(404).json({ code: 404, msg: "User not found" });
+  if (!user) { res.status(404).json({ code: 404, msg: "User not found" }); return; }
   res.json({ code: 200, data: user });
 }));
 
 AdminRoute.patch("/users/:id/block", Utility.CatchAsync(async (req, res) => {
   const id   = parseInt(req.params.id);
   const user = await prisma.user.findUnique({ where: { id } });
-  if (!user) return res.status(404).json({ code: 404, msg: "User not found" });
+  if (!user) { res.status(404).json({ code: 404, msg: "User not found" }); return; }
 
   const updated = await prisma.user.update({
     where: { id },
@@ -117,7 +117,8 @@ AdminRoute.patch("/orders/:id/status", Utility.CatchAsync(async (req, res) => {
   const { orderStatus } = req.body;
   const validStatuses = ["PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
   if (!validStatuses.includes(orderStatus)) {
-    return res.status(400).json({ code: 400, msg: "Invalid order status" });
+    res.status(400).json({ code: 400, msg: "Invalid order status" });
+    return;
   }
 
   const updated = await prisma.order.update({
