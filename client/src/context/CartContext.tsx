@@ -113,68 +113,7 @@ const DEFAULT_BANNER_SLIDES: BannerSlide[] = [
   { id: 3, image: claudeImg }
 ];
 
-const INITIAL_PRODUCTS: Product[] = [
-  {
-    id: 1,
-    name: "Telegram Premium 1-Year Key",
-    slug: "telegram-premium-1-year-key",
-    description: "Instant redeemable activation key for 1 year of Telegram Premium. Unlock 4GB uploads, faster downloads, badges, and custom emojis.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 1,
-    categoryName: "Telegram & Bot Keys",
-    stock: 120,
-    rating: 4.9,
-    reviewCount: 340,
-    isFeatured: true,
-    isNew: true,
-    isOnSale: true,
-    discount: 15,
-    isDigital: true,
-    keyFormat: "TGPM-XXXX-XXXX-XXXX",
-    activationInstructions: "Open Telegram Settings -> Premium -> Redeem Key, or activate directly in bot."
-  },
-  {
-    id: 2,
-    name: "Steam $50 Digital Gift Card Key",
-    slug: "steam-50-digital-gift-card-key",
-    description: "Global Steam Wallet activation code. Instantly adds $50 USD to your Steam account balance.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 2,
-    categoryName: "Gaming & Gift Cards",
-    stock: 85,
-    rating: 4.9,
-    reviewCount: 512,
-    isFeatured: true,
-    isNew: false,
-    isOnSale: false,
-    discount: 0,
-    isDigital: true,
-    keyFormat: "STEAM-XXXX-XXXX-XXXX",
-    activationInstructions: "Go to store.steampowered.com/account/redeemwalletcode and enter your digital key."
-  },
-  {
-    id: 3,
-    name: "Express VPN Pro 1-Year License Key",
-    slug: "express-vpn-pro-1-year-key",
-    description: "High-speed encrypted VPN activation serial key. Supports 8 devices concurrently with unlimited bandwidth.",
-    price: 1.00,
-    images: ["https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80"],
-    categoryId: 3,
-    categoryName: "Software & VPN Licenses",
-    stock: 50,
-    rating: 4.8,
-    reviewCount: 198,
-    isFeatured: true,
-    isNew: false,
-    isOnSale: true,
-    discount: 25,
-    isDigital: true,
-    keyFormat: "VPNP-XXXX-XXXX-XXXX",
-    activationInstructions: "Enter key into Express VPN client under Account -> Enter Activation Code."
-  }
-];
+
 
 const INITIAL_PROMOS: PromoCodeItem[] = [
   { id: 1, code: "SIK10", discountPercent: 10, isActive: true },
@@ -221,9 +160,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [currentOtpCode, setCurrentOtpCode] = useState<string>("");
 
-  // 🛡️ Global Admin State & Stores
-  // Always start with hardcoded products; API fetch below will immediately replace with live DB data
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  // Products come entirely from live DB — start empty, API fetch below replaces with real data
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [bannerSlides, setBannerSlides] = useState<BannerSlide[]>(() => {
     const saved = localStorage.getItem("mini_app_banners");
@@ -257,14 +195,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Products — always replace with live DB data (respects admin add/edit/delete)
+    // Products — always replace with live DB data; empty DB = empty store
     fetchWithTimeout(`${API_BASE_URL}/shop/products`).then(data => {
       if (data && Array.isArray(data.data)) {
-        // If DB has products, use them. If empty, keep INITIAL_PRODUCTS as fallback.
-        if (data.data.length > 0) {
-          setProducts(data.data);
-        }
-        // else: keep INITIAL_PRODUCTS so store doesn't look empty
+        setProducts(data.data);
       }
     });
 
