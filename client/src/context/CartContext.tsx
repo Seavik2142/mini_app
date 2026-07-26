@@ -147,16 +147,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedOrders ? JSON.parse(savedOrders) : [];
   });
 
-  const [verifiedPhone, setVerifiedPhone] = useState<string>(() => {
-    return localStorage.getItem("mini_app_verified_phone") || "";
-  });
-
-  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(() => {
-    return localStorage.getItem("mini_app_is_verified") === "true";
-  });
-
-  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
-
   const [userProfile, setUserProfile] = useState<any>(() => {
     const saved = localStorage.getItem("mini_app_user_profile");
     return saved ? JSON.parse(saved) : null;
@@ -168,6 +158,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const windowTgUser = (typeof window !== "undefined" && (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user) || null;
   const sdkTgUser = initData.user?.() || null;
   const realTgUser = windowTgUser || sdkTgUser;
+
+  const [verifiedPhone, setVerifiedPhone] = useState<string>(() => {
+    return localStorage.getItem("mini_app_verified_phone") || "";
+  });
+
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+
+  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(() => {
+    const saved = localStorage.getItem("mini_app_phone_verified") || localStorage.getItem("mini_app_is_verified");
+    if (saved === "true") return true;
+    const savedProfile = localStorage.getItem("mini_app_user_profile");
+    if (savedProfile) return true;
+    if (realTgUser?.id || realTgUser?.first_name) return true;
+    return false;
+  });
 
   const telegramUser = {
     id: realTgUser?.id ? String(realTgUser.id) : (userProfile?.tgId || (isPhoneVerified ? verifiedPhone : "")),
