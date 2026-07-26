@@ -21,13 +21,17 @@ const API = {
  * Generic fetch helper — returns parsed JSON or throws error
  */
 async function apiFetch(url, options = {}) {
+  const token = localStorage.getItem('admin_token');
+  const customHeaders = { 'Content-Type': 'application/json', ...options.headers };
+  if (token) customHeaders['Authorization'] = `Bearer ${token}`;
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(url, {
       credentials: 'include',
       cache: 'no-store',
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers: customHeaders,
       signal: controller.signal,
       ...options,
     });

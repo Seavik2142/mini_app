@@ -19,7 +19,7 @@ AdminRoute.post("/login", Utility.CatchAsync(async (req, res) => {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
         sameSite: "none",
     });
-    res.json({ success: true, message: "Logged in successfully" });
+    res.json({ success: true, message: "Logged in successfully", token });
   } else {
     res.status(401).json({ success: false, message: "Invalid credentials" });
   }

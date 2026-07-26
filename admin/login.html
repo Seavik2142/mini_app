@@ -99,6 +99,9 @@
             loggedInAt: new Date().toISOString()
           };
           localStorage.setItem('mini_app_admin_session', JSON.stringify(adminSession));
+          if (res.token) {
+            localStorage.setItem('admin_token', res.token);
+          }
           showToast(`👑 Welcome back, Super Admin ${adminSession.username}! Directing to workspace...`, 'success');
 
           setTimeout(() => {

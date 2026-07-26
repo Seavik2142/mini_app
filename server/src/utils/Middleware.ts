@@ -30,7 +30,10 @@ export const UserVaildation: RequestHandler = CatchAsync(async (req, res, next) 
 });
 
 export const AdminValidation: RequestHandler = CatchAsync(async (req, res, next) => {
-    const token = req?.cookies?.admin_auth;
+    let token = req?.cookies?.admin_auth;
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+        token = req.headers.authorization.split(" ")[1];
+    }
 
     if (!token) {
         res.status(401).json({ code: 401, message: "Admin authentication required." });
