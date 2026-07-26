@@ -2016,28 +2016,123 @@ html[data-theme="dark"] .btn-outline-primary:hover {
   }
 }
 
-/* Phone Portrait Breakpoint (< 576px) */
+/* Phone Portrait & Small Screen Mobile UI Polish (< 576px & < 768px) */
+@media (max-width: 767.98px) {
+  /* Prevent iOS Safari input auto-zoom by enforcing 16px font-size */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Page Heading & Action Button stack on mobile */
+  .page-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem;
+  }
+
+  .heading-actions,
+  .heading-actions .btn {
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Metric cards grid for mobile */
+  .metric-card {
+    padding: 1.1rem !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .metric-value {
+    font-size: 1.65rem !important;
+    font-weight: 800 !important;
+  }
+
+  /* Mobile Data Table Fixes */
+  .panel {
+    border-radius: 14px !important;
+    overflow: hidden;
+  }
+
+  .table-responsive {
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .table th, .table td {
+    padding: 0.75rem 0.6rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Modals on Mobile: Bottom Sheet feel */
+  .modal-dialog {
+    margin: 0.5rem auto !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  .modal-content {
+    border-radius: 18px !important;
+    border: none !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .modal-header {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .modal-body {
+    padding: 1.25rem !important;
+  }
+
+  .modal-footer {
+    padding: 0.85rem 1.25rem !important;
+    gap: 0.5rem;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    min-height: 46px;
+    font-weight: 600;
+  }
+}
+
 @media (max-width: 575.98px) {
   .admin-navbar {
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
+    height: 60px !important;
+  }
+
+  .brand-title {
+    font-size: 1.1rem !important;
   }
 
   .navbar-actions {
-    gap: 0.25rem !important;
+    gap: 0.35rem !important;
   }
 
   .btn {
-    padding: 0.4rem 0.75rem;
+    padding: 0.5rem 0.85rem;
     font-size: 0.875rem;
+    border-radius: 10px !important;
   }
 
   .card-header, .card-body, .card-footer {
-    padding: 0.85rem !important;
+    padding: 1rem !important;
   }
 
-  h1, .h1 { font-size: 1.5rem !important; }
-  h2, .h2 { font-size: 1.35rem !important; }
-  h3, .h3 { font-size: 1.2rem !important; }
+  h1, .h1 { font-size: 1.4rem !important; }
+  h2, .h2 { font-size: 1.25rem !important; }
+  h3, .h3 { font-size: 1.1rem !important; }
 }
 

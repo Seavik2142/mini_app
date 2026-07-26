@@ -7,7 +7,7 @@
   <title>Products | Mini App Admin</title>
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
-  <link rel="stylesheet" href="assets/css/style.css?v=20260726_v15">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260726_v18">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 </head>
 <body>
@@ -160,7 +160,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="product-form" onsubmit="event.preventDefault(); saveProduct();">
+          <form id="product-form" onsubmit="event.preventDefault(); saveProduct(); return false;">
             <div class="row g-3">
               <div class="col-12">
                 <label class="form-label fw-semibold">Product Name <span class="text-danger">*</span></label>
@@ -253,7 +253,7 @@
             </div>
             <div class="modal-footer px-0 pb-0 mt-4">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary" onclick="saveProduct()">
+              <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Save Product
               </button>
             </div>
@@ -286,9 +286,9 @@
   </div>
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/js/main.js?v=20260726_v15"></script>
-  <script src="assets/js/config.js?v=20260726_v15"></script>
+  <script src="assets/js/main.js?v=20260726_v18"></script>
+  <script src="assets/js/config.js?v=20260726_v18"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-  <script src="assets/js/products.js?v=20260726_v15"></script>
+  <script src="assets/js/products.js?v=20260726_v18"></script>
 </body>
 </html>
