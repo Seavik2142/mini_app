@@ -10,7 +10,8 @@ export const UserVaildation: RequestHandler = CatchAsync(async (req, res, next) 
         throw new Error("User authentication required (cookie missing).");
     }
 
-    const verify: any = jwt.verify(token, process.env.SECRET as string);
+    const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
+    const verify: any = jwt.verify(token, secret);
     if (verify?.tgId && verify?.id) {
         const user = await prisma.user.findUniqueOrThrow({
             where: {
@@ -41,7 +42,8 @@ export const AdminValidation: RequestHandler = CatchAsync(async (req, res, next)
     }
 
     try {
-        const verify: any = jwt.verify(token, process.env.SECRET as string);
+        const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
+        const verify: any = jwt.verify(token, secret);
         if (verify?.role === "SUPER_ADMIN") {
             next();
         } else {
