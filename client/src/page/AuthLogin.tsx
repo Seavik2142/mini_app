@@ -14,13 +14,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ||
 
 const AuthLogin: React.FC = () => {
   const navigate = useNavigate();
-  const { isPhoneVerified, verifiedPhone, updateVerifiedPhone } = useCart();
+  const { isPhoneVerified, updateVerifiedPhone } = useCart();
 
   // Step: "REQUEST" → "WAITING" → "CODE" → "VERIFIED_SUCCESS"
   const [step, setStep] = useState<"REQUEST" | "WAITING" | "CODE" | "VERIFIED_SUCCESS">(() => {
     return localStorage.getItem("mini_app_otp_session_id") ? "CODE" : "REQUEST";
   });
-  const [phone, setPhone] = useState(verifiedPhone || "");
+  const [phone, setPhone] = useState("");
   const [sessionId, setSessionId] = useState(() => localStorage.getItem("mini_app_otp_session_id") || "");
   const [deepLink, setDeepLink] = useState("");
   const [otpCode, setOtpCode] = useState("");

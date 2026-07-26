@@ -28,7 +28,7 @@ const Cart: React.FC = () => {
   const navigate = useNavigate();
   const [inputCode, setInputCode] = useState("");
   const paymentMethod = "PAYPAL";
-  const [phone, setPhone] = useState("+855 12 345 678");
+  const [phone, setPhone] = useState("");
   const [showKHQRModal, setShowKHQRModal] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [paypalData, setPaypalData] = useState<any>(null);

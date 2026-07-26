@@ -358,12 +358,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     // Synchronous write to localStorage so all router pages read verified immediately
     localStorage.setItem("mini_app_phone_verified", "true");
-    localStorage.setItem("mini_app_verified_phone", cleanPhone || "+855123456");
+    localStorage.setItem("mini_app_verified_phone", cleanPhone || "");
     if (profile) {
       setUserProfile(profile);
       localStorage.setItem("mini_app_user_profile", JSON.stringify(profile));
     }
-    setVerifiedPhone(cleanPhone || "+855123456");
+    setVerifiedPhone(cleanPhone || "");
     setIsPhoneVerified(true);
     toast.success(`✅ Telegram account verified! Welcome!`);
   };
