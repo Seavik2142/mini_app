@@ -163,10 +163,10 @@
               <div class="panel h-100 text-center profile-card">
                 <div class="profile-cover"><img src="assets/images/png/dasher-ui-bootstrap-5.jpg" alt="adminHMD dashboard preview"></div>
                 <img class="avatar-img avatar-xl profile-photo" src="assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-                <h2 class="h5 mt-3 mb-1">Admin Hasan</h2>
-                <p class="text-muted mb-3">Product Administrator</p>
-                <div class="d-flex justify-content-center gap-2"><span class="badge text-bg-primary">Admin</span><span class="badge text-bg-success">Verified</span></div>
-                <div class="info-list mt-4 text-start"><div><span>Email</span><strong>admin@example.com</strong></div><div><span>Department</span><strong>Product Ops</strong></div><div><span>Time Zone</span><strong>Asia/Dhaka</strong></div></div>
+                <h2 class="h5 mt-3 mb-1" id="displayProfileName">Admin Hasan</h2>
+                <p class="text-muted mb-3" id="displayProfileRole">Product Administrator</p>
+                <div class="d-flex justify-content-center gap-2"><span class="badge text-bg-primary" id="displayBadge">Admin</span><span class="badge text-bg-success">Verified</span></div>
+                <div class="info-list mt-4 text-start"><div><span>Email</span><strong id="displayEmailText">admin@example.com</strong></div><div><span>Department</span><strong>Product Ops</strong></div><div><span>Time Zone</span><strong>Asia/Dhaka</strong></div></div>
               </div>
             </div>
             <div class="col-12 col-xl-8">
@@ -192,5 +192,29 @@
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        const sessionStr = window.localStorage.getItem('mini_app_admin_session');
+        const session = sessionStr ? JSON.parse(sessionStr) : { username: 'Seavik', role: 'SUPER_ADMIN' };
+        
+        let cleanName = (session.username || 'Seavik').replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/gi, '').trim();
+        if (!cleanName) cleanName = 'Seavik';
+        const roleLabel = session.role === 'SUPER_ADMIN' ? 'Super Admin' : (session.role || 'Admin');
+        const emailStr = session.email || (cleanName.toLowerCase() + '@miniapp.com');
+
+        document.getElementById('displayProfileName').textContent = "👑 " + cleanName;
+        document.getElementById('displayProfileRole').textContent = roleLabel;
+        document.getElementById('displayBadge').textContent = roleLabel;
+        document.getElementById('displayEmailText').textContent = emailStr;
+        
+        const inputName = document.getElementById('profileName');
+        const inputEmail = document.getElementById('profileEmail');
+        
+        if (inputName) inputName.value = cleanName;
+        if (inputEmail) inputEmail.value = emailStr;
+      } catch(e) {}
+    });
+  </script>
 </body>
 </html>
