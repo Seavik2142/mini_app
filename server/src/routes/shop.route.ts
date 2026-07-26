@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getProducts, getCategories, getProductById, createOrder, createAbaPayment, abaWebhook, createPaypalPayment, getBanners, createBanner, updateBanner, deleteBanner, getPromos, createPromo, deletePromo, rateProduct, getUserOrders, getUserProfile } from "../module/shop.services";
+import { getProducts, getCategories, getProductById, createOrder, createAbaPayment, abaWebhook, createPaypalPayment, getBanners, createBanner, updateBanner, deleteBanner, getPromos, createPromo, deletePromo, rateProduct, getUserOrders, getUserProfile, updateUserProfile } from "../module/shop.services";
 
 const ShopRoute = Router();
 
@@ -17,6 +17,7 @@ ShopRoute.delete("/promos/:id", deletePromo);
 ShopRoute.post("/orders", createOrder);
 ShopRoute.get("/user-orders", getUserOrders);
 ShopRoute.get("/user-profile", getUserProfile);
+ShopRoute.patch("/user-profile", updateUserProfile);
 ShopRoute.post("/aba-checkout", createAbaPayment);
 ShopRoute.post("/aba-webhook", abaWebhook);
 ShopRoute.post("/paypal-checkout", createPaypalPayment);

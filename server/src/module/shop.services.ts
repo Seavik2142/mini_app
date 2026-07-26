@@ -802,12 +802,53 @@ export const getUserProfile: RequestHandler = async (req, res): Promise<void> =>
         name: user.name,
         username: user.username,
         phone: user.phone,
+        email: user.email || "",
         tgId: user.tgId,
         joinedAt: user.joinedAt,
         totalOrders: userOrders.length,
         totalSpent,
         keysOwned
       }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateUserProfile: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { tgId, phone, email, name } = req.body;
+    if (!tgId && !phone) {
+      res.status(400).json({ success: false, message: "tgId or phone required" });
+      return;
+    }
+
+    const OR: any[] = [];
+    if (tgId) OR.push({ tgId: String(tgId) });
+    if (phone) OR.push({ phone: String(phone) });
+
+    const user = await prisma.user.findFirst({
+      where: { OR, isDelete: false }
+    });
+
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found" });
+      return;
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        ...(email !== undefined ? { email: String(email).trim() } : {}),
+        ...(name !== undefined ? { name: String(name).trim() } : {}),
+        ...(phone !== undefined ? { phone: String(phone).trim() } : {})
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully!",
+      data: updated
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

@@ -18,6 +18,7 @@ model user {
   publicKey     String?
   address       String?
   phone         String?
+  email         String?
   joinedAt      DateTime    @default(now())
   lastSeenAt    DateTime?
   isIntroShowed Boolean     @default(false)

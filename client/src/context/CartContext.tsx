@@ -82,6 +82,7 @@ interface CartContextType {
   toggleUserRole: (userId: number) => void;
   toggleUserBlock: (userId: number) => void;
   dbUserProfile: any;
+  updateUserProfileData: (email: string) => Promise<boolean>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -721,6 +722,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     syncUserOrdersAndProfile();
   }, [telegramUser?.id, verifiedPhone]);
 
+  const updateUserProfileData = async (email: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/shop/user-profile`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tgId: telegramUser.id,
+          phone: verifiedPhone,
+          email
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDbUserProfile((prev: any) => ({ ...prev, email }));
+        toast.success("📧 Email address updated successfully!");
+        return true;
+      }
+      toast.error(data.message || "Failed to update email");
+      return false;
+    } catch (e) {
+      toast.error("Error updating email");
+      return false;
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -762,7 +788,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addPromoCodeItem,
         toggleUserRole,
         toggleUserBlock,
-        dbUserProfile
+        dbUserProfile,
+        updateUserProfileData
       }}
     >
       {children}
