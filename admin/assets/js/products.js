@@ -6,7 +6,41 @@ let currentPage = 1;
 let editingId = null;
 let productsList = [];
 
+const DEFAULT_PRODUCTS = [
+  {
+    id: 1,
+    name: "ChatGPT Plus (1 Month Private Key)",
+    slug: "chatgpt-plus-1m",
+    description: "Official ChatGPT Plus private access key with GPT-4o enabled.",
+    price: 19.99,
+    stock: 50,
+    rating: 4.9,
+    isFeatured: true,
+    isNew: true,
+    isOnSale: true,
+    images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"],
+    digitalKeys: ["GPT-PRIV-8A7B6C5D4E", "GPT-PRIV-9F8E7D6C5B"]
+  },
+  {
+    id: 2,
+    name: "Telegram Premium 12 Months Gift Code",
+    slug: "telegram-premium-12m",
+    description: "Telegram Premium 1 year subscription gift code.",
+    price: 28.99,
+    stock: 100,
+    rating: 5.0,
+    isFeatured: true,
+    isNew: false,
+    isOnSale: false,
+    images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"],
+    digitalKeys: ["https://t.me/giftcode?code=TGPM12M_XYZ888"]
+  }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
+  const local = JSON.parse(localStorage.getItem('mini_app_products'));
+  productsList = Array.isArray(local) && local.length > 0 ? local : DEFAULT_PRODUCTS;
+  renderProductsList(productsList);
   loadProducts(1);
   loadCategoriesForForm();
 });
@@ -16,27 +50,25 @@ async function loadProducts(page = 1) {
   const tbody = document.getElementById('products-tbody');
   if (!tbody) return;
 
-  const local = JSON.parse(localStorage.getItem('mini_app_products')) || [];
-
   try {
     const data = await apiFetch(`${API.products}?page=${page}&limit=20`);
     const remote = data.data?.products || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-    if (remote.length > 0) {
+    if (Array.isArray(remote) && remote.length > 0) {
       productsList = remote;
-    } else {
-      productsList = local;
+      localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+      renderProductsList(productsList);
     }
   } catch (e) {
-    productsList = local;
+    console.warn('API products fetch notice (using active store list):', e);
   }
-
-  localStorage.setItem('mini_app_products', JSON.stringify(productsList));
-  renderProductsList(productsList);
 }
 
 function renderProductsList(products) {
   const tbody = document.getElementById('products-tbody');
   if (!tbody) return;
+
+  const countEl = document.getElementById('products-count');
+  if (countEl) countEl.textContent = `${(products || []).length} products in store catalog`;
 
   if (!products || products.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No products available. Click "Add Product" to create one.</td></tr>`;
