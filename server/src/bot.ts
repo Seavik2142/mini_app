@@ -318,18 +318,16 @@ export const initBot = () => {
 async function updateBotMenu(bot: TelegramBot) {
   try {
     const commands = [
-      { command: 'start', description: '🚀 Open Mini App & Welcome' },
-      { command: 'orders', description: '📦 My Orders & Key Vault' },
-      { command: 'profile', description: '👤 My Account Profile' },
+      { command: 'start', description: '🚀 Open Key Vault Store & Welcome' },
+      { command: 'orders', description: '📦 My Orders & Digital Keys' },
+      { command: 'profile', description: '👤 My Account & Profile' },
       { command: 'shop', description: '🔑 Digital Key Marketplace' },
-      { command: 'update', description: '🔄 Refresh Bot Menu & Config' },
-      { command: 'clear', description: '🧹 Clear & Reset Sessions' },
-      { command: 'help', description: '💡 Show Help & Support' }
+      { command: 'update', description: '🔄 Refresh Bot Menu & Links' },
+      { command: 'clear', description: '🧹 Reset & Clear Sessions' },
+      { command: 'help', description: '💡 Show Help & Support Guide' }
     ];
 
-    // Set commands for default and all_private_chats scope
-    await bot.setMyCommands(commands, { scope: JSON.stringify({ type: 'default' }) } as any);
-    await bot.setMyCommands(commands, { scope: JSON.stringify({ type: 'all_private_chats' }) } as any);
+    await bot.setMyCommands(commands);
 
     await (bot as any)._request('setChatMenuButton', {
       form: {
@@ -340,9 +338,9 @@ async function updateBotMenu(bot: TelegramBot) {
         })
       }
     });
-    console.log(`✅ Bot menu & commands registered for URL: ${getMiniAppUrl()}`);
-  } catch (e) {
-    console.log('Bot menu setup notice:', e);
+    console.log(`✅ Telegram Bot menu & commands registered successfully: ${getMiniAppUrl()}`);
+  } catch (e: any) {
+    console.log('Bot menu setup notice:', e.message || e);
   }
 }
 
