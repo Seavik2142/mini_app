@@ -432,15 +432,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyPromoCode = (code: string): boolean => {
     const clean = code.trim().toUpperCase();
-    if (clean === "TELEGRAM10" || clean === "SIAMDEV" || clean === "KEY15" || clean === "ABA10" || clean === "BAKONG15") {
+
+    // Check against live promo codes from admin panel
+    const match = promoCodesList.find(
+      (p) => p.code.trim().toUpperCase() === clean && p.isActive !== false
+    );
+
+    if (match) {
       setPromoCode(clean);
-      setDiscountPercent(15);
-      toast.success("Promo code applied! 15% OFF 🎉");
+      setDiscountPercent(match.discountPercent);
+      toast.success(`Promo code applied! ${match.discountPercent}% OFF 🎉`);
       return true;
-    } else {
-      toast.error("Invalid promo code");
-      return false;
     }
+
+    toast.error("Invalid promo code");
+    return false;
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
