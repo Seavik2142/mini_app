@@ -46,6 +46,10 @@ const Routes = createBrowserRouter([
     },
     {
         path: '/',
+        element: <Navigate to="/app" replace />
+    },
+    {
+        path: '/splash',
         element: <Splash />
     },
     {

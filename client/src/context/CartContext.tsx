@@ -242,34 +242,39 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : INITIAL_USERS;
   });
 
-  // Sync Products & Banners from Server API
+  // Sync Products & Banners from Server API (Non-blocking with 4s timeout)
   useEffect(() => {
-    fetch(`${API_BASE_URL}/shop/products`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.data && Array.isArray(data.data)) {
-          setProducts(data.data);
-        }
-      })
-      .catch(err => console.log("Products API sync notice:", err));
+    const fetchWithTimeout = async (url: string) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 4000);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        clearTimeout(id);
+        return null;
+      }
+    };
 
-    fetch(`${API_BASE_URL}/shop/banners`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.data && Array.isArray(data.data)) {
-          setBannerSlides(data.data);
-        }
-      })
-      .catch(err => console.log("Banners API sync notice:", err));
+    fetchWithTimeout(`${API_BASE_URL}/shop/products`).then(data => {
+      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+        setProducts(data.data);
+      }
+    });
 
-    fetch(`${API_BASE_URL}/shop/promos`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.data && Array.isArray(data.data)) {
-          setPromoCodesList(data.data);
-        }
-      })
-      .catch(err => console.log("Promos API sync notice:", err));
+    fetchWithTimeout(`${API_BASE_URL}/shop/banners`).then(data => {
+      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+        setBannerSlides(data.data);
+      }
+    });
+
+    fetchWithTimeout(`${API_BASE_URL}/shop/promos`).then(data => {
+      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+        setPromoCodesList(data.data);
+      }
+    });
   }, []);
 
   useEffect(() => {
