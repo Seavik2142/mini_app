@@ -712,6 +712,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const profileJson = await profileRes.json();
           if (profileJson.success && profileJson.data) {
             setDbUserProfile(profileJson.data);
+            if (profileJson.data.phone) {
+              setVerifiedPhone(profileJson.data.phone);
+              setIsPhoneVerified(true);
+              localStorage.setItem("mini_app_verified_phone", profileJson.data.phone);
+              localStorage.setItem("mini_app_is_verified", "true");
+            }
           }
         }
       } catch (err) {

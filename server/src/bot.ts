@@ -484,6 +484,46 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
+    // Telegram Authentic Contact Handler (Real Phone Sync)
+    // ──────────────────────────────────────────────────
+    bot.on('contact', async (msg) => {
+      const chatId = msg.chat.id;
+      const contact = msg.contact;
+      if (!contact || !contact.phone_number) return;
+
+      const rawPhone = contact.phone_number.startsWith('+') ? contact.phone_number : `+${contact.phone_number}`;
+      const name = `${contact.first_name || msg.from?.first_name || 'User'} ${contact.last_name || msg.from?.last_name || ''}`.trim();
+      const username = msg.from?.username || null;
+      const tgId = String(msg.from?.id || chatId);
+
+      try {
+        await prisma.user.upsert({
+          where: { tgId },
+          update: { phone: rawPhone, name, username },
+          create: {
+            tgId,
+            name,
+            username,
+            phone: rawPhone,
+            referCode: 'REF' + Math.floor(100000 + Math.random() * 900000)
+          }
+        });
+
+        const lang = getUserLanguage(chatId);
+        const successMsg = lang === 'km' 
+          ? `✅ *លេខទូរស័ព្ទពិតប្រាកដរបស់អ្នក (${rawPhone}) ត្រូវបានតភ្ជាប់ជាមួយ Telegram រួចរាល់!*`
+          : `✅ *Your authentic Telegram phone number (${rawPhone}) is now connected!*`;
+
+        bot.sendMessage(chatId, successMsg, {
+          parse_mode: 'Markdown',
+          reply_markup: getControlReplyKeyboard(chatId)
+        });
+      } catch (err) {
+        console.error("Error saving Telegram contact:", err);
+      }
+    });
+
+    // ──────────────────────────────────────────────────
     // 14. Callback Query Handler (Inline Button Clicks)
     // ──────────────────────────────────────────────────
     bot.on('callback_query', async (query) => {
