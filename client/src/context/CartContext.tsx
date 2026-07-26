@@ -505,6 +505,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await fetch(`${API_BASE_URL}/shop/orders`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: newOrderItems,
@@ -712,7 +713,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // Fetch User DB Profile
-        const profileRes = await fetch(`${API_BASE_URL}/shop/user-profile?${query.toString()}`);
+        const profileRes = await fetch(`${API_BASE_URL}/shop/user-profile?${query.toString()}`, { credentials: "include" });
         if (profileRes.ok) {
           const profileJson = await profileRes.json();
           if (profileJson.success && profileJson.data) {
@@ -737,6 +738,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await fetch(`${API_BASE_URL}/shop/user-profile`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tgId: telegramUser.id,
