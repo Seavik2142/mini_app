@@ -23,7 +23,7 @@ const API = {
  */
 async function apiFetch(url, options = {}) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(url, {
       headers: { 'Content-Type': 'application/json', ...options.headers },

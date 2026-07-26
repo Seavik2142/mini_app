@@ -56,10 +56,13 @@ async function loadProducts(page = 1) {
     if (Array.isArray(remote) && remote.length > 0) {
       productsList = remote;
       localStorage.setItem('mini_app_products', JSON.stringify(productsList));
-      renderProductsList(productsList);
     }
+    // Always re-render (even empty — clears the spinner)
+    renderProductsList(productsList);
   } catch (e) {
     console.warn('API products fetch notice (using active store list):', e);
+    // Still clear the loading spinner with whatever we have
+    renderProductsList(productsList);
   }
 }
 
