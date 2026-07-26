@@ -5,41 +5,11 @@
 let currentPage = 1;
 let editingId = null;
 let productsList = [];
-
-const DEFAULT_PRODUCTS = [
-  {
-    id: 1,
-    name: "ChatGPT Plus (1 Month Private Key)",
-    slug: "chatgpt-plus-1m",
-    description: "Official ChatGPT Plus private access key with GPT-4o enabled.",
-    price: 19.99,
-    stock: 50,
-    rating: 4.9,
-    isFeatured: true,
-    isNew: true,
-    isOnSale: true,
-    images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"],
-    digitalKeys: ["GPT-PRIV-8A7B6C5D4E", "GPT-PRIV-9F8E7D6C5B"]
-  },
-  {
-    id: 2,
-    name: "Telegram Premium 12 Months Gift Code",
-    slug: "telegram-premium-12m",
-    description: "Telegram Premium 1 year subscription gift code.",
-    price: 28.99,
-    stock: 100,
-    rating: 5.0,
-    isFeatured: true,
-    isNew: false,
-    isOnSale: false,
-    images: ["https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"],
-    digitalKeys: ["https://t.me/giftcode?code=TGPM12M_XYZ888"]
-  }
-];
+let _savingProduct = false; // guard against double-submit
 
 document.addEventListener('DOMContentLoaded', () => {
   const local = JSON.parse(localStorage.getItem('mini_app_products'));
-  productsList = Array.isArray(local) && local.length > 0 ? local : DEFAULT_PRODUCTS;
+  productsList = Array.isArray(local) && local.length > 0 ? local : [];
   renderProductsList(productsList);
   loadProducts(1);
   loadCategoriesForForm();
@@ -47,23 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadProducts(page = 1) {
   currentPage = page;
-  const tbody = document.getElementById('products-tbody');
-  if (!tbody) return;
-
   try {
-    const data = await apiFetch(`${API.products}?page=${page}&limit=20`);
+    const data = await apiFetch(`${API.products}?page=${page}&limit=50`);
     const remote = data.data?.products || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
     if (Array.isArray(remote) && remote.length > 0) {
       productsList = remote;
       localStorage.setItem('mini_app_products', JSON.stringify(productsList));
     }
-    // Always re-render (even empty — clears the spinner)
-    renderProductsList(productsList);
   } catch (e) {
-    console.warn('API products fetch notice (using active store list):', e);
-    // Still clear the loading spinner with whatever we have
-    renderProductsList(productsList);
+    console.warn('API products fetch notice (using cached list):', e);
   }
+  // Always render — clears loading spinner
+  renderProductsList(productsList);
 }
 
 function renderProductsList(products) {
@@ -74,7 +39,10 @@ function renderProductsList(products) {
   if (countEl) countEl.textContent = `${(products || []).length} products in store catalog`;
 
   if (!products || products.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No products available. Click "Add Product" to create one.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">
+      <i class="bi bi-box-seam" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:8px;"></i>
+      No products yet. Click <strong>"Add Product"</strong> to create one.
+    </td></tr>`;
     return;
   }
 
@@ -83,7 +51,9 @@ function renderProductsList(products) {
     return `
     <tr>
       <td>
-        ${p.images?.[0] ? `<img src="${escHtml(p.images[0])}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">` : '<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;"></div>'}
+        ${p.images?.[0]
+          ? `<img src="${escHtml(p.images[0])}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">`
+          : '<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-image text-muted"></i></div>'}
       </td>
       <td>
         <p class="fw-semibold mb-0">${escHtml(p.name)}</p>
@@ -106,34 +76,24 @@ function renderProductsList(products) {
         <button class="btn btn-light btn-sm me-1" onclick="openEditModal(${p.id})">Edit</button>
         <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
       </td>
-    </tr>
-  `;
+    </tr>`;
   }).join('');
-}
-          <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
-        </td>
-      </tr>
-      `;
-    }).join('') || `<tr><td colspan="8" class="text-center text-muted py-4">No products found</td></tr>`;
-
-    const countEl = document.getElementById('products-count');
-    if (countEl) countEl.textContent = `${total} total products`;
-
-  } catch (e) {
-    console.error('Load products error:', e);
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error loading products: ${escHtml(e.message)}</td></tr>`;
-  }
 }
 
 async function loadCategoriesForForm() {
   try {
     const data = await apiFetch(API.categories);
-    const cats = data.data || data;
+    const cats = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
     const sel = document.getElementById('product-category');
     if (!sel) return;
-    sel.innerHTML = cats.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+    if (cats.length > 0) {
+      sel.innerHTML = cats.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+    } else {
+      sel.innerHTML = '<option value="1">General</option>';
+    }
   } catch (e) {
-    console.error('Categories error:', e);
+    const sel = document.getElementById('product-category');
+    if (sel) sel.innerHTML = '<option value="1">General</option>';
   }
 }
 
@@ -141,7 +101,6 @@ let productCropper = null;
 
 function handleProductFileUpload(input) {
   if (input.files && input.files[0]) {
-    const file = input.files[0];
     const reader = new FileReader();
     reader.onload = function(e) {
       const dataUrl = e.target.result;
@@ -149,7 +108,7 @@ function handleProductFileUpload(input) {
       updateProductImagePreview(dataUrl);
       showToast('Local image loaded into cropper!');
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(input.files[0]);
   }
 }
 
@@ -158,10 +117,7 @@ function updateProductImagePreview(url) {
   const img = document.getElementById('prod-img-preview');
   if (!box || !img) return;
 
-  if (productCropper) {
-    productCropper.destroy();
-    productCropper = null;
-  }
+  if (productCropper) { productCropper.destroy(); productCropper = null; }
 
   const cleanUrl = (url || '').trim();
   let targetUrl = '';
@@ -172,19 +128,13 @@ function updateProductImagePreview(url) {
   }
 
   if (targetUrl && (targetUrl.startsWith('http') || targetUrl.startsWith('data:image'))) {
-    img.crossOrigin = "anonymous";
+    img.crossOrigin = 'anonymous';
     img.src = targetUrl;
     box.style.display = 'block';
-
     img.onload = function() {
       if (productCropper) productCropper.destroy();
       if (window.Cropper) {
-        productCropper = new Cropper(img, {
-          viewMode: 1,
-          autoCropArea: 0.95,
-          responsive: true,
-          background: false,
-        });
+        productCropper = new Cropper(img, { viewMode: 1, autoCropArea: 0.95, responsive: true, background: false });
       }
     };
   } else {
@@ -192,54 +142,30 @@ function updateProductImagePreview(url) {
   }
 }
 
-function rotateProductCrop(degree) {
-  if (productCropper) {
-    productCropper.rotate(degree);
-  }
-}
+function rotateProductCrop(degree) { if (productCropper) productCropper.rotate(degree); }
 
 function applyProductCrop() {
-  if (!productCropper) {
-    showToast('Image loaded');
-    return;
-  }
+  if (!productCropper) { showToast('Image loaded'); return; }
   try {
-    const canvas = productCropper.getCroppedCanvas({
-      maxWidth: 1200,
-      maxHeight: 1200,
-      imageSmoothingQuality: 'high',
-    });
+    const canvas = productCropper.getCroppedCanvas({ maxWidth: 1200, maxHeight: 1200, imageSmoothingQuality: 'high' });
     if (canvas) {
-      const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
-      setField('product-images', croppedDataUrl);
+      setField('product-images', canvas.toDataURL('image/jpeg', 0.92));
       showToast('✂️ Image cropped & applied successfully!');
     }
-  } catch (err) {
-    console.warn('Canvas cropper notice:', err);
-    showToast('Image applied');
-  }
+  } catch (err) { showToast('Image applied'); }
 }
 
 function updateKeysCount(val) {
   const el = document.getElementById('product-keys-count');
   const lines = (val || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-  if (el) {
-    el.textContent = `${lines.length} Item${lines.length === 1 ? '' : 's'}`;
-  }
-  if (lines.length > 0) {
-    setField('product-stock', lines.length);
-  }
+  if (el) el.textContent = `${lines.length} Item${lines.length === 1 ? '' : 's'}`;
+  if (lines.length > 0) setField('product-stock', lines.length);
 }
 
 function cleanProductKeysFormat() {
   const textarea = document.getElementById('product-keys');
   if (!textarea) return;
-  const raw = textarea.value;
-  const cleaned = raw
-    .split(/[\n,\s]+/)
-    .map(s => s.trim())
-    .filter(Boolean)
-    .join('\n');
+  const cleaned = textarea.value.split(/[\n,\s]+/).map(s => s.trim()).filter(Boolean).join('\n');
   textarea.value = cleaned;
   updateKeysCount(cleaned);
   showToast('✨ Formatted to 1 link per line cleanly!');
@@ -247,27 +173,25 @@ function cleanProductKeysFormat() {
 
 function openAddModal() {
   editingId = null;
-  document.getElementById('productModalLabel').textContent = 'Add Product';
-  document.getElementById('product-form').reset();
+  const labelEl = document.getElementById('productModalLabel');
+  if (labelEl) labelEl.textContent = 'Add Product';
+  const formEl = document.getElementById('product-form');
+  if (formEl) formEl.reset();
   updateProductImagePreview('');
   updateKeysCount('');
   loadCategoriesForForm();
   const modalEl = document.getElementById('productModal');
-  if (modalEl) {
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    modal.show();
-  }
+  if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
-function openCreateModal() {
-  openAddModal();
-}
+function openCreateModal() { openAddModal(); }
 
 function openEditModal(id) {
   const product = productsList.find(p => p.id === id);
   if (!product) return;
 
   editingId = product.id;
-  document.getElementById('productModalLabel').textContent = 'Edit Product';
+  const labelEl = document.getElementById('productModalLabel');
+  if (labelEl) labelEl.textContent = 'Edit Product';
   setField('product-name', product.name);
   setField('product-slug', product.slug);
   setField('product-description', product.description);
@@ -276,42 +200,42 @@ function openEditModal(id) {
   setField('product-warranty', product.warranty || '30 Days Replacement Warranty');
   setField('product-keys', (product.digitalKeys || []).join('\n'));
   updateKeysCount((product.digitalKeys || []).join('\n'));
-  setField('product-category', product.categoryId);
   setField('product-images', (product.images || []).join(', '));
   updateProductImagePreview((product.images || [])[0] || '');
   setCheck('product-featured', product.isFeatured);
   setCheck('product-new', product.isNew);
   setCheck('product-sale', product.isOnSale);
 
+  loadCategoriesForForm().then(() => setField('product-category', product.categoryId));
+
   const modalEl = document.getElementById('productModal');
-  if (modalEl) {
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    modal.show();
-  }
+  if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 async function saveProduct() {
+  // Guard against double-submit (form onsubmit + button onclick)
+  if (_savingProduct) return;
+  _savingProduct = true;
+
   const name = getField('product-name').trim();
   if (!name) {
     showToast('Product name is required', 'error');
+    _savingProduct = false;
     return;
   }
 
   const rawImages = getField('product-images').trim();
   let imagesArray = [];
-  if (rawImages) {
-    if (rawImages.startsWith('data:image/')) {
-      imagesArray = [rawImages];
-    } else {
-      imagesArray = rawImages.split(',').map(s => s.trim()).filter(Boolean);
-    }
+  if (rawImages.startsWith('data:image/')) {
+    imagesArray = [rawImages];
+  } else if (rawImages) {
+    imagesArray = rawImages.split(',').map(s => s.trim()).filter(Boolean);
   }
   if (imagesArray.length === 0) {
     imagesArray = ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'];
   }
 
   const catVal = parseInt(getField('product-category'));
-
   const rawKeys = getField('product-keys').trim();
   const digitalKeysArray = rawKeys ? rawKeys.split(/[\n,]+/).map(k => k.trim()).filter(Boolean) : [];
 
@@ -330,39 +254,48 @@ async function saveProduct() {
     isOnSale: getCheck('product-sale'),
   };
 
-  const newProductObj = { id: editingId || Date.now(), ...body, rating: 5.0, reviewCount: 1 };
+  // Capture editingId before clearing it
+  const savedEditingId = editingId;
+  const newProductObj = { id: savedEditingId || Date.now(), ...body, rating: 5.0, reviewCount: 0 };
 
-  if (editingId) {
-    productsList = productsList.map(p => p.id === editingId ? { ...p, ...newProductObj } : p);
-    showToast('Product updated successfully!');
+  // Instant local render
+  if (savedEditingId) {
+    productsList = productsList.map(p => p.id === savedEditingId ? { ...p, ...newProductObj } : p);
+    showToast('✅ Product updated successfully!');
   } else {
     productsList.unshift(newProductObj);
-    showToast('Product created successfully!');
+    showToast('✅ Product created successfully!');
   }
-
   localStorage.setItem('mini_app_products', JSON.stringify(productsList));
   renderProductsList(productsList);
 
-  const modalEl = document.getElementById('productModal');
-  if (modalEl) {
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    if (modal) modal.hide();
-  }
-
+  // Close modal and reset form
   editingId = null;
+  const modalEl = document.getElementById('productModal');
+  if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
   const formEl = document.getElementById('product-form');
   if (formEl) formEl.reset();
   updateProductImagePreview('');
 
+  // Sync to backend API in background
   try {
-    if (editingId) {
-      await apiFetch(`${API.products}/${editingId}`, { method: 'PATCH', body: JSON.stringify(body) });
+    let result;
+    if (savedEditingId) {
+      result = await apiFetch(`${API.products}/${savedEditingId}`, { method: 'PATCH', body: JSON.stringify(body) });
     } else {
-      await apiFetch(API.products, { method: 'POST', body: JSON.stringify(body) });
+      result = await apiFetch(API.products, { method: 'POST', body: JSON.stringify(body) });
+    }
+    // Update local list with real DB id
+    if (result?.data?.id && !savedEditingId) {
+      productsList = productsList.map(p => p.id === newProductObj.id ? { ...p, id: result.data.id } : p);
+      localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+      renderProductsList(productsList);
     }
   } catch (e) {
     console.warn('API save notice (saved locally):', e);
   }
+
+  _savingProduct = false;
 }
 
 async function deleteProduct(id) {
@@ -371,7 +304,6 @@ async function deleteProduct(id) {
   localStorage.setItem('mini_app_products', JSON.stringify(productsList));
   renderProductsList(productsList);
   showToast('Product deleted', 'info');
-
   try {
     await apiFetch(`${API.products}/${id}`, { method: 'DELETE' });
   } catch (err) {
@@ -388,21 +320,15 @@ function escHtml(str) { return String(str || '').replace(/&/g,'&amp;').replace(/
 function openKeysViewModal(id) {
   const product = productsList.find(p => p.id === id);
   if (!product) return;
-
   const keys = product.digitalKeys || [];
   const titleEl = document.getElementById('keysViewModalLabel');
   const countEl = document.getElementById('keysModalCount');
   const contentEl = document.getElementById('keysModalContent');
-
   if (titleEl) titleEl.innerHTML = `<i class="bi bi-key-fill text-primary me-1"></i> Keys & Links Inventory — ${escHtml(product.name)}`;
   if (countEl) countEl.textContent = `${keys.length} Key${keys.length === 1 ? '' : 's'} / Link${keys.length === 1 ? '' : 's'} Remaining in Stock`;
   if (contentEl) contentEl.textContent = keys.length > 0 ? keys.join('\n') : '⚠️ No digital keys or links remaining in stock for this product.';
-
   const modalEl = document.getElementById('keysViewModal');
-  if (modalEl) {
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    modal.show();
-  }
+  if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 function copyAllKeysFromModal() {
