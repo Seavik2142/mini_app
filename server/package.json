@@ -13,7 +13,7 @@
   },
   "scripts": {
     "dev": "tsnd --respawn ./src/start.ts",
-    "build": "prisma generate && tsc",
+    "build": "npx prisma db push && prisma generate && tsc",
     "start": "node dist/start.js",
     "push": "npx prisma db push"
   },
