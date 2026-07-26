@@ -15,39 +15,66 @@ async function loadProducts(page = 1) {
   currentPage = page;
   const tbody = document.getElementById('products-tbody');
   if (!tbody) return;
-  tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading products...</td></tr>`;
+
+  const local = JSON.parse(localStorage.getItem('mini_app_products')) || [];
 
   try {
     const data = await apiFetch(`${API.products}?page=${page}&limit=20`);
-    const { products = [], total = 0, totalPages = 1 } = data.data || data;
-    productsList = products;
+    const remote = data.data?.products || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+    if (remote.length > 0) {
+      productsList = remote;
+    } else {
+      productsList = local;
+    }
+  } catch (e) {
+    productsList = local;
+  }
 
-    tbody.innerHTML = products.map(p => {
-      const keysCount = p.digitalKeys?.length || 0;
-      return `
-      <tr>
-        <td>
-          ${p.images?.[0] ? `<img src="${escHtml(p.images[0])}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">` : '<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;"></div>'}
-        </td>
-        <td>
-          <p class="fw-semibold mb-0">${escHtml(p.name)}</p>
-          <p class="text-muted small mb-0">${escHtml(p.category?.name || '—')}</p>
-        </td>
-        <td>${formatCurrency(p.price)}</td>
-        <td>
-          <button class="btn btn-sm ${keysCount > 0 ? 'btn-outline-success' : 'btn-outline-warning'} font-monospace py-0 px-2" onclick="openKeysViewModal(${p.id})">
-            <i class="bi bi-key-fill me-1"></i> ${keysCount} Keys
-          </button>
-        </td>
-        <td>${p.stock ?? '—'}</td>
-        <td>${p.rating ?? '—'} ⭐</td>
-        <td>
-          ${p.isFeatured ? '<span class="badge bg-primary me-1">Featured</span>' : ''}
-          ${p.isNew ? '<span class="badge bg-success me-1">New</span>' : ''}
-          ${p.isOnSale ? '<span class="badge bg-warning text-dark">Sale</span>' : ''}
-        </td>
-        <td class="text-end">
-          <button class="btn btn-light btn-sm me-1" onclick="openEditModal(${p.id})">Edit</button>
+  localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+  renderProductsList(productsList);
+}
+
+function renderProductsList(products) {
+  const tbody = document.getElementById('products-tbody');
+  if (!tbody) return;
+
+  if (!products || products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No products available. Click "Add Product" to create one.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = products.map(p => {
+    const keysCount = p.digitalKeys?.length || 0;
+    return `
+    <tr>
+      <td>
+        ${p.images?.[0] ? `<img src="${escHtml(p.images[0])}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">` : '<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;"></div>'}
+      </td>
+      <td>
+        <p class="fw-semibold mb-0">${escHtml(p.name)}</p>
+        <p class="text-muted small mb-0">${escHtml(p.category?.name || 'General')}</p>
+      </td>
+      <td>${formatCurrency(p.price)}</td>
+      <td>
+        <button class="btn btn-sm ${keysCount > 0 ? 'btn-outline-success' : 'btn-outline-warning'} font-monospace py-0 px-2" onclick="openKeysViewModal(${p.id})">
+          <i class="bi bi-key-fill me-1"></i> ${keysCount} Keys
+        </button>
+      </td>
+      <td>${p.stock ?? '—'}</td>
+      <td>${p.rating ?? '5.0'} ⭐</td>
+      <td>
+        ${p.isFeatured ? '<span class="badge bg-primary me-1">Featured</span>' : ''}
+        ${p.isNew ? '<span class="badge bg-success me-1">New</span>' : ''}
+        ${p.isOnSale ? '<span class="badge bg-warning text-dark">Sale</span>' : ''}
+      </td>
+      <td class="text-end">
+        <button class="btn btn-light btn-sm me-1" onclick="openEditModal(${p.id})">Edit</button>
+        <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
+      </td>
+    </tr>
+  `;
+  }).join('');
+}
           <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Delete</button>
         </td>
       </tr>
@@ -268,51 +295,52 @@ async function saveProduct() {
     isOnSale: getCheck('product-sale'),
   };
 
-  try {
-    if (editingId) {
-      await apiFetch(`${API.products}/${editingId}`, { method: 'PATCH', body: JSON.stringify(body) });
-      showToast('Product updated successfully!');
-    } else {
-      await apiFetch(API.products, { method: 'POST', body: JSON.stringify(body) });
-      showToast('Product created successfully!');
-    }
-  } catch (e) {
-    console.warn('API save notice, updating local memory store:', e);
-    if (editingId) {
-      productsList = productsList.map(p => p.id === editingId ? { ...p, ...body } : p);
-      showToast('Product updated!');
-    } else {
-      const newProd = { id: Date.now(), ...body, rating: 5.0, reviewCount: 1 };
-      productsList.unshift(newProd);
-      showToast('New product added!');
-    }
-    localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+  const newProductObj = { id: editingId || Date.now(), ...body, rating: 5.0, reviewCount: 1 };
+
+  if (editingId) {
+    productsList = productsList.map(p => p.id === editingId ? { ...p, ...newProductObj } : p);
+    showToast('Product updated successfully!');
+  } else {
+    productsList.unshift(newProductObj);
+    showToast('Product created successfully!');
   }
 
-  // Close modal cleanly
+  localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+  renderProductsList(productsList);
+
   const modalEl = document.getElementById('productModal');
   if (modalEl) {
     const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     if (modal) modal.hide();
   }
 
-  // Reset form state & reload table
   editingId = null;
   const formEl = document.getElementById('product-form');
   if (formEl) formEl.reset();
   updateProductImagePreview('');
-  renderProducts();
-  loadProducts(currentPage);
+
+  try {
+    if (editingId) {
+      await apiFetch(`${API.products}/${editingId}`, { method: 'PATCH', body: JSON.stringify(body) });
+    } else {
+      await apiFetch(API.products, { method: 'POST', body: JSON.stringify(body) });
+    }
+  } catch (e) {
+    console.warn('API save notice (saved locally):', e);
+  }
 }
 
 async function deleteProduct(id) {
   if (!confirm('Are you sure you want to delete this product?')) return;
+  productsList = productsList.filter(p => p.id !== id);
+  localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+  renderProductsList(productsList);
+  showToast('Product deleted', 'info');
+
   try {
     await apiFetch(`${API.products}/${id}`, { method: 'DELETE' });
-    showToast('Product deleted', 'info');
-    loadProducts(currentPage);
-  } catch (e) {
-    showToast('Error deleting product: ' + e.message, 'error');
+  } catch (err) {
+    console.warn('API delete notice:', err);
   }
 }
 

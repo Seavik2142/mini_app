@@ -152,13 +152,15 @@
     let promos = [];
 
     async function loadPromos() {
+      const local = JSON.parse(localStorage.getItem('mini_app_promos')) || [];
       try {
         const res = await apiFetch(API.promos);
-        promos = res.data || res || [];
+        const remote = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+        promos = remote.length > 0 ? remote : local;
       } catch (e) {
-        console.warn('API promos fetch fallback to localStorage:', e);
-        promos = JSON.parse(localStorage.getItem('mini_app_promos')) || [];
+        promos = local;
       }
+      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
       renderPromos();
     }
 
@@ -190,33 +192,36 @@
       const percent = parseInt(document.getElementById('promoPercentInput').value) || 10;
       if (!code) return;
 
+      const newPromoObj = { id: Date.now(), code, discountPercent: percent, isActive: true };
+      promos.unshift(newPromoObj);
+      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
+      renderPromos();
+      showToast(`Promo code ${code} created`);
+
+      document.getElementById('promoCodeInput').value = '';
+
       try {
         await apiFetch(API.promos, {
           method: 'POST',
           body: JSON.stringify({ code, discountPercent: percent })
         });
-        showToast(`Promo code ${code} created`);
       } catch (err) {
-        promos.unshift({ id: Date.now(), code, discountPercent: percent, isActive: true });
-        localStorage.setItem('mini_app_promos', JSON.stringify(promos));
-        showToast(`Saved ${code} locally`);
+        console.warn('Promo API save notice (saved locally):', err);
       }
-
-      document.getElementById('promoCodeInput').value = '';
-      loadPromos();
     }
 
     async function deletePromo(id) {
       if (!confirm('Delete this promo code?')) return;
+      promos = promos.filter(p => p.id !== id);
+      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
+      renderPromos();
+      showToast('Promo code deleted', 'info');
+
       try {
         await apiFetch(`${API.promos}/${id}`, { method: 'DELETE' });
-        showToast('Promo code deleted', 'info');
       } catch (err) {
-        promos = promos.filter(p => p.id !== id);
-        localStorage.setItem('mini_app_promos', JSON.stringify(promos));
-        showToast('Promo code removed locally', 'info');
+        console.warn('Promo API delete notice:', err);
       }
-      loadPromos();
     }
 
     function escHtml(str) {

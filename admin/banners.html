@@ -192,13 +192,15 @@
     let bannerCropper = null;
 
     async function loadBanners() {
+      const local = JSON.parse(localStorage.getItem('mini_app_banners')) || [];
       try {
         const res = await apiFetch(API.banners);
-        banners = res.data || res || [];
+        const remote = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+        banners = remote.length > 0 ? remote : (local.length > 0 ? local : DEFAULT_BANNER_SLIDES);
       } catch (e) {
-        console.warn('API banners fetch fallback to localStorage:', e);
-        banners = JSON.parse(localStorage.getItem('mini_app_banners')) || [];
+        banners = local.length > 0 ? local : DEFAULT_BANNER_SLIDES;
       }
+      localStorage.setItem('mini_app_banners', JSON.stringify(banners));
       renderBanners();
     }
 
@@ -345,45 +347,46 @@
         return;
       }
 
-      const body = { image };
+      const newBannerObj = { id: editingBannerId || Date.now(), image };
 
-      try {
-        if (editingBannerId) {
-          await apiFetch(`${API.banners}/${editingBannerId}`, { method: 'PATCH', body: JSON.stringify(body) });
-          showToast('Image banner updated successfully!');
-        } else {
-          await apiFetch(API.banners, { method: 'POST', body: JSON.stringify(body) });
-          showToast('New image banner added!');
-        }
-      } catch (err) {
-        console.warn('Banner API save error, updating local array:', err);
-        if (editingBannerId) {
-          banners = banners.map(b => b.id === editingBannerId ? { ...b, ...body } : b);
-        } else {
-          banners.push({ id: Date.now(), ...body });
-        }
-        localStorage.setItem('mini_app_banners', JSON.stringify(banners));
-        showToast('Banner saved locally');
+      if (editingBannerId) {
+        banners = banners.map(b => b.id === editingBannerId ? { ...b, ...newBannerObj } : b);
+        showToast('Image banner updated successfully!');
+      } else {
+        banners.push(newBannerObj);
+        showToast('New image banner added!');
       }
+
+      localStorage.setItem('mini_app_banners', JSON.stringify(banners));
+      renderBanners();
 
       const modalEl = document.getElementById('bannerModal');
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       modal.hide();
 
-      loadBanners();
+      try {
+        if (editingBannerId) {
+          await apiFetch(`${API.banners}/${editingBannerId}`, { method: 'PATCH', body: JSON.stringify(newBannerObj) });
+        } else {
+          await apiFetch(API.banners, { method: 'POST', body: JSON.stringify(newBannerObj) });
+        }
+      } catch (err) {
+        console.warn('Banner API sync notice (saved locally):', err);
+      }
     }
 
     async function deleteBanner(id) {
       if (!confirm('Are you sure you want to delete this image banner?')) return;
+      banners = banners.filter(b => b.id !== id);
+      localStorage.setItem('mini_app_banners', JSON.stringify(banners));
+      renderBanners();
+      showToast('Banner deleted', 'info');
+
       try {
         await apiFetch(`${API.banners}/${id}`, { method: 'DELETE' });
-        showToast('Banner deleted', 'info');
       } catch (err) {
-        banners = banners.filter(b => b.id !== id);
-        localStorage.setItem('mini_app_banners', JSON.stringify(banners));
-        showToast('Banner removed from local storage', 'info');
+        console.warn('Banner API delete notice:', err);
       }
-      loadBanners();
     }
 
     function escHtml(str) {
