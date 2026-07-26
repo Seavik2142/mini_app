@@ -296,9 +296,30 @@ AdminRoute.post("/banners", createBanner);
 AdminRoute.patch("/banners/:id", updateBanner);
 AdminRoute.delete("/banners/:id", deleteBanner);
 
+import { sendBroadcastNews } from "../bot";
+
 // ── Promos ────────────────────────────────────────────────────
 AdminRoute.get("/promos", getPromos);
 AdminRoute.post("/promos", createPromo);
 AdminRoute.delete("/promos/:id", deletePromo);
+
+// ── Broadcast News to Telegram Users ──────────────────────────
+AdminRoute.post("/broadcast-news", Utility.CatchAsync(async (req, res) => {
+  const { title, message, imageUrl, btnText, btnUrl } = req.body;
+
+  if (!title || !message) {
+    res.status(400).json({ code: 400, message: "Title and Message are required" });
+    return;
+  }
+
+  const result = await sendBroadcastNews({ title, message, imageUrl, btnText, btnUrl });
+
+  res.json({
+    code: 200,
+    success: true,
+    data: result,
+    message: `📢 Broadcast sent to ${result.successCount} Telegram users!`
+  });
+}));
 
 export default AdminRoute;

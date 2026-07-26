@@ -9,13 +9,14 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
   : 'https://mini-app-mzu6.onrender.com';
 
 const API = {
-  stats:      `${API_BASE}/admin-api/stats`,
-  users:      `${API_BASE}/admin-api/users`,
-  orders:     `${API_BASE}/admin-api/orders`,
-  products:   `${API_BASE}/admin-api/products`,
-  categories: `${API_BASE}/admin-api/categories`,
-  banners:    `${API_BASE}/admin-api/banners`,
-  promos:     `${API_BASE}/admin-api/promos`,
+  stats:         `${API_BASE}/admin-api/stats`,
+  users:         `${API_BASE}/admin-api/users`,
+  orders:        `${API_BASE}/admin-api/orders`,
+  products:      `${API_BASE}/admin-api/products`,
+  categories:    `${API_BASE}/admin-api/categories`,
+  banners:       `${API_BASE}/admin-api/banners`,
+  promos:        `${API_BASE}/admin-api/promos`,
+  broadcastNews: `${API_BASE}/admin-api/broadcast-news`,
 };
 
 /**

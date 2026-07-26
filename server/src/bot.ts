@@ -22,6 +22,7 @@ import {
   attachTelegramUser,
   getSecondsUntilExpiry,
 } from './utils/otpStore';
+import { prisma } from './index';
 
 dotenv.config();
 
@@ -630,4 +631,76 @@ function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
       reply_markup: getControlReplyKeyboard(chatId)
     }
   ).catch(console.error);
+}
+
+export async function sendBroadcastNews(payload: {
+  title: string;
+  message: string;
+  imageUrl?: string;
+  btnText?: string;
+  btnUrl?: string;
+}) {
+  const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
+
+  const users = await prisma.user.findMany({
+    where: { isDelete: false },
+    select: { tgId: true }
+  });
+
+  const chatIds = new Set<string>();
+  users.forEach(u => {
+    if (u.tgId && u.tgId.trim()) chatIds.add(u.tgId.trim());
+  });
+
+  let successCount = 0;
+  let failCount = 0;
+
+  const formattedText = `📢 *${payload.title.trim()}*\n\n${payload.message.trim()}`;
+  const buttonUrl = payload.btnUrl?.trim() || getMiniAppUrl();
+  const buttonText = payload.btnText?.trim() || '🚀 Open Key Vault Store';
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [{ text: buttonText, web_app: { url: buttonUrl } }]
+    ]
+  };
+
+  for (const chatId of chatIds) {
+    try {
+      if (payload.imageUrl && payload.imageUrl.trim().startsWith('http')) {
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            photo: payload.imageUrl.trim(),
+            caption: formattedText,
+            parse_mode: 'Markdown',
+            reply_markup: replyMarkup
+          })
+        });
+        const data = await res.json();
+        if (data.ok) successCount++;
+        else failCount++;
+      } else {
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: formattedText,
+            parse_mode: 'Markdown',
+            reply_markup: replyMarkup
+          })
+        });
+        const data = await res.json();
+        if (data.ok) successCount++;
+        else failCount++;
+      }
+    } catch (err) {
+      failCount++;
+    }
+  }
+
+  return { successCount, failCount, totalTarget: chatIds.size };
 }
