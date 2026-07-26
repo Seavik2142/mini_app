@@ -1922,7 +1922,7 @@ html[data-theme="dark"] .btn-outline-primary:hover {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   MOBILE PHONE TOUCH & RESPONSIVE LAYOUT FIXES
+   UNIVERSAL CROSS-DEVICE (PHONE, TABLET, IPAD, LAPTOP, DESKTOP) FIXES
 ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 991.98px) {
@@ -1954,6 +1954,7 @@ html[data-theme="dark"] .btn-outline-primary:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
 
   .table-responsive,
@@ -1993,5 +1994,50 @@ html[data-theme="dark"] .btn-outline-primary:hover {
   body.sidebar-open .admin-sidebar {
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
   }
+}
+
+/* Specific iPad & Tablet Breakpoint (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .metric-card {
+    padding: 1rem !important;
+  }
+
+  .admin-main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .table-responsive {
+    border-radius: 8px;
+  }
+
+  .modal-dialog {
+    max-width: 680px !important;
+  }
+}
+
+/* Phone Portrait Breakpoint (< 576px) */
+@media (max-width: 575.98px) {
+  .admin-navbar {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .navbar-actions {
+    gap: 0.25rem !important;
+  }
+
+  .btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .card-header, .card-body, .card-footer {
+    padding: 0.85rem !important;
+  }
+
+  h1, .h1 { font-size: 1.5rem !important; }
+  h2, .h2 { font-size: 1.35rem !important; }
+  h3, .h3 { font-size: 1.2rem !important; }
 }
 
