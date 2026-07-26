@@ -667,17 +667,38 @@ export async function sendBroadcastNews(payload: {
 
   for (const chatId of chatIds) {
     try {
-      if (payload.imageUrl && payload.imageUrl.trim().startsWith('http')) {
+      const rawImg = (payload.imageUrl || '').trim();
+      if (rawImg.startsWith('http')) {
         const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            photo: payload.imageUrl.trim(),
+            photo: rawImg,
             caption: formattedText,
             parse_mode: 'Markdown',
             reply_markup: replyMarkup
           })
+        });
+        const data = await res.json();
+        if (data.ok) successCount++;
+        else failCount++;
+      } else if (rawImg.startsWith('data:image')) {
+        const base64Data = rawImg.split(',')[1];
+        const mimeMatch = rawImg.match(/data:(image\/\w+);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        const formData = new FormData();
+        formData.append('chat_id', chatId);
+        formData.append('photo', new Blob([buffer], { type: mimeType }), 'news.png');
+        formData.append('caption', formattedText);
+        formData.append('parse_mode', 'Markdown');
+        formData.append('reply_markup', JSON.stringify(replyMarkup));
+
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+          method: 'POST',
+          body: formData
         });
         const data = await res.json();
         if (data.ok) successCount++;

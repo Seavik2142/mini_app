@@ -132,9 +132,15 @@
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label text-muted small fw-bold uppercase">Banner / Image URL (Optional)</label>
-                    <input type="url" id="newsImage" class="form-control font-monospace" placeholder="https://images.unsplash.com/..." oninput="updateLivePreview()">
-                    <span class="form-text text-muted">Include a banner image URL to display a rich photo card in Telegram.</span>
+                    <label class="form-label text-muted small fw-bold uppercase">Banner / News Image (Optional)</label>
+                    <div class="input-group mb-1">
+                      <input type="text" id="newsImage" class="form-control font-monospace" placeholder="https://... or select photo from device" oninput="updateLivePreview()">
+                      <button type="button" class="btn btn-outline-primary fw-bold" onclick="document.getElementById('newsFileInput').click()">
+                        <i class="bi bi-upload me-1"></i> Choose Device Image
+                      </button>
+                    </div>
+                    <input type="file" id="newsFileInput" accept="image/*" class="d-none" onchange="handleNewsLocalUpload(this)">
+                    <span class="form-text text-muted">Paste an image URL or click <strong>Choose Device Image</strong> to upload a photo from your phone or computer gallery.</span>
                   </div>
 
                   <div class="row g-3 mb-3">
@@ -211,6 +217,20 @@
   <script src="assets/js/main.js?v=20260726_v21"></script>
   <script src="assets/js/config.js?v=20260726_v21"></script>
   <script>
+    function handleNewsLocalUpload(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const dataUrl = e.target.result;
+          document.getElementById('newsImage').value = dataUrl;
+          updateLivePreview();
+          showToast('Photo loaded from device!', 'success');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function updateLivePreview() {
       const title = document.getElementById('newsTitle').value.trim() || '🔥 News Title Preview';
       const message = document.getElementById('newsMessage').value.trim() || 'Your news announcement message will appear here...';
@@ -224,7 +244,7 @@
       const imgContainer = document.getElementById('previewImageContainer');
       const imgEl = document.getElementById('previewImage');
 
-      if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
+      if (image && (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:image'))) {
         imgEl.src = image;
         imgContainer.style.display = 'block';
       } else {
