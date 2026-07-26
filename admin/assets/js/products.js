@@ -20,7 +20,7 @@ async function loadProducts(page = 1) {
   try {
     const data = await apiFetch(`${API.products}?page=${page}&limit=50`);
     const remote = data.data?.products || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-    if (Array.isArray(remote) && remote.length > 0) {
+    if (Array.isArray(remote)) {
       productsList = remote;
       localStorage.setItem('mini_app_products', JSON.stringify(productsList));
     }

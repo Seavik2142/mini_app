@@ -40,7 +40,7 @@ async function loadUsers(page = 1, search = '') {
 
     const data = await apiFetch(url);
     const remote = data.data?.users || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-    usersList = remote.length > 0 ? remote : localUsers;
+    usersList = Array.isArray(remote) ? remote : localUsers;
   } catch (e) {
     usersList = localUsers;
   }
