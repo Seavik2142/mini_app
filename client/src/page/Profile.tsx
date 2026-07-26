@@ -37,7 +37,7 @@ const Profile: React.FC = () => {
 
   const handleQuickTelegramLogin = () => {
     if (telegramUser.id || telegramUser.firstName) {
-      updateVerifiedPhone(String(telegramUser.id || "tg_user"), {
+      updateVerifiedPhone("", {
         tgId: String(telegramUser.id || "tg_user"),
         name: `${telegramUser.firstName || ''} ${telegramUser.lastName || ''}`.trim() || "Telegram User",
         username: telegramUser.username || null
