@@ -213,6 +213,28 @@
         
         if (inputName) inputName.value = cleanName;
         if (inputEmail) inputEmail.value = emailStr;
+        const form = document.querySelector('.needs-validation');
+        if (form) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (form.checkValidity()) {
+              const newName = inputName ? inputName.value.trim() : '';
+              const newEmail = inputEmail ? inputEmail.value.trim() : '';
+              if (newName) session.username = newName;
+              if (newEmail) session.email = newEmail;
+              window.localStorage.setItem('mini_app_admin_session', JSON.stringify(session));
+              
+              document.getElementById('displayProfileName').textContent = "👑 " + newName;
+              document.getElementById('displayEmailText').textContent = newEmail;
+              
+              if (typeof showToast !== 'undefined') {
+                showToast('Profile updated successfully!', 'success');
+              } else {
+                alert('Profile updated successfully!');
+              }
+            }
+          });
+        }
       } catch(e) {}
     });
   </script>
