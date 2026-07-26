@@ -32,6 +32,15 @@ app.get("/", Utility.CatchAsync(async (req, res) => {
     })
 }))
 
+app.get("/ping-db", async (req, res) => {
+    try {
+        const count = await prisma.product.count();
+        res.json({ success: true, count });
+    } catch (e: any) {
+        res.status(500).json({ success: false, error: e.message, stack: e.stack });
+    }
+});
+
 app.use(MainRoute);
 
 app.use(Utility.Error_Handler);
