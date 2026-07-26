@@ -2,8 +2,36 @@ import { Router } from "express";
 import { prisma } from "../index";
 import Utility from "../utils/Utilite";
 import { getBanners, createBanner, updateBanner, deleteBanner, getPromos, createPromo, deletePromo } from "../module/shop.services";
+import { AdminValidation } from "../utils/Middleware";
+import jwt from "jsonwebtoken";
 
 const AdminRoute = Router();
+
+// ── Authentication ────────────────────────────────────────────
+AdminRoute.post("/login", Utility.CatchAsync(async (req, res) => {
+  const { username, password } = req.body;
+  if (username && username.toLowerCase() === 'seavik' && password === 'Seavik214262') {
+    const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
+    const token = jwt.sign({ role: "SUPER_ADMIN", username: "Seavik" }, secret, { expiresIn: '7d' });
+    res.cookie("admin_auth", token, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        sameSite: "none",
+    });
+    res.json({ success: true, message: "Logged in successfully" });
+  } else {
+    res.status(401).json({ success: false, message: "Invalid credentials" });
+  }
+}));
+
+AdminRoute.post("/logout", (req, res) => {
+  res.clearCookie("admin_auth", { httpOnly: true, secure: true, sameSite: "none" });
+  res.json({ success: true, message: "Logged out" });
+});
+
+// Require authentication for all subsequent routes
+AdminRoute.use(AdminValidation);
 
 // ── Stats ─────────────────────────────────────────────────────
 AdminRoute.get("/stats", Utility.CatchAsync(async (req, res) => {
@@ -239,11 +267,25 @@ AdminRoute.patch("/products/:id", Utility.CatchAsync(async (req, res) => {
       return;
     }
 
-    const updateData: any = { ...req.body };
-    if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
-    if (updateData.stock !== undefined) updateData.stock = parseInt(updateData.stock) || 0;
-    if (updateData.categoryId !== undefined) {
-      const cId = parseInt(updateData.categoryId);
+    const { name, slug, description, price, tonPrice, starsPrice, images, categoryId, stock, isFeatured, isNew, isOnSale, discount, warranty, digitalKeys } = req.body;
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (slug !== undefined) updateData.slug = slug;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = parseFloat(price) || 0;
+    if (tonPrice !== undefined) updateData.tonPrice = tonPrice;
+    if (starsPrice !== undefined) updateData.starsPrice = starsPrice;
+    if (images !== undefined) updateData.images = images;
+    if (stock !== undefined) updateData.stock = parseInt(stock) || 0;
+    if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+    if (isNew !== undefined) updateData.isNew = isNew;
+    if (isOnSale !== undefined) updateData.isOnSale = isOnSale;
+    if (discount !== undefined) updateData.discount = discount;
+    if (warranty !== undefined) updateData.warranty = warranty;
+    if (digitalKeys !== undefined) updateData.digitalKeys = digitalKeys;
+
+    if (categoryId !== undefined) {
+      const cId = parseInt(categoryId);
       if (!isNaN(cId) && cId <= 2147483647) updateData.categoryId = cId;
       else delete updateData.categoryId;
     }

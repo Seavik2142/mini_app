@@ -27,6 +27,7 @@ async function apiFetch(url, options = {}) {
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(url, {
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...options.headers },
       signal: controller.signal,
       ...options,

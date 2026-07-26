@@ -7,7 +7,7 @@ export const UserVaildation: RequestHandler = CatchAsync(async (req, res, next) 
     const token = req?.cookies?.auth;
 
     if (!token) {
-        throw new Error("headers not found.");
+        throw new Error("User authentication required (cookie missing).");
     }
 
     const verify: any = jwt.verify(token, process.env.SECRET as string);
@@ -25,7 +25,26 @@ export const UserVaildation: RequestHandler = CatchAsync(async (req, res, next) 
 
         if (user) next();
     } else {
-        throw new Error("headers is invaild.");
+        throw new Error("User token is invalid.");
     }
-})
+});
 
+export const AdminValidation: RequestHandler = CatchAsync(async (req, res, next) => {
+    const token = req?.cookies?.admin_auth;
+
+    if (!token) {
+        res.status(401).json({ code: 401, message: "Admin authentication required." });
+        return;
+    }
+
+    try {
+        const verify: any = jwt.verify(token, process.env.SECRET as string);
+        if (verify?.role === "SUPER_ADMIN") {
+            next();
+        } else {
+            res.status(403).json({ code: 403, message: "Forbidden: Not an admin." });
+        }
+    } catch (e) {
+        res.status(401).json({ code: 401, message: "Invalid admin token." });
+    }
+});

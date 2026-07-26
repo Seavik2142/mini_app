@@ -75,7 +75,7 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/main.js?v=20260726_2"></script>
   <script>
-    function handleAdminLogin(event) {
+    async function handleAdminLogin(event) {
       event.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -86,26 +86,30 @@
         return;
       }
 
-      // Enforce Super Admin Root Credentials (Seavik / Seavik214262)
-      if (role === 'SUPER_ADMIN' || username.toLowerCase() === 'seavik') {
-        if (username.toLowerCase() !== 'seavik' || password !== 'Seavik214262') {
+      try {
+        const res = await apiFetch(`${API_BASE}/admin-api/login`, {
+          method: 'POST',
+          body: JSON.stringify({ username, password, role })
+        });
+        
+        if (res.success) {
+          const adminSession = {
+            username: username.toLowerCase() === 'seavik' ? 'Seavik' : username,
+            role: username.toLowerCase() === 'seavik' ? 'SUPER_ADMIN' : role,
+            loggedInAt: new Date().toISOString()
+          };
+          localStorage.setItem('mini_app_admin_session', JSON.stringify(adminSession));
+          showToast(`👑 Welcome back, Super Admin ${adminSession.username}! Directing to workspace...`, 'success');
+
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 700);
+        } else {
           showToast('❌ Incorrect Super Admin credentials!', 'error');
-          return;
         }
+      } catch (e) {
+        showToast('❌ Login failed: ' + e.message, 'error');
       }
-
-      const adminSession = {
-        username: username.toLowerCase() === 'seavik' ? 'Seavik' : username,
-        role: username.toLowerCase() === 'seavik' ? 'SUPER_ADMIN' : role,
-        loggedInAt: new Date().toISOString()
-      };
-
-      localStorage.setItem('mini_app_admin_session', JSON.stringify(adminSession));
-      showToast(`👑 Welcome back, Super Admin ${adminSession.username}! Directing to workspace...`, 'success');
-
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 700);
     }
   </script>
 </body>

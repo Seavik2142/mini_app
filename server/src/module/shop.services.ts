@@ -405,23 +405,33 @@ async function sendTelegramBotNotification(chatId: string | number, text: string
 
 export const createOrder: RequestHandler = async (req, res): Promise<void> => {
   try {
-    const { items, totalAmount, paymentMethod, contactPhone, telegramUserId, telegramChatId } = req.body;
+    const { items, paymentMethod, contactPhone, telegramChatId } = req.body;
     const orderNumber = "KEY-" + Math.floor(100000 + Math.random() * 900000);
+    const userId = req.user?.id;
+    const recipientChatId = telegramChatId || req.user?.tgId;
     
+    if (!userId) {
+      res.status(401).json({ success: false, message: "Unauthorized" });
+      return;
+    }
+
     const processedItems: any[] = [];
     const allDeliveredKeysForTelegram: { productName: string; keys: string[] }[] = [];
+    let realTotalAmount = 0;
 
     for (const item of (items || [])) {
       let deliveredKeys: string[] = [];
       let activationInstructions = "Redeem inside app or software settings.";
+      const neededQty = item.quantity || 1;
+      let unitPrice = 0;
 
       if (item.productId) {
         const dbProduct = await prisma.product.findUnique({ where: { id: Number(item.productId) } });
         if (dbProduct) {
           activationInstructions = dbProduct.description || activationInstructions;
+          unitPrice = paymentMethod === 'TON' ? dbProduct.tonPrice : (paymentMethod === 'STARS' ? dbProduct.starsPrice : dbProduct.price);
+          
           const availableKeys = dbProduct.digitalKeys || [];
-          const neededQty = item.quantity || 1;
-
           if (availableKeys.length > 0) {
             const takeQty = Math.min(neededQty, availableKeys.length);
             deliveredKeys = availableKeys.slice(0, takeQty);
@@ -434,13 +444,13 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
                 digitalKeys: remainingKeys,
                 stock: newStock
               }
-            }).catch(() => {});
+            });
           }
         }
       }
 
-      // Ensure user receives exact requested quantity (e.g. 3 keys for 3 qty)
-      const neededQty = item.quantity || 1;
+      realTotalAmount += unitPrice * neededQty;
+
       if (deliveredKeys.length < neededQty) {
         const prefix = (item.productName || "KEY").substring(0, 4).toUpperCase();
         const missingCount = neededQty - deliveredKeys.length;
@@ -460,21 +470,19 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
       });
     }
 
-    const newOrder = {
-      id: Math.floor(Math.random() * 10000),
-      orderNumber,
-      totalAmount: totalAmount || 0,
-      currency: paymentMethod === 'TON' ? 'TON' : paymentMethod === 'STARS' ? 'STARS' : 'USD',
-      paymentMethod: paymentMethod || 'USD',
-      paymentStatus: 'PAID',
-      orderStatus: 'DELIVERED',
-      contactPhone: contactPhone || 'Telegram User',
-      createdAt: new Date().toISOString(),
-      items: processedItems
-    };
+    const newOrder = await prisma.order.create({
+      data: {
+        orderNumber,
+        totalAmount: realTotalAmount,
+        paymentMethod: paymentMethod || 'USD',
+        paymentStatus: 'PAID', // In production, this should be PENDING until webhook confirms
+        orderStatus: 'DELIVERED',
+        contactPhone: contactPhone || 'Telegram User',
+        userId: userId,
+        items: processedItems
+      }
+    });
 
-    // 🤖 Send Auto-Delivery Message to Customer's Telegram Chat
-    const recipientChatId = telegramChatId || telegramUserId;
     if (recipientChatId) {
       let keyDetailsMarkdown = "";
       allDeliveredKeysForTelegram.forEach((kGroup) => {
@@ -491,7 +499,7 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
       const messageText = `🎉 *PAYMENT SUCCESSFUL - KEYS DELIVERED!*
 
 🛍️ *Order Number:* #${orderNumber}
-💰 *Total Paid:* $${Number(totalAmount || 0).toFixed(2)} USD
+💰 *Total Paid:* $${Number(realTotalAmount).toFixed(2)}
 
 ${keyDetailsMarkdown}
 📌 *Activation Instructions:*
