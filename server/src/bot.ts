@@ -233,21 +233,90 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 8. /help — Command Guide & Support Link
+    // 8. /cart — Direct Shopping Cart & Checkout Link
     // ──────────────────────────────────────────────────
-    bot.onText(/\/help/, (msg) => {
+    bot.onText(/\/cart/, (msg) => {
+      const chatId = msg.chat.id;
+      const firstName = msg.from?.first_name || 'User';
+      bot.sendMessage(
+        chatId,
+        `🛒 *Shopping Cart & Checkout*\n\n` +
+        `Hello ${firstName}! Tap below to view your current cart and proceed to checkout:`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🛒 Open Cart & Checkout', web_app: { url: getMiniAppUrl('/cart') } }],
+              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    // ──────────────────────────────────────────────────
+    // 9. /promos — Active Promo Coupons List
+    // ──────────────────────────────────────────────────
+    bot.onText(/\/promos/, (msg) => {
       bot.sendMessage(
         msg.chat.id,
-        `💡 *Key Vault Bot Help & Support Guide*\n\n` +
-        `Need help or custom key orders? Contact owner *@BoomBaya_ik*!\n\n` +
-        `Available Commands:\n` +
-        `• /start - 🚀 Open Mini App & Welcome\n` +
-        `• /orders - 📦 My Orders & Digital Keys\n` +
-        `• /profile - 👤 My Account & Profile\n` +
+        `🎟️ *Active Discount Promo Codes*\n\n` +
+        `Use these discount coupons at checkout in the Mini App:\n\n` +
+        `• \`SIK10\` — *10% OFF* on all orders\n` +
+        `• \`WELCOME20\` — *20% OFF* for new users\n\n` +
+        `Enter code during checkout to claim your discount!`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🛒 Use Promo Code in Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    // ──────────────────────────────────────────────────
+    // 10. /admin — Store Admin Control Panel Launcher
+    // ──────────────────────────────────────────────────
+    bot.onText(/\/admin/, (msg) => {
+      const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-mzu6.onrender.com/admin').trim();
+      bot.sendMessage(
+        msg.chat.id,
+        `⚙️ *Store Admin Control Panel*\n\n` +
+        `Manage products, banners, promo codes, users, and orders:\n\n` +
+        `🔗 URL: \`${adminUrl}\``,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '⚙️ Open Admin Control Panel', url: adminUrl }],
+              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    // ──────────────────────────────────────────────────
+    // 11. /help & /support — Command Guide & Owner Contact
+    // ──────────────────────────────────────────────────
+    bot.onText(/\/help|\/support/, (msg) => {
+      bot.sendMessage(
+        msg.chat.id,
+        `💡 *Key Vault Bot Help & Control Menu*\n\n` +
+        `Need help or custom orders? Contact owner *@BoomBaya_ik*!\n\n` +
+        `Available Bot Commands:\n` +
+        `• /start - 🚀 Open Key Vault Store & Welcome\n` +
         `• /shop - 🔑 Digital Key Marketplace\n` +
+        `• /orders - 📦 My Orders & Digital Keys\n` +
+        `• /cart - 🛒 Shopping Cart & Checkout\n` +
+        `• /profile - 👤 Account & Referral Rewards\n` +
+        `• /promos - 🎟️ Active Promo Codes List\n` +
+        `• /admin - ⚙️ Store Admin Control Panel\n` +
         `• /update - 🔄 Refresh Bot Menu & Links\n` +
         `• /clear - 🧹 Reset & Clear Sessions\n` +
-        `• /help - 💡 Show Help & Support Guide`,
+        `• /help - 💡 Show Help & Contact Support`,
         {
           parse_mode: 'Markdown',
           reply_markup: {
@@ -261,7 +330,7 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 9. Callback Query Handler (Inline Button Clicks)
+    // 12. Callback Query Handler (Inline Button Clicks)
     // ──────────────────────────────────────────────────
     bot.on('callback_query', async (query) => {
       const chatId = query.message?.chat.id;
@@ -280,14 +349,17 @@ export const initBot = () => {
           await bot.answerCallbackQuery(query.id);
           await bot.sendMessage(
             chatId,
-            `💡 *Key Vault Help & Support Guide*\n\n` +
+            `💡 *Key Vault Help & Control Menu*\n\n` +
             `Need help or custom key orders? Tap below to chat with owner *@BoomBaya_ik*!\n\n` +
-            `• /start - 🚀 Open Mini App & Welcome\n` +
+            `• /start - 🚀 Open Store & Welcome\n` +
+            `• /shop - 🔑 Key Marketplace\n` +
             `• /orders - 📦 My Orders & Keys\n` +
-            `• /profile - 👤 My Account Profile\n` +
-            `• /shop - 🔑 Digital Key Marketplace\n` +
-            `• /update - 🔄 Refresh Bot Menu & Config\n` +
-            `• /clear - 🧹 Reset & Clear Sessions\n` +
+            `• /cart - 🛒 Cart & Checkout\n` +
+            `• /profile - 👤 Account Profile\n` +
+            `• /promos - 🎟️ Active Coupons\n` +
+            `• /admin - ⚙️ Admin Control Panel\n` +
+            `• /update - 🔄 Refresh Bot Menu\n` +
+            `• /clear - 🧹 Reset Sessions\n` +
             `• /help - 💡 Show Help & Support`,
             {
               parse_mode: 'Markdown',
@@ -319,12 +391,15 @@ async function updateBotMenu(bot: TelegramBot) {
   try {
     const commands = [
       { command: 'start', description: '🚀 Open Key Vault Store & Welcome' },
-      { command: 'orders', description: '📦 My Orders & Digital Keys' },
-      { command: 'profile', description: '👤 My Account & Profile' },
       { command: 'shop', description: '🔑 Digital Key Marketplace' },
+      { command: 'orders', description: '📦 My Orders & Key Vault' },
+      { command: 'cart', description: '🛒 Shopping Cart & Checkout' },
+      { command: 'profile', description: '👤 Account & Referral Rewards' },
+      { command: 'promos', description: '🎟️ View Active Promo Codes' },
+      { command: 'admin', description: '⚙️ Store Admin Control Panel' },
       { command: 'update', description: '🔄 Refresh Bot Menu & Links' },
-      { command: 'clear', description: '🧹 Reset & Clear Sessions' },
-      { command: 'help', description: '💡 Show Help & Support Guide' }
+      { command: 'clear', description: '🧹 Reset Verification Sessions' },
+      { command: 'help', description: '💡 Show Help & Contact Support' }
     ];
 
     await bot.setMyCommands(commands);
