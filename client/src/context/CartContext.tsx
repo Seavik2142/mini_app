@@ -205,7 +205,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 10000);
       try {
-        const res = await fetch(url, { signal: controller.signal });
+        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
         clearTimeout(id);
         if (!res.ok) return null;
         return await res.json();

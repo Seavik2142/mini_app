@@ -26,6 +26,7 @@ async function apiFetch(url, options = {}) {
   try {
     const res = await fetch(url, {
       credentials: 'include',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json', ...options.headers },
       signal: controller.signal,
       ...options,
