@@ -713,3 +713,103 @@ export const rateProduct: RequestHandler = async (req, res): Promise<void> => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getUserOrders: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { tgId, phone } = req.query;
+    if (!tgId && !phone) {
+      res.status(200).json({ success: true, data: [] });
+      return;
+    }
+
+    const userWhere: any[] = [];
+    if (tgId) userWhere.push({ tgId: String(tgId) });
+    if (phone) userWhere.push({ phone: String(phone) });
+
+    const targetUser = await prisma.user.findFirst({
+      where: { OR: userWhere, isDelete: false }
+    });
+
+    const OR: any[] = [];
+    if (targetUser) OR.push({ userId: targetUser.id });
+    if (phone) OR.push({ contactPhone: String(phone) });
+
+    if (OR.length === 0) {
+      res.status(200).json({ success: true, data: [] });
+      return;
+    }
+
+    const orders = await prisma.order.findMany({
+      where: { OR },
+      orderBy: { createdAt: "desc" },
+      include: {
+        items: {
+          include: { product: true }
+        }
+      }
+    });
+
+    res.status(200).json({ success: true, data: orders });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getUserProfile: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { tgId, phone } = req.query;
+    if (!tgId && !phone) {
+      res.status(200).json({ success: true, data: null });
+      return;
+    }
+
+    const OR: any[] = [];
+    if (tgId) OR.push({ tgId: String(tgId) });
+    if (phone) OR.push({ phone: String(phone) });
+
+    const user = await prisma.user.findFirst({
+      where: { OR, isDelete: false }
+    });
+
+    if (!user) {
+      res.status(200).json({ success: true, data: null });
+      return;
+    }
+
+    const userOrders = await prisma.order.findMany({
+      where: {
+        OR: [
+          { userId: user.id },
+          ...(user.phone ? [{ contactPhone: user.phone }] : [])
+        ]
+      },
+      include: {
+        items: {
+          include: { product: true }
+        }
+      }
+    });
+
+    const totalSpent = userOrders.reduce((sum, o) => sum + (o.paymentStatus === "PAID" ? o.totalAmount : 0), 0);
+    const keysOwned = userOrders.reduce((sum, o) => {
+      return sum + o.items.reduce((iSum, item) => iSum + (item.product?.digitalKeys?.length || item.quantity || 1), 0);
+    }, 0);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        phone: user.phone,
+        tgId: user.tgId,
+        joinedAt: user.joinedAt,
+        totalOrders: userOrders.length,
+        totalSpent,
+        keysOwned
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

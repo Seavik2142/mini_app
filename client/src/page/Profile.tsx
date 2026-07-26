@@ -1,14 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaCheck, FaGlobe } from "react-icons/fa";
+import { FaShieldAlt, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaCheck, FaGlobe } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { orders, telegramUser, isPhoneVerified, verifiedPhone, verifyPhone, sendOtpCode, updateVerifiedPhone, logout } = useCart();
+  const { orders, telegramUser, isPhoneVerified, verifiedPhone, dbUserProfile, verifyPhone, sendOtpCode, updateVerifiedPhone, logout } = useCart();
   const { language, setLanguage, t } = useLanguage();
+
+  const realKeysCount = dbUserProfile?.keysOwned ?? orders.reduce((sum, order) => {
+    return sum + order.items.reduce((iSum, item) => iSum + (item.digitalKeys?.length || item.quantity), 0);
+  }, 0);
+
+  const realOrdersCount = dbUserProfile?.totalOrders ?? orders.length;
+  const realTotalSpent = dbUserProfile?.totalSpent ?? orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [inputPhone, setInputPhone] = useState(verifiedPhone || "");
   const [otpCode, setOtpCode] = useState("");
@@ -66,10 +73,6 @@ const Profile: React.FC = () => {
       setStep("PHONE");
     }
   };
-
-  const totalKeysOwned = orders.reduce((sum, order) => {
-    return sum + order.items.reduce((iSum, item) => iSum + (item.digitalKeys?.length || item.quantity), 0);
-  }, 0);
 
   return (
     <div className="space-y-4">
@@ -144,34 +147,39 @@ const Profile: React.FC = () => {
               {telegramUser.username ? (
                 <p className="text-xs text-indigo-300 font-semibold">@{telegramUser.username}</p>
               ) : (
-                <p className="text-xs text-slate-400 font-mono">{verifiedPhone}</p>
+                <p className="text-xs text-slate-400 font-mono">{verifiedPhone || dbUserProfile?.phone}</p>
               )}
-              <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-slate-300 font-mono bg-slate-950 px-2.5 py-0.5 rounded-lg border border-slate-800 shadow-inner">
-                <FaShieldAlt className="text-emerald-400 text-[9px]" />
-                {telegramUser.id ? `Telegram ID: ${telegramUser.id}` : `Verified Account`}
+              <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 text-[10px] text-slate-300 font-mono bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 shadow-inner">
+                  <FaShieldAlt className="text-emerald-400 text-[9px]" />
+                  {telegramUser.id ? `TG ID: ${telegramUser.id}` : `Verified Account`}
+                </span>
+                {(verifiedPhone || dbUserProfile?.phone) && (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-slate-300 font-mono bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 shadow-inner">
+                    <FaPhoneAlt className="text-indigo-400 text-[9px]" />
+                    {verifiedPhone || dbUserProfile?.phone}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
 
-          {/* Key Vault Statistics */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg hover:border-indigo-500/40 transition-all">
-              <div className="flex items-center justify-between text-xs text-slate-300 font-bold">
-                <span>Keys Owned</span>
-                <FaKey className="text-indigo-400" />
-              </div>
-              <p className="text-2xl font-black text-white font-mono">{totalKeysOwned}</p>
-              <p className="text-[10px] text-slate-400">Total Digital Keys</p>
+          {/* Key Vault Real Database Statistics */}
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg text-center">
+              <span className="text-[10px] text-slate-400 font-bold block">Keys Owned</span>
+              <p className="text-xl font-black text-white font-mono">{realKeysCount}</p>
             </div>
 
-            <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg hover:border-indigo-500/40 transition-all">
-              <div className="flex items-center justify-between text-xs text-slate-300 font-bold">
-                <span>Account Status</span>
-                <FaShieldAlt className="text-emerald-400" />
-              </div>
-              <p className="text-sm font-black text-emerald-400 mt-1">VERIFIED PRO</p>
-              <p className="text-[10px] text-slate-400">Instant Access</p>
+            <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg text-center">
+              <span className="text-[10px] text-slate-400 font-bold block">Total Orders</span>
+              <p className="text-xl font-black text-indigo-400 font-mono">{realOrdersCount}</p>
+            </div>
+
+            <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg text-center">
+              <span className="text-[10px] text-slate-400 font-bold block">Total Spent</span>
+              <p className="text-base font-black text-emerald-400 font-mono">${realTotalSpent.toFixed(2)}</p>
             </div>
           </div>
 

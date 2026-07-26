@@ -81,6 +81,7 @@ interface CartContextType {
   addPromoCodeItem: (code: string, discountPercent: number) => void;
   toggleUserRole: (userId: number) => void;
   toggleUserBlock: (userId: number) => void;
+  dbUserProfile: any;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -135,23 +136,40 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(() => {
-    return localStorage.getItem("mini_app_phone_verified") === "true";
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    const savedCart = localStorage.getItem("mini_app_cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  const [orders, setOrders] = useState<Order[]>(() => {
+    const savedOrders = localStorage.getItem("mini_app_orders");
+    return savedOrders ? JSON.parse(savedOrders) : [];
   });
 
   const [verifiedPhone, setVerifiedPhone] = useState<string>(() => {
     return localStorage.getItem("mini_app_verified_phone") || "";
   });
 
+  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(() => {
+    return localStorage.getItem("mini_app_is_verified") === "true";
+  });
+
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+
   const [userProfile, setUserProfile] = useState<any>(() => {
     const saved = localStorage.getItem("mini_app_user_profile");
     return saved ? JSON.parse(saved) : null;
   });
 
+  const [dbUserProfile, setDbUserProfile] = useState<any>(null);
+
   // Extract Authentic Telegram User Data from Telegram WebApp SDK or Backend DB Profile
-  const realTgUser = initData.user?.();
+  const windowTgUser = (typeof window !== "undefined" && (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user) || null;
+  const sdkTgUser = initData.user?.() || null;
+  const realTgUser = windowTgUser || sdkTgUser;
+
   const telegramUser = {
-    id: realTgUser?.id || userProfile?.tgId || (isPhoneVerified ? verifiedPhone : ""),
+    id: realTgUser?.id ? String(realTgUser.id) : (userProfile?.tgId || (isPhoneVerified ? verifiedPhone : "")),
     firstName: realTgUser?.first_name || userProfile?.name || (isPhoneVerified ? "Verified User" : ""),
     lastName: realTgUser?.last_name || "",
     username: realTgUser?.username || userProfile?.username || "",
@@ -273,18 +291,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAdminUsersList(prev => prev.map(u => (u.id === userId ? { ...u, isBlock: !u.isBlock } : u)));
     toast.success("User status updated");
   };
-
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem("mini_app_cart");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const savedPhone = localStorage.getItem("mini_app_verified_phone") || "";
-    const key = savedPhone ? `mini_app_orders_${savedPhone}` : "mini_app_orders";
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : [];
-  });
 
   const [promoCode, setPromoCode] = useState<string>("");
   const [discountPercent, setDiscountPercent] = useState<number>(0);
@@ -527,7 +533,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── Telegram OTP Modal State ────────────────────────────────────
-  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
   // "REQUEST" → show button | "WAITING" → show open-bot button | "CODE" → enter code
   const [modalStep, setModalStep] = useState<"REQUEST" | "WAITING" | "CODE">("REQUEST");
@@ -663,6 +668,59 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Auto fetch real user orders & profile from backend DB whenever telegramUser or verifiedPhone is available
+  useEffect(() => {
+    const syncUserOrdersAndProfile = async () => {
+      const tgId = telegramUser?.id;
+      const phone = verifiedPhone;
+
+      if (!tgId && !phone) return;
+
+      try {
+        const query = new URLSearchParams();
+        if (tgId) query.append("tgId", String(tgId));
+        if (phone) query.append("phone", phone);
+
+        // Fetch User Orders
+        const ordersRes = await fetch(`${API_BASE_URL}/shop/user-orders?${query.toString()}`);
+        if (ordersRes.ok) {
+          const ordersJson = await ordersRes.json();
+          if (ordersJson.success && Array.isArray(ordersJson.data) && ordersJson.data.length > 0) {
+            const remoteOrders: Order[] = ordersJson.data.map((o: any) => ({
+              id: String(o.id),
+              items: o.items && o.items.length > 0 ? o.items.map((i: any) => ({
+                product: i.product || { id: i.productId, name: "Digital Key", price: i.price, images: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe"], rating: 5, categoryName: "Software" },
+                quantity: i.quantity,
+                digitalKeys: i.digitalKeys ? (typeof i.digitalKeys === "string" ? JSON.parse(i.digitalKeys) : i.digitalKeys) : []
+              })) : [],
+              totalAmount: o.totalAmount,
+              paymentMethod: o.paymentMethod || "ABA KHQR",
+              paymentStatus: o.paymentStatus || "PAID",
+              createdAt: o.createdAt || new Date().toISOString(),
+              phone: o.phone || phone || ""
+            }));
+
+            setOrders(remoteOrders);
+            localStorage.setItem("mini_app_orders", JSON.stringify(remoteOrders));
+          }
+        }
+
+        // Fetch User DB Profile
+        const profileRes = await fetch(`${API_BASE_URL}/shop/user-profile?${query.toString()}`);
+        if (profileRes.ok) {
+          const profileJson = await profileRes.json();
+          if (profileJson.success && profileJson.data) {
+            setDbUserProfile(profileJson.data);
+          }
+        }
+      } catch (err) {
+        console.error("Error syncing user profile:", err);
+      }
+    };
+
+    syncUserOrdersAndProfile();
+  }, [telegramUser?.id, verifiedPhone]);
+
   return (
     <CartContext.Provider
       value={{
@@ -703,7 +761,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateBannerSlide,
         addPromoCodeItem,
         toggleUserRole,
-        toggleUserBlock
+        toggleUserBlock,
+        dbUserProfile
       }}
     >
       {children}
