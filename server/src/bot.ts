@@ -377,6 +377,75 @@ export const initBot = () => {
       }
     });
 
+    // ──────────────────────────────────────────────────
+    // 13. Persistent Reply Keyboard Button Command Listeners
+    // ──────────────────────────────────────────────────
+    bot.onText(/🎟️|Promo Codes/, (msg) => {
+      bot.sendMessage(
+        msg.chat.id,
+        `🎟️ *Active Discount Promo Codes*\n\n` +
+        `Use these discount coupons at checkout in the Mini App:\n\n` +
+        `• \`SIK10\` — *10% OFF* on all orders\n` +
+        `• \`WELCOME20\` — *20% OFF* for new users\n\n` +
+        `Enter code during checkout to claim your discount!`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🛒 Use Promo Code in Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    bot.onText(/⚙️|Admin Panel/, (msg) => {
+      const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-mzu6.onrender.com/admin').trim();
+      bot.sendMessage(
+        msg.chat.id,
+        `⚙️ *Store Admin Control Panel*\n\n` +
+        `Manage products, banners, promo codes, users, and orders:\n\n` +
+        `🔗 URL: \`${adminUrl}\``,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '⚙️ Open Admin Control Panel', url: adminUrl }],
+              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
+    bot.onText(/💡|Help & Support/, (msg) => {
+      bot.sendMessage(
+        msg.chat.id,
+        `💡 *Key Vault Bot Help & Control Menu*\n\n` +
+        `Need help or custom orders? Contact owner *@BoomBaya_ik*!\n\n` +
+        `Available Bot Commands:\n` +
+        `• /start - 🚀 Open Key Vault Store & Welcome\n` +
+        `• /shop - 🔑 Digital Key Marketplace\n` +
+        `• /orders - 📦 My Orders & Digital Keys\n` +
+        `• /cart - 🛒 Shopping Cart & Checkout\n` +
+        `• /profile - 👤 Account & Referral Rewards\n` +
+        `• /promos - 🎟️ Active Promo Codes List\n` +
+        `• /admin - ⚙️ Store Admin Control Panel\n` +
+        `• /update - 🔄 Refresh Bot Menu & Links\n` +
+        `• /clear - 🧹 Reset & Clear Sessions\n` +
+        `• /help - 💡 Show Help & Contact Support`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
+              [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
+            ]
+          }
+        }
+      );
+    });
+
     // Register Menu Commands & Button
     updateBotMenu(bot);
 
@@ -419,6 +488,28 @@ async function updateBotMenu(bot: TelegramBot) {
   }
 }
 
+function getControlReplyKeyboard() {
+  return {
+    keyboard: [
+      [
+        { text: '🔑 Open Store', web_app: { url: getMiniAppUrl() } },
+        { text: '📦 My Orders', web_app: { url: getMiniAppUrl('/orders') } }
+      ],
+      [
+        { text: '🛒 Cart', web_app: { url: getMiniAppUrl('/cart') } },
+        { text: '👤 Profile', web_app: { url: getMiniAppUrl('/profile') } }
+      ],
+      [
+        { text: '🎟️ Promo Codes' },
+        { text: '⚙️ Admin Panel' },
+        { text: '💡 Help & Support' }
+      ]
+    ],
+    resize_keyboard: true,
+    persistent: true
+  };
+}
+
 function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
   bot.sendMessage(
     chatId,
@@ -426,22 +517,10 @@ function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
     `🔑 Buy instant activation keys for:\n` +
     `• Telegram Premium\n• Steam Games & Wallet Cards\n• VPN Passes & Licenses\n• Software Keys\n\n` +
     `💰 Pay with *KHQR*, *USD ($)*, or *Khmer Riel (៛)*\n\n` +
-    `Tap below to open the Mini App:`,
+    `Tap the buttons below to open the Mini App or control commands:`,
     {
       parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }],
-          [
-            { text: '📦 My Orders', web_app: { url: getMiniAppUrl('/orders') } },
-            { text: '👤 Profile', web_app: { url: getMiniAppUrl('/profile') } }
-          ],
-          [
-            { text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' },
-            { text: '💡 Help Guide', callback_data: 'help' }
-          ]
-        ]
-      }
+      reply_markup: getControlReplyKeyboard()
     }
   ).catch(console.error);
 }
