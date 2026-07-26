@@ -1,14 +1,18 @@
 /**
- * Telegram Bot — OTP & Mini App Management Bot
+ * Telegram Bot — OTP & Mini App Management Bot (Bilingual: Khmer 🇰🇭 / English 🇬🇧)
  *
  * Commands:
- *   /start    - New User Welcome & Mini App Launcher
- *   /orders   - Open My Orders & Key Vault
- *   /profile  - Open Profile & Account Settings
+ *   /start    - Welcome & Launch Mini App
+ *   /language - Change Bot Language (Khmer / English)
  *   /shop     - Open Key Vault Marketplace
- *   /update   - Refresh bot configuration & menu buttons
- *   /clear    - Reset/Clear active OTP verification sessions
- *   /help     - Show command list & help support
+ *   /orders   - View Purchases & Key Vault
+ *   /cart     - Open Shopping Cart & Checkout
+ *   /profile  - View Account Profile & Rewards
+ *   /promos   - View Active Promo Discount Codes
+ *   /admin    - Open Store Admin Control Panel
+ *   /update   - Refresh Bot Configuration & Links
+ *   /clear    - Reset Active OTP Verification Sessions
+ *   /help     - Show Command Guide & Support Link
  */
 
 import TelegramBot from 'node-telegram-bot-api';
@@ -23,6 +27,125 @@ dotenv.config();
 
 const token = process.env.BOT_TOKEN!;
 const BOT_USERNAME = 'Sik_mybot';
+
+// ── Per-User Language Memory Store (default: 'km') ─────────────────
+const userLanguages: Record<number, 'en' | 'km'> = {};
+
+export const getUserLanguage = (chatId: number): 'en' | 'km' => {
+  return userLanguages[chatId] || 'km'; // Default to Khmer
+};
+
+export const setUserLanguage = (chatId: number, lang: 'en' | 'km') => {
+  userLanguages[chatId] = lang;
+};
+
+// ── Complete Bilingual Translation Dictionary ───────────────────────
+const i18n = {
+  en: {
+    welcomeTitle: (name: string) => `👋 *Welcome to Key Vault Store, ${name}!*`,
+    welcomeBody:
+      `🔑 Buy instant activation keys for:\n` +
+      `• Telegram Premium\n• Steam Games & Wallet Cards\n• VPN Passes & Licenses\n• Software Keys\n\n` +
+      `💰 Pay with *KHQR*, *USD ($)*, or *Khmer Riel (៛)*\n\n` +
+      `Tap the buttons below to open the Mini App or control commands:`,
+    btnOpenStore: '🔑 Open Store',
+    btnOrders: '📦 My Orders',
+    btnCart: '🛒 Cart',
+    btnProfile: '👤 Profile',
+    btnPromos: '🎟️ Promo Codes',
+    btnAdmin: '⚙️ Admin Panel',
+    btnLanguage: '🌐 Language / ភាសា',
+    btnHelp: '💡 Help & Support',
+    btnContactOwner: '💬 Contact Owner (@BoomBaya_ik)',
+
+    otpSent: (name: string, otp: string, min: number, sec: number) =>
+      `🔐 *Your Mini App Verification Code*\n\n` +
+      `Hello *${name}*! Here is your 6-digit verification code:\n\n` +
+      `\`${otp}\`\n\n` +
+      `⏳ Valid for *${min}m ${sec}s*\n` +
+      `🔒 Do not share this code with anyone.`,
+    btnVerifyInApp: '↩️ Open Mini App to Verify',
+    otpExpired: `⚠️ *This verification link has expired or is invalid.*\n\nPlease go back to the Mini App and request a new code.`,
+
+    ordersTitle: (name: string) => `📦 *My Orders & Digital Key Vault*\n\nHello ${name}! Tap below to view your purchased activation keys:`,
+    btnViewOrders: '📦 View My Orders & Keys',
+    btnBackToStore: '🔑 Back to Store',
+
+    profileTitle: (name: string) => `👤 *My Account Profile*\n\nHello ${name}! Tap below to manage your account and referral link:`,
+    btnViewProfile: '👤 Open Profile & Rewards',
+
+    cartTitle: (name: string) => `🛒 *Shopping Cart & Checkout*\n\nHello ${name}! Tap below to view your current cart and proceed to checkout:`,
+    btnViewCart: '🛒 Open Cart & Checkout',
+
+    promosTitle: `🎟️ *Active Discount Promo Codes*\n\nUse these discount coupons at checkout in the Mini App:\n\n• \`SIK10\` — *10% OFF* on all orders\n• \`WELCOME20\` — *20% OFF* for new users\n\nEnter code during checkout to claim your discount!`,
+    btnUsePromo: '🛒 Use Promo Code in Store',
+
+    adminTitle: (url: string) => `⚙️ *Store Admin Control Panel*\n\nManage products, banners, promo codes, users, and orders:\n\n🔗 URL: \`${url}\``,
+    btnOpenAdmin: '⚙️ Open Admin Control Panel',
+
+    clearTitle: (name: string) => `🧹 *Session Cleared & Reset!*\n\nHello ${name}, your active verification sessions have been cleared.\n\nIf you need to log in again, request a new code from the Mini App.`,
+
+    updateTitle: (name: string, base: string, orders: string, profile: string) =>
+      `🔄 *Bot Configuration & Links Refreshed!*\n\nHello ${name}, all links and menu buttons have been updated:\n\n• Base URL: \`${base}\`\n• Orders URL: \`${orders}\`\n• Profile URL: \`${profile}\`\n\nMenu buttons are fully synced.`,
+
+    helpTitle: `💡 *Key Vault Bot Help & Control Menu*\n\nNeed help or custom orders? Contact owner *@BoomBaya_ik*!\n\nAvailable Bot Commands:\n• /start - 🚀 Open Key Vault Store & Welcome\n• /language - 🌐 Change Language (Khmer / English)\n• /shop - 🔑 Digital Key Marketplace\n• /orders - 📦 My Orders & Digital Keys\n• /cart - 🛒 Shopping Cart & Checkout\n• /profile - 👤 Account & Referral Rewards\n• /promos - 🎟️ Active Promo Codes List\n• /admin - ⚙️ Store Admin Control Panel\n• /update - 🔄 Refresh Bot Menu & Links\n• /clear - 🧹 Reset Verification Sessions\n• /help - 💡 Show Help & Contact Support`,
+
+    langSelector: `🌐 *Select Language / ជ្រើសរើសភាសា*\n\nPlease choose your preferred language for the Telegram Bot:`,
+    langChanged: `✅ *Language changed to English 🇬🇧!*\n\nAll bot text and keyboard controls are now set to English.`
+  },
+  km: {
+    welcomeTitle: (name: string) => `👋 *សូមស្វាគមន៍មកកាន់ Key Vault Store, ${name}!*`,
+    welcomeBody:
+      `🔑 ទិញកូដសកម្មភាពភ្លាមៗសម្រាប់:\n` +
+      `• Telegram Premium\n• កាតហ្គេម Steam & Wallet Cards\n• កូដ VPN & អាជ្ញាប័ណ្ណ\n• កូដកម្មវិធីផ្សេងៗ\n\n` +
+      `💰 ទូទាត់តាម *KHQR*, *ដុល្លារ ($)* ឬ *ប្រាក់រៀល (៛)*\n\n` +
+      `ចុចប៊ូតុងខាងក្រោមដើម្បីបើក Mini App ឬបញ្ជាប៊ូតុង:`,
+    btnOpenStore: '🔑 បើកហាង (Store)',
+    btnOrders: '📦 ការទិញរបស់ខ្ញុំ (Orders)',
+    btnCart: '🛒 កន្ត្រកទំនិញ (Cart)',
+    btnProfile: '👤 គណនី (Profile)',
+    btnPromos: '🎟️ កូដបញ្ចុះតម្លៃ',
+    btnAdmin: '⚙️ ផ្ទាំងគ្រប់គ្រង Admin',
+    btnLanguage: '🌐 ភាសា / Language',
+    btnHelp: '💡 ជំនួយ (Help)',
+    btnContactOwner: '💬 ទំនាក់ទំនងម្ចាស់ហាង (@BoomBaya_ik)',
+
+    otpSent: (name: string, otp: string, min: number, sec: number) =>
+      `🔐 *កូដផ្ទៀងផ្ទាត់ Mini App របស់អ្នក*\n\n` +
+      `សួស្តី *${name}*! នេះជាកូដផ្ទៀងផ្ទាត់ ៦ ខ្ទង់របស់អ្នក:\n\n` +
+      `\`${otp}\`\n\n` +
+      `⏳ មានសុពលភាពរយៈពេល *${min}នាទី ${sec}វិនាទី*\n` +
+      `🔒 សូមកុំចែករំលែកកូដនេះទៅកាន់អ្នកផ្សេង។`,
+    btnVerifyInApp: '↩️ បើក Mini App ដើម្បីផ្ទៀងផ្ទាត់',
+    otpExpired: `⚠️ *តំណផ្ទៀងផ្ទាត់នេះបានផុតកំណត់ ឬមិនត្រឹមត្រូវ។*\n\nសូមត្រឡប់ទៅកាន់ Mini App ហើយស្នើសុំកូដថ្មី។`,
+
+    ordersTitle: (name: string) => `📦 *ការទិញរបស់ខ្ញុំ & Key Vault*\n\nសួស្តី ${name}! ចុចខាងក្រោមដើម្បីមើលកូដដែលអ្នកបានទិញ:`,
+    btnViewOrders: '📦 មើលការទិញរបស់ខ្ញុំ',
+    btnBackToStore: '🔑 ត្រឡប់ទៅហាងវិញ',
+
+    profileTitle: (name: string) => `👤 *ព័ត៌មានគណនីរបស់ខ្ញុំ*\n\nសួស្តី ${name}! ចុចខាងក្រោមដើម្បីគ្រប់គ្រងគណនី និងតំណណែនាំ:`,
+    btnViewProfile: '👤 បើកមើលគណនី & ភាគរយ',
+
+    cartTitle: (name: string) => `🛒 *កន្ត្រកទំនិញ & ការទូទាត់*\n\nសួស្តី ${name}! ចុចខាងក្រោមដើម្បីមើលកន្ត្រកទំនិញ និងទូទាត់ប្រាក់:`,
+    btnViewCart: '🛒 បើកកន្ត្រកទំនិញ & ទូទាត់',
+
+    promosTitle: `🎟️ *កូដបញ្ចុះតម្លៃពិសេស (Promo Codes)*\n\nសូមប្រើប្រាស់កូដបញ្ចុះតម្លៃខាងក្រោមពេលទូទាត់ប្រាក់ក្នុង Mini App:\n\n• \`SIK10\` — *បញ្ចុះតម្លៃ 10%* លើគ្រប់ការបញ្ជាទិញ\n• \`WELCOME20\` — *បញ្ចុះតម្លៃ 20%* សម្រាប់អ្នកប្រើប្រាស់ថ្មី\n\nបញ្ចូលកូដពេលទូទាត់ប្រាក់ដើម្បីទទួលបានការបញ្ចុះតម្លៃ!`,
+    btnUsePromo: '🛒 បើកហាងទិញទំនិញ',
+
+    adminTitle: (url: string) => `⚙️ *ផ្ទាំងគ្រប់គ្រង Admin*\n\nគ្រប់គ្រងទំនិញ បដា កូដបញ្ចុះតម្លៃ អ្នកប្រើប្រាស់ និងការបញ្ជាទិញ:\n\n🔗 URL: \`${url}\``,
+    btnOpenAdmin: '⚙️ បើកផ្ទាំងគ្រប់គ្រង Admin',
+
+    clearTitle: (name: string) => `🧹 *បានលុប Session រួចរាល់!*\n\nសួស្តី ${name}, សេសសិនផ្ទៀងផ្ទាត់របស់អ្នកត្រូវបានលុបសំអាត។\n\nប្រសិនបើអ្នកត្រូវការចូលប្រើម្តងទៀត សូមស្នើសុំកូដថ្មីពី Mini App។`,
+
+    updateTitle: (name: string, base: string, orders: string, profile: string) =>
+      `🔄 *បានធ្វើបច្ចុប្បន្នភាពមឺនុយ & តំណភ្ជាប់!*\n\nសួស្តី ${name}, តំណភ្ជាប់ និងប៊ូតុងមឺនុយត្រូវបានធ្វើបច្ចុប្បន្នភាពរួចរាល់:\n\n• Base URL: \`${base}\`\n• Orders URL: \`${orders}\`\n• Profile URL: \`${profile}\`\n\nប៊ូតុងមឺនុយត្រូវបានធ្វើសមកាលកម្មពេញលេញ។`,
+
+    helpTitle: `💡 *មគ្គុទ្ទេសក៍ជំនួយ & គាំទ្រ Key Vault*\n\nត្រូវការជំនួយ ឬកុម្ម៉ង់កូដពិសេស? ទំនាក់ទំនងម្ចាស់ហាង *@BoomBaya_ik*!\n\nបញ្ជីពាក្យបញ្ជាដែលមាន:\n• /start - 🚀 បើកហាង & ស្វាគមន៍\n• /language - 🌐 ផ្លាស់ប្តូរភាសា (Khmer / English)\n• /shop - 🔑 ហាងទំនិញកូដឌីជីថល\n• /orders - 📦 ការទិញរបស់ខ្ញុំ\n• /cart - 🛒 កន្ត្រកទំនិញ & ទូទាត់ប្រាក់\n• /profile - 👤 គណនី & ភាគរយណែនាំ\n• /promos - 🎟️ កូដបញ្ចុះតម្លៃ\n• /admin - ⚙️ ផ្ទាំងគ្រប់គ្រង Admin\n• /update - 🔄 ធ្វើបច្ចុប្បន្នភាពមឺនុយ\n• /clear - 🧹 លុបសេសសិន\n• /help - 💡 ជំនួយ & ទំនាក់ទំនង`,
+
+    langSelector: `🌐 *ជ្រើសរើសភាសា / Select Language*\n\nសូមជ្រើសរើសភាសាដែលអ្នកចង់ប្រើប្រាស់ក្នុង Telegram Bot:`,
+    langChanged: `✅ *ភាសាត្រូវ​បានផ្លាស់ប្តូរទៅជា ភាសាខ្មែរ 🇰🇭!*\n\nអត្ថបទសារ និងក្តារចុចបញ្ជាទាំងអស់ក្នុង Bot ត្រូវបានផ្លាស់ប្តូរមកជា ភាសាខ្មែរ។`
+  }
+};
 
 // Helper to construct exact, clean Mini App URLs for subpages (/app, /app/orders, /app/profile)
 export const getMiniAppUrl = (path: string = ''): string => {
@@ -64,6 +187,8 @@ export const initBot = () => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'User';
       const sessionId = match?.[1]?.trim();
+      const lang = getUserLanguage(chatId);
+      const t = i18n[lang];
 
       if (!sessionId) {
         return sendWelcome(bot, chatId, firstName);
@@ -74,12 +199,12 @@ export const initBot = () => {
       if (!session) {
         await bot.sendMessage(
           chatId,
-          `⚠️ *This verification link has expired or is invalid.*\n\nPlease go back to the Mini App and request a new code.`,
+          t.otpExpired,
           {
             parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [[
-                { text: '🚀 Open Mini App', web_app: { url: getMiniAppUrl() } }
+                { text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } }
               ]]
             }
           }
@@ -102,19 +227,15 @@ export const initBot = () => {
       const minutes = Math.floor(expiresIn / 60);
       const seconds = expiresIn % 60;
 
-      // Send the 6-digit OTP code
+      // Send the 6-digit OTP code in user's language
       await bot.sendMessage(
         chatId,
-        `🔐 *Your Mini App Verification Code*\n\n` +
-        `Hello *${firstName}*! Here is your 6-digit verification code:\n\n` +
-        `\`${session.otp}\`\n\n` +
-        `⏳ Valid for *${minutes}m ${seconds}s*\n` +
-        `🔒 Do not share this code with anyone.`,
+        t.otpSent(firstName, session.otp, minutes, seconds),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [[
-              { text: '↩️ Open Mini App to Verify', web_app: { url: getMiniAppUrl() } }
+              { text: t.btnVerifyInApp, web_app: { url: getMiniAppUrl() } }
             ]]
           }
         }
@@ -136,16 +257,18 @@ export const initBot = () => {
     bot.onText(/\/orders/, (msg) => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'User';
+      const lang = getUserLanguage(chatId);
+      const t = i18n[lang];
+
       bot.sendMessage(
         chatId,
-        `📦 *My Orders & Digital Key Vault*\n\n` +
-        `Hello ${firstName}! Tap below to view your purchased activation keys:`,
+        t.ordersTitle(firstName),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '📦 View My Orders & Keys', web_app: { url: getMiniAppUrl('/orders') } }],
-              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnViewOrders, web_app: { url: getMiniAppUrl('/orders') } }],
+              [{ text: t.btnBackToStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -158,16 +281,18 @@ export const initBot = () => {
     bot.onText(/\/profile/, (msg) => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'User';
+      const lang = getUserLanguage(chatId);
+      const t = i18n[lang];
+
       bot.sendMessage(
         chatId,
-        `👤 *My Account Profile*\n\n` +
-        `Hello ${firstName}! Tap below to manage your account and referral link:`,
+        t.profileTitle(firstName),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '👤 Open Profile & Rewards', web_app: { url: getMiniAppUrl('/profile') } }],
-              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnViewProfile, web_app: { url: getMiniAppUrl('/profile') } }],
+              [{ text: t.btnBackToStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -180,22 +305,19 @@ export const initBot = () => {
     bot.onText(/\/update|\/refresh/, async (msg) => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'User';
+      const lang = getUserLanguage(chatId);
+      const t = i18n[lang];
 
       await updateBotMenu(bot);
 
       await bot.sendMessage(
         chatId,
-        `🔄 *Bot Configuration & Links Refreshed!*\n\n` +
-        `Hello ${firstName}, all links and menu buttons have been updated:\n\n` +
-        `• Base URL: \`${getMiniAppUrl()}\`\n` +
-        `• Orders URL: \`${getMiniAppUrl('/orders')}\`\n` +
-        `• Profile URL: \`${getMiniAppUrl('/profile')}\`\n\n` +
-        `Menu buttons are fully synced.`,
+        t.updateTitle(firstName, getMiniAppUrl(), getMiniAppUrl('/orders'), getMiniAppUrl('/profile')),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🚀 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -208,17 +330,17 @@ export const initBot = () => {
     bot.onText(/\/clear|\/reset/, async (msg) => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'User';
+      const lang = getUserLanguage(chatId);
+      const t = i18n[lang];
 
       await bot.sendMessage(
         chatId,
-        `🧹 *Session Cleared & Reset!*\n\n` +
-        `Hello ${firstName}, your active verification sessions have been cleared.\n\n` +
-        `If you need to log in again, request a new code from the Mini App.`,
+        t.clearTitle(firstName),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -238,16 +360,18 @@ export const initBot = () => {
     bot.onText(/\/cart/, (msg) => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'User';
+      const lang = getUserLanguage(chatId);
+      const t = i18n[lang];
+
       bot.sendMessage(
         chatId,
-        `🛒 *Shopping Cart & Checkout*\n\n` +
-        `Hello ${firstName}! Tap below to view your current cart and proceed to checkout:`,
+        t.cartTitle(firstName),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🛒 Open Cart & Checkout', web_app: { url: getMiniAppUrl('/cart') } }],
-              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnViewCart, web_app: { url: getMiniAppUrl('/cart') } }],
+              [{ text: t.btnBackToStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -258,18 +382,17 @@ export const initBot = () => {
     // 9. /promos — Active Promo Coupons List
     // ──────────────────────────────────────────────────
     bot.onText(/\/promos/, (msg) => {
+      const lang = getUserLanguage(msg.chat.id);
+      const t = i18n[lang];
+
       bot.sendMessage(
         msg.chat.id,
-        `🎟️ *Active Discount Promo Codes*\n\n` +
-        `Use these discount coupons at checkout in the Mini App:\n\n` +
-        `• \`SIK10\` — *10% OFF* on all orders\n` +
-        `• \`WELCOME20\` — *20% OFF* for new users\n\n` +
-        `Enter code during checkout to claim your discount!`,
+        t.promosTitle,
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '🛒 Use Promo Code in Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnUsePromo, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -281,17 +404,18 @@ export const initBot = () => {
     // ──────────────────────────────────────────────────
     bot.onText(/\/admin/, (msg) => {
       const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-mzu6.onrender.com/admin').trim();
+      const lang = getUserLanguage(msg.chat.id);
+      const t = i18n[lang];
+
       bot.sendMessage(
         msg.chat.id,
-        `⚙️ *Store Admin Control Panel*\n\n` +
-        `Manage products, banners, promo codes, users, and orders:\n\n` +
-        `🔗 URL: \`${adminUrl}\``,
+        t.adminTitle(adminUrl),
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '⚙️ Open Admin Control Panel', url: adminUrl }],
-              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnOpenAdmin, url: adminUrl }],
+              [{ text: t.btnBackToStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -302,27 +426,18 @@ export const initBot = () => {
     // 11. /help & /support — Command Guide & Owner Contact
     // ──────────────────────────────────────────────────
     bot.onText(/\/help|\/support/, (msg) => {
+      const lang = getUserLanguage(msg.chat.id);
+      const t = i18n[lang];
+
       bot.sendMessage(
         msg.chat.id,
-        `💡 *Key Vault Bot Help & Control Menu*\n\n` +
-        `Need help or custom orders? Contact owner *@BoomBaya_ik*!\n\n` +
-        `Available Bot Commands:\n` +
-        `• /start - 🚀 Open Key Vault Store & Welcome\n` +
-        `• /shop - 🔑 Digital Key Marketplace\n` +
-        `• /orders - 📦 My Orders & Digital Keys\n` +
-        `• /cart - 🛒 Shopping Cart & Checkout\n` +
-        `• /profile - 👤 Account & Referral Rewards\n` +
-        `• /promos - 🎟️ Active Promo Codes List\n` +
-        `• /admin - ⚙️ Store Admin Control Panel\n` +
-        `• /update - 🔄 Refresh Bot Menu & Links\n` +
-        `• /clear - 🧹 Reset & Clear Sessions\n` +
-        `• /help - 💡 Show Help & Contact Support`,
+        t.helpTitle,
         {
           parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: [
-              [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
-              [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
+              [{ text: t.btnContactOwner, url: 'https://t.me/BoomBaya_ik' }],
+              [{ text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } }]
             ]
           }
         }
@@ -330,179 +445,46 @@ export const initBot = () => {
     });
 
     // ──────────────────────────────────────────────────
-    // 12. Callback Query Handler (Inline Button Clicks)
-    // ──────────────────────────────────────────────────
-    bot.on('callback_query', async (query) => {
-      const chatId = query.message?.chat.id;
-      if (!chatId) return;
-
-      try {
-        if (query.data === 'refresh') {
-          await updateBotMenu(bot);
-          await bot.answerCallbackQuery(query.id, { text: '🔄 Bot Menu Refreshed!' });
-          await bot.sendMessage(
-            chatId,
-            `✅ *Bot Menu Refreshed!*\n\nCommands and menu buttons updated for chat.`,
-            { parse_mode: 'Markdown' }
-          );
-        } else if (query.data === 'help' || query.data === 'commands') {
-          await bot.answerCallbackQuery(query.id);
-          await bot.sendMessage(
-            chatId,
-            `💡 *Key Vault Help & Control Menu*\n\n` +
-            `Need help or custom key orders? Tap below to chat with owner *@BoomBaya_ik*!\n\n` +
-            `• /start - 🚀 Open Store & Welcome\n` +
-            `• /shop - 🔑 Key Marketplace\n` +
-            `• /orders - 📦 My Orders & Keys\n` +
-            `• /cart - 🛒 Cart & Checkout\n` +
-            `• /profile - 👤 Account Profile\n` +
-            `• /promos - 🎟️ Active Coupons\n` +
-            `• /admin - ⚙️ Admin Control Panel\n` +
-            `• /update - 🔄 Refresh Bot Menu\n` +
-            `• /clear - 🧹 Reset Sessions\n` +
-            `• /help - 💡 Show Help & Support`,
-            {
-              parse_mode: 'Markdown',
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
-                  [{ text: '🚀 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
-                ]
-              }
-            }
-          );
-        }
-      } catch (e) {
-        console.log('Callback query error:', e);
-      }
-    });
-
-    // ──────────────────────────────────────────────────
-    // 13. /language & 🌐 Language Selector Handler
+    // 12. /language & 🌐 Language Selector Handler
     // ──────────────────────────────────────────────────
     bot.onText(/\/language|🌐|ភាសា|Language/, (msg) => {
       sendLanguageSelector(bot, msg.chat.id);
     });
 
     // ──────────────────────────────────────────────────
-    // 14. Persistent Reply Keyboard Button Command Listeners (Khmer + English)
+    // 13. Persistent Reply Keyboard Button Command Listeners
     // ──────────────────────────────────────────────────
     bot.onText(/🎟️|Promo Codes|កូដបញ្ចុះតម្លៃ/, (msg) => {
       const lang = getUserLanguage(msg.chat.id);
-      if (lang === 'km') {
-        bot.sendMessage(
-          msg.chat.id,
-          `🎟️ *កូដបញ្ចុះតម្លៃពិសេស (Promo Codes)*\n\n` +
-          `សូមប្រើប្រាស់កូដបញ្ចុះតម្លៃខាងក្រោមពេលទូទាត់ប្រាក់ក្នុង Mini App:\n\n` +
-          `• \`SIK10\` — *បញ្ចុះតម្លៃ 10%* លើគ្រប់ការបញ្ជាទិញ\n` +
-          `• \`WELCOME20\` — *បញ្ចុះតម្លៃ 20%* សម្រាប់អ្នកប្រើប្រាស់ថ្មី\n\n` +
-          `បញ្ចូលកូដពេលទូទាត់ប្រាក់ដើម្បីទទួលបានការបញ្ចុះតម្លៃ!`,
-          {
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '🛒 បើកហាងទិញទំនិញ', web_app: { url: getMiniAppUrl() } }]
-              ]
-            }
-          }
-        );
-      } else {
-        bot.sendMessage(
-          msg.chat.id,
-          `🎟️ *Active Discount Promo Codes*\n\n` +
-          `Use these discount coupons at checkout in the Mini App:\n\n` +
-          `• \`SIK10\` — *10% OFF* on all orders\n` +
-          `• \`WELCOME20\` — *20% OFF* for new users\n\n` +
-          `Enter code during checkout to claim your discount!`,
-          {
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '🛒 Use Promo Code in Store', web_app: { url: getMiniAppUrl() } }]
-              ]
-            }
-          }
-        );
-      }
+      const t = i18n[lang];
+      bot.sendMessage(msg.chat.id, t.promosTitle, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: [[{ text: t.btnUsePromo, web_app: { url: getMiniAppUrl() } }]] }
+      });
     });
 
     bot.onText(/⚙️|Admin Panel|ផ្ទាំងគ្រប់គ្រង/, (msg) => {
       const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-mzu6.onrender.com/admin').trim();
-      bot.sendMessage(
-        msg.chat.id,
-        `⚙️ *Store Admin Control Panel*\n\n` +
-        `Manage products, banners, promo codes, users, and orders:\n\n` +
-        `🔗 URL: \`${adminUrl}\``,
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '⚙️ Open Admin Control Panel', url: adminUrl }],
-              [{ text: '🔑 Back to Store', web_app: { url: getMiniAppUrl() } }]
-            ]
-          }
-        }
-      );
+      const lang = getUserLanguage(msg.chat.id);
+      const t = i18n[lang];
+      bot.sendMessage(msg.chat.id, t.adminTitle(adminUrl), {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: [[{ text: t.btnOpenAdmin, url: adminUrl }], [{ text: t.btnBackToStore, web_app: { url: getMiniAppUrl() } }]] }
+      });
     });
 
     bot.onText(/💡|Help & Support|ជំនួយ/, (msg) => {
       const lang = getUserLanguage(msg.chat.id);
-      if (lang === 'km') {
-        bot.sendMessage(
-          msg.chat.id,
-          `💡 *មគ្គុទ្ទេសក៍ជំនួយ & គាំទ្រ Key Vault*\n\n` +
-          `ត្រូវការជំនួយ ឬកុម្ម៉ង់កូដពិសេស? ទំនាក់ទំនងម្ចាស់ហាង *@BoomBaya_ik*!\n\n` +
-          `បញ្ជីពាក្យបញ្ជាដែលមាន:\n` +
-          `• /start - 🚀 បើកហាង & ស្វាគមន៍\n` +
-          `• /language - 🌐 ផ្លាស់ប្តូរភាសា (Khmer / English)\n` +
-          `• /shop - 🔑 ហាងទំនិញកូដឌីជីថល\n` +
-          `• /orders - 📦 ការទិញរបស់ខ្ញុំ\n` +
-          `• /cart - 🛒 កន្ត្រកទំនិញ & ទូទាត់ប្រាក់\n` +
-          `• /profile - 👤 គណនី & ភាគរយណែនាំ\n` +
-          `• /promos - 🎟️ កូដបញ្ចុះតម្លៃ\n` +
-          `• /admin - ⚙️ ផ្ទាំងគ្រប់គ្រង Admin\n` +
-          `• /update - 🔄 ធ្វើបច្ចុប្បន្នភាពមឺនុយ\n` +
-          `• /help - 💡 ជំនួយ & ទំនាក់ទំនង`,
-          {
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '💬 ទំនាក់ទំនងម្ចាស់ហាង (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
-                [{ text: '🔑 បើកហាងទិញទំនិញ', web_app: { url: getMiniAppUrl() } }]
-              ]
-            }
-          }
-        );
-      } else {
-        bot.sendMessage(
-          msg.chat.id,
-          `💡 *Key Vault Bot Help & Control Menu*\n\n` +
-          `Need help or custom orders? Contact owner *@BoomBaya_ik*!\n\n` +
-          `Available Bot Commands:\n` +
-          `• /start - 🚀 Open Key Vault Store & Welcome\n` +
-          `• /language - 🌐 Change Language (Khmer / English)\n` +
-          `• /shop - 🔑 Digital Key Marketplace\n` +
-          `• /orders - 📦 My Orders & Digital Keys\n` +
-          `• /cart - 🛒 Shopping Cart & Checkout\n` +
-          `• /profile - 👤 Account & Referral Rewards\n` +
-          `• /promos - 🎟️ Active Promo Codes List\n` +
-          `• /admin - ⚙️ Store Admin Control Panel\n` +
-          `• /update - 🔄 Refresh Bot Menu & Links\n` +
-          `• /help - 💡 Show Help & Contact Support`,
-          {
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
-                [{ text: '🔑 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
-              ]
-            }
-          }
-        );
-      }
+      const t = i18n[lang];
+      bot.sendMessage(msg.chat.id, t.helpTitle, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: [[{ text: t.btnContactOwner, url: 'https://t.me/BoomBaya_ik' }], [{ text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } }]] }
+      });
     });
 
-    // Callback Query Handler for Language Switch & Refresh
+    // ──────────────────────────────────────────────────
+    // 14. Callback Query Handler (Inline Button Clicks)
+    // ──────────────────────────────────────────────────
     bot.on('callback_query', async (query) => {
       const chatId = query.message?.chat.id;
       if (!chatId) return;
@@ -510,10 +492,10 @@ export const initBot = () => {
       try {
         if (query.data === 'lang_en') {
           setUserLanguage(chatId, 'en');
-          await bot.answerCallbackQuery(query.id, { text: 'Language changed to English 🇬🇧' });
+          await bot.answerCallbackQuery(query.id, { text: 'Language set to English 🇬🇧' });
           await bot.sendMessage(
             chatId,
-            `✅ *Language changed to English 🇬🇧!*\n\nCustom keyboard and bot messages are now in English.`,
+            i18n.en.langChanged,
             { parse_mode: 'Markdown', reply_markup: getControlReplyKeyboard(chatId) }
           );
         } else if (query.data === 'lang_km') {
@@ -521,7 +503,7 @@ export const initBot = () => {
           await bot.answerCallbackQuery(query.id, { text: 'ភាសាត្រូវ​បានផ្លាស់ប្តូរទៅជា ភាសាខ្មែរ 🇰🇭' });
           await bot.sendMessage(
             chatId,
-            `✅ *ភាសាត្រូវ​បានផ្លាស់ប្តូរទៅជា ភាសាខ្មែរ 🇰🇭!*\n\nក្តារចុចបញ្ជា និងសារត្រូវបានផ្លាស់ប្តូរមកជា ភាសាខ្មែរ។`,
+            i18n.km.langChanged,
             { parse_mode: 'Markdown', reply_markup: getControlReplyKeyboard(chatId) }
           );
         } else if (query.data === 'refresh') {
@@ -529,61 +511,22 @@ export const initBot = () => {
           await bot.answerCallbackQuery(query.id, { text: '🔄 Bot Menu Refreshed!' });
           await bot.sendMessage(
             chatId,
-            `✅ *Bot Menu Refreshed!*\n\nCommands and menu buttons updated for chat.`,
+            `✅ *Bot Menu Refreshed!*`,
             { parse_mode: 'Markdown' }
           );
         } else if (query.data === 'help' || query.data === 'commands') {
           await bot.answerCallbackQuery(query.id);
           const lang = getUserLanguage(chatId);
-          if (lang === 'km') {
-            await bot.sendMessage(
-              chatId,
-              `💡 *មគ្គុទ្ទេសក៍ជំនួយ Key Vault*\n\n` +
-              `ទំនាក់ទំនងម្ចាស់ហាង *@BoomBaya_ik*!\n\n` +
-              `• /start - 🚀 បើកហាង & ស្វាគមន៍\n` +
-              `• /language - 🌐 ផ្លាស់ប្តូរភាសា (Khmer / English)\n` +
-              `• /shop - 🔑 ហាងទំនិញ\n` +
-              `• /orders - 📦 ការទិញរបស់ខ្ញុំ\n` +
-              `• /cart - 🛒 កន្ត្រកទំនិញ\n` +
-              `• /profile - 👤 គណនី\n` +
-              `• /promos - 🎟️ កូដបញ្ចុះតម្លៃ\n` +
-              `• /admin - ⚙️ ផ្ទាំងគ្រប់គ្រង Admin\n` +
-              `• /help - 💡 ជំនួយ`,
-              {
-                parse_mode: 'Markdown',
-                reply_markup: {
-                  inline_keyboard: [
-                    [{ text: '💬 ទំនាក់ទំនងម្ចាស់ហាង (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
-                    [{ text: '🚀 បើកហាងទិញទំនិញ', web_app: { url: getMiniAppUrl() } }]
-                  ]
-                }
-              }
-            );
-          } else {
-            await bot.sendMessage(
-              chatId,
-              `💡 *Key Vault Help & Control Menu*\n\n` +
-              `Need help? Tap below to chat with owner *@BoomBaya_ik*!\n\n` +
-              `• /start - 🚀 Open Store & Welcome\n` +
-              `• /language - 🌐 Change Language\n` +
-              `• /shop - 🔑 Key Marketplace\n` +
-              `• /orders - 📦 My Orders & Keys\n` +
-              `• /cart - 🛒 Cart & Checkout\n` +
-              `• /profile - 👤 Account Profile\n` +
-              `• /promos - 🎟️ Active Coupons\n` +
-              `• /admin - ⚙️ Admin Control Panel\n` +
-              `• /help - 💡 Show Help`,
-              {
-                parse_mode: 'Markdown',
-                reply_markup: {
-                  inline_keyboard: [
-                    [{ text: '💬 Contact Owner (@BoomBaya_ik)', url: 'https://t.me/BoomBaya_ik' }],
-                    [{ text: '🚀 Open Key Vault Store', web_app: { url: getMiniAppUrl() } }]
-                  ]
-                }
-              }
-            );
-          }
+          const t = i18n[lang];
+          await bot.sendMessage(chatId, t.helpTitle, {
+            parse_mode: 'Markdown',
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: t.btnContactOwner, url: 'https://t.me/BoomBaya_ik' }],
+                [{ text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } }]
+              ]
+            }
+          });
         }
       } catch (e) {
         console.log('Callback query error:', e);
@@ -600,23 +543,11 @@ export const initBot = () => {
   }
 };
 
-const userLanguages: Record<number, 'en' | 'km'> = {};
-
-export const getUserLanguage = (chatId: number): 'en' | 'km' => {
-  return userLanguages[chatId] || 'km'; // Default to Khmer
-};
-
-export const setUserLanguage = (chatId: number, lang: 'en' | 'km') => {
-  userLanguages[chatId] = lang;
-};
-
 function sendLanguageSelector(bot: TelegramBot, chatId: number) {
-  const currentLang = getUserLanguage(chatId);
-  const text = currentLang === 'km'
-    ? `🌐 *ជ្រើសរើសភាសា / Select Language*\n\nសូមជ្រើសរើសភាសាដែលអ្នកចង់ប្រើប្រាស់ក្នុង Telegram Bot:`
-    : `🌐 *Select Language / ជ្រើសរើសភាសា*\n\nPlease choose your preferred language for the Telegram Bot:`;
+  const lang = getUserLanguage(chatId);
+  const t = i18n[lang];
 
-  bot.sendMessage(chatId, text, {
+  bot.sendMessage(chatId, t.langSelector, {
     parse_mode: 'Markdown',
     reply_markup: {
       inline_keyboard: [
@@ -664,42 +595,22 @@ async function updateBotMenu(bot: TelegramBot) {
 
 function getControlReplyKeyboard(chatId?: number) {
   const lang = chatId ? getUserLanguage(chatId) : 'km';
-  if (lang === 'km') {
-    return {
-      keyboard: [
-        [
-          { text: '🔑 បើកហាង (Store)', web_app: { url: getMiniAppUrl() } },
-          { text: '📦 ការទិញរបស់ខ្ញុំ (Orders)', web_app: { url: getMiniAppUrl('/orders') } }
-        ],
-        [
-          { text: '🛒 កន្ត្រកទំនិញ (Cart)', web_app: { url: getMiniAppUrl('/cart') } },
-          { text: '👤 គណនី (Profile)', web_app: { url: getMiniAppUrl('/profile') } }
-        ],
-        [
-          { text: '🎟️ កូដបញ្ចុះតម្លៃ' },
-          { text: '🌐 ភាសា / Language' },
-          { text: '💡 ជំនួយ (Help)' }
-        ]
-      ],
-      resize_keyboard: true,
-      persistent: true
-    };
-  }
+  const t = i18n[lang];
 
   return {
     keyboard: [
       [
-        { text: '🔑 Open Store', web_app: { url: getMiniAppUrl() } },
-        { text: '📦 My Orders', web_app: { url: getMiniAppUrl('/orders') } }
+        { text: t.btnOpenStore, web_app: { url: getMiniAppUrl() } },
+        { text: t.btnOrders, web_app: { url: getMiniAppUrl('/orders') } }
       ],
       [
-        { text: '🛒 Cart', web_app: { url: getMiniAppUrl('/cart') } },
-        { text: '👤 Profile', web_app: { url: getMiniAppUrl('/profile') } }
+        { text: t.btnCart, web_app: { url: getMiniAppUrl('/cart') } },
+        { text: t.btnProfile, web_app: { url: getMiniAppUrl('/profile') } }
       ],
       [
-        { text: '🎟️ Promo Codes' },
-        { text: '🌐 Language / ភាសា' },
-        { text: '💡 Help & Support' }
+        { text: t.btnPromos },
+        { text: t.btnLanguage },
+        { text: t.btnHelp }
       ]
     ],
     resize_keyboard: true,
@@ -709,31 +620,14 @@ function getControlReplyKeyboard(chatId?: number) {
 
 function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
   const lang = getUserLanguage(chatId);
-  if (lang === 'km') {
-    bot.sendMessage(
-      chatId,
-      `👋 *សូមស្វាគមន៍មកកាន់ Key Vault Store, ${firstName}!*\n\n` +
-      `🔑 ទិញកូដសកម្មភាពភ្លាមៗសម្រាប់:\n` +
-      `• Telegram Premium\n• កាតហ្គេម Steam & Wallet Cards\n• កូដ VPN & អាជ្ញាប័ណ្ណ\n• កូដកម្មវិធីផ្សេងៗ\n\n` +
-      `💰 ទូទាត់តាម *KHQR*, *ដុល្លារ ($)* ឬ *ប្រាក់រៀល (៛)*\n\n` +
-      `ចុចប៊ូតុងខាងក្រោមដើម្បីបើក Mini App ឬបញ្ជាប៊ូតុង:`,
-      {
-        parse_mode: 'Markdown',
-        reply_markup: getControlReplyKeyboard(chatId)
-      }
-    ).catch(console.error);
-  } else {
-    bot.sendMessage(
-      chatId,
-      `👋 *Welcome to Key Vault Store, ${firstName}!*\n\n` +
-      `🔑 Buy instant activation keys for:\n` +
-      `• Telegram Premium\n• Steam Games & Wallet Cards\n• VPN Passes & Licenses\n• Software Keys\n\n` +
-      `💰 Pay with *KHQR*, *USD ($)*, or *Khmer Riel (៛)*\n\n` +
-      `Tap the buttons below to open the Mini App or control commands:`,
-      {
-        parse_mode: 'Markdown',
-        reply_markup: getControlReplyKeyboard(chatId)
-      }
-    ).catch(console.error);
-  }
+  const t = i18n[lang];
+
+  bot.sendMessage(
+    chatId,
+    `${t.welcomeTitle(firstName)}\n\n${t.welcomeBody}`,
+    {
+      parse_mode: 'Markdown',
+      reply_markup: getControlReplyKeyboard(chatId)
+    }
+  ).catch(console.error);
 }
