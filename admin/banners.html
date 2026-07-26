@@ -8,7 +8,7 @@
 
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
-  <link rel="stylesheet" href="assets/css/style.css?v=20260726_v19">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260726_v20">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <style>
     .banner-card {
@@ -183,8 +183,8 @@
   </div>
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/js/main.js?v=20260726_v19"></script>
-  <script src="assets/js/config.js?v=20260726_v19"></script>
+  <script src="assets/js/main.js?v=20260726_v20"></script>
+  <script src="assets/js/config.js?v=20260726_v20"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script>
     let editingBannerId = null;
@@ -338,19 +338,25 @@
       }
     }
 
+    let _savingBanner = false;
     async function saveBanner(e) {
       e.preventDefault();
+      if (_savingBanner) return;
+      _savingBanner = true;
+
       const image = document.getElementById('bannerImageUrl').value.trim();
 
       if (!image) {
         showToast('Image URL or Local Image File is required', 'error');
+        _savingBanner = false;
         return;
       }
 
-      const newBannerObj = { id: editingBannerId || Date.now(), image };
+      const savedEditingId = editingBannerId;
+      const newBannerObj = { id: savedEditingId || Date.now(), image };
 
-      if (editingBannerId) {
-        banners = banners.map(b => b.id === editingBannerId ? { ...b, ...newBannerObj } : b);
+      if (savedEditingId) {
+        banners = banners.map(b => b.id === savedEditingId ? { ...b, ...newBannerObj } : b);
         showToast('Image banner updated successfully!');
       } else {
         banners.push(newBannerObj);
@@ -360,19 +366,27 @@
       localStorage.setItem('mini_app_banners', JSON.stringify(banners));
       renderBanners();
 
+      editingBannerId = null;
       const modalEl = document.getElementById('bannerModal');
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       modal.hide();
 
       try {
-        if (editingBannerId) {
-          await apiFetch(`${API.banners}/${editingBannerId}`, { method: 'PATCH', body: JSON.stringify(newBannerObj) });
+        let res;
+        if (savedEditingId) {
+          res = await apiFetch(`${API.banners}/${savedEditingId}`, { method: 'PATCH', body: JSON.stringify(newBannerObj) });
         } else {
-          await apiFetch(API.banners, { method: 'POST', body: JSON.stringify(newBannerObj) });
+          res = await apiFetch(API.banners, { method: 'POST', body: JSON.stringify(newBannerObj) });
+        }
+        if (res?.data?.id && !savedEditingId) {
+          banners = banners.map(b => b.id === newBannerObj.id ? { ...b, id: res.data.id } : b);
+          localStorage.setItem('mini_app_banners', JSON.stringify(banners));
+          renderBanners();
         }
       } catch (err) {
         console.warn('Banner API sync notice (saved locally):', err);
       }
+      _savingBanner = false;
     }
 
     async function deleteBanner(id) {
