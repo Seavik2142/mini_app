@@ -195,39 +195,76 @@ export let MOCK_BANNERS = [
   }
 ];
 
-export const getBanners: RequestHandler = (_req, res): void => {
-  res.status(200).json({ success: true, data: MOCK_BANNERS });
-};
-
-export const createBanner: RequestHandler = (req, res): void => {
-  const { image } = req.body;
-  const newBanner = {
-    id: Date.now(),
-    image: image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
-  };
-  MOCK_BANNERS.push(newBanner);
-  res.status(201).json({ success: true, data: newBanner });
-};
-
-export const updateBanner: RequestHandler = (req, res): void => {
-  const id = Number(req.params.id);
-  const index = MOCK_BANNERS.findIndex(b => b.id === id);
-  if (index === -1) {
-    res.status(404).json({ success: false, message: "Banner not found" });
-    return;
+export const getBanners: RequestHandler = async (_req, res): Promise<void> => {
+  try {
+    const banners = await prisma.banner.findMany({ orderBy: { id: "asc" } });
+    if (banners.length > 0) {
+      res.status(200).json({ success: true, data: banners });
+      return;
+    }
+    res.status(200).json({ success: true, data: MOCK_BANNERS });
+  } catch (err) {
+    res.status(200).json({ success: true, data: MOCK_BANNERS });
   }
-  MOCK_BANNERS[index] = { ...MOCK_BANNERS[index], ...req.body };
-  res.status(200).json({ success: true, data: MOCK_BANNERS[index] });
 };
 
-export const deleteBanner: RequestHandler = (req, res): void => {
+export const createBanner: RequestHandler = async (req, res): Promise<void> => {
+  const { image } = req.body;
+  const imageUrl = image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80";
+  try {
+    const newBanner = await prisma.banner.create({
+      data: { image: imageUrl }
+    });
+    res.status(201).json({ success: true, data: newBanner });
+  } catch (err) {
+    const newBanner = { id: Date.now(), image: imageUrl };
+    MOCK_BANNERS.push(newBanner);
+    res.status(201).json({ success: true, data: newBanner });
+  }
+};
+
+export const updateBanner: RequestHandler = async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  MOCK_BANNERS = MOCK_BANNERS.filter(b => b.id !== id);
-  res.status(200).json({ success: true, message: "Banner deleted" });
+  const { image } = req.body;
+  try {
+    const updated = await prisma.banner.update({
+      where: { id },
+      data: { ...(image ? { image } : req.body) }
+    });
+    res.status(200).json({ success: true, data: updated });
+  } catch (err) {
+    const index = MOCK_BANNERS.findIndex(b => b.id === id);
+    if (index === -1) {
+      res.status(404).json({ success: false, message: "Banner not found" });
+      return;
+    }
+    MOCK_BANNERS[index] = { ...MOCK_BANNERS[index], ...req.body };
+    res.status(200).json({ success: true, data: MOCK_BANNERS[index] });
+  }
+};
+
+export const deleteBanner: RequestHandler = async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  try {
+    await prisma.banner.delete({ where: { id } });
+    res.status(200).json({ success: true, message: "Banner deleted" });
+  } catch (err) {
+    MOCK_BANNERS = MOCK_BANNERS.filter(b => b.id !== id);
+    res.status(200).json({ success: true, message: "Banner deleted" });
+  }
 };
 
 export const seedDatabaseIfEmpty = async () => {
   try {
+    const bannerCount = await prisma.banner.count();
+    if (bannerCount === 0) {
+      for (const b of MOCK_BANNERS) {
+        await prisma.banner.create({
+          data: { image: b.image }
+        }).catch(() => {});
+      }
+      console.log("✅ Seeded initial banners into Prisma DB");
+    }
     const categoryCount = await prisma.category.count();
     if (categoryCount === 0) {
       for (const cat of MOCK_CATEGORIES) {

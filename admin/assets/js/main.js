@@ -145,29 +145,35 @@
     initTableSearch();
     initThemeToggle();
 
-    // Initialize user profile values in UI. Provide a window.adminHMDUser object to override defaults.
+    // Auto sanitize stored session string to fix legacy "Admin: seavik (Super Admin)"
+    try {
+      var sStr = window.localStorage.getItem('mini_app_admin_session');
+      if (sStr) {
+        var sObj = JSON.parse(sStr);
+        if (sObj && sObj.username) {
+          sObj.username = sObj.username.replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/gi, '').trim();
+          if (!sObj.username) sObj.username = 'Seavik';
+          window.localStorage.setItem('mini_app_admin_session', JSON.stringify(sObj));
+        }
+      }
+    } catch(e) {}
+
+    // Initialize user profile values in UI.
     function initUserProfile() {
-      var user = window.adminHMDUser || { name: "Admin Vault", workspace: "Active Workspace", avatar: "assets/images/avatar/avatar.jpg" };
+      var sessionStr = window.localStorage.getItem('mini_app_admin_session');
+      var session = sessionStr ? JSON.parse(sessionStr) : { username: 'Seavik', role: 'SUPER_ADMIN' };
+      var cleanName = (session.username || 'Seavik').replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/gi, '').trim();
+      if (!cleanName) cleanName = 'Seavik';
+      var roleLabel = session.role === 'SUPER_ADMIN' ? 'Super Admin' : (session.role || 'Admin');
 
       var sidebarNameEl = document.querySelector(".sidebar-user strong");
       var sidebarWorkspaceEl = document.querySelector(".sidebar-user small");
-      var sidebarAvatar = document.querySelector(".sidebar-user .avatar-img");
-      var profileNameEls = document.querySelectorAll(".profile-name");
-      var profileAvatarEls = document.querySelectorAll(".profile-button .avatar-img, .profile-button img");
 
-      if (sidebarNameEl) sidebarNameEl.textContent = user.name;
-      if (sidebarWorkspaceEl) sidebarWorkspaceEl.textContent = user.workspace;
-      if (sidebarAvatar && user.avatar) { sidebarAvatar.src = user.avatar; sidebarAvatar.alt = user.name; }
-
-      Array.prototype.forEach.call(profileNameEls, function (el) { el.textContent = user.name; });
-      Array.prototype.forEach.call(profileAvatarEls, function (img) { if (user.avatar) img.src = user.avatar; if (user.name) img.alt = user.name; });
+      if (sidebarNameEl) sidebarNameEl.textContent = cleanName;
+      if (sidebarWorkspaceEl) sidebarWorkspaceEl.textContent = roleLabel;
     }
 
     initUserProfile();
-
-    if (!sidebarToggle) {
-      return;
-    }
 
     function setClass(element, className, enabled) {
       if (enabled) {
@@ -182,7 +188,9 @@
         ? !body.classList.contains("sidebar-mini")
         : body.classList.contains("sidebar-open");
 
-      sidebarToggle.setAttribute("aria-expanded", String(expanded));
+      if (sidebarToggle) {
+        sidebarToggle.setAttribute("aria-expanded", String(expanded));
+      }
     }
 
     function closeMobileSidebar() {
@@ -208,6 +216,11 @@
             closeMobileSidebar();
           }
         });
+        item.addEventListener("touchstart", function () {
+          if (!isDesktop()) {
+            closeMobileSidebar();
+          }
+        }, { passive: true });
       });
     }
 
@@ -215,7 +228,20 @@
       body.classList.add("sidebar-mini");
     }
 
-    sidebarToggle.addEventListener("click", toggleSidebar);
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener("click", toggleSidebar);
+      sidebarToggle.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        toggleSidebar();
+      });
+    }
+
+    var backdrop = document.querySelector(".sidebar-backdrop");
+    if (backdrop) {
+      backdrop.addEventListener("click", closeMobileSidebar);
+      backdrop.addEventListener("touchstart", closeMobileSidebar, { passive: true });
+    }
+
     addCloseHandlers(closeButtons);
     addCloseHandlers(sidebarLinks);
     setToggleExpanded();
@@ -227,7 +253,6 @@
       } else {
         body.classList.remove("sidebar-mini");
       }
-
       setToggleExpanded();
     }
 
@@ -268,35 +293,57 @@
     function renderAdminUserInfo() {
       try {
         var sessionStr = window.localStorage.getItem('mini_app_admin_session');
-        if (!sessionStr) return;
-        var session = JSON.parse(sessionStr);
+        var session = sessionStr ? JSON.parse(sessionStr) : { username: 'Seavik', role: 'SUPER_ADMIN' };
         var rawName = session.username || 'Seavik';
-        var cleanName = rawName.replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/, '').trim();
+        var cleanName = rawName.replace(/^Admin:\s*/i, '').replace(/\s*\([^)]*\)$/gi, '').trim();
         if (!cleanName) cleanName = 'Seavik';
         var roleLabel = session.role === 'SUPER_ADMIN' ? 'Super Admin' : (session.role || 'Admin');
-
-        var nameEl = document.getElementById('admin-profile-name');
-        var roleEl = document.getElementById('admin-profile-role');
-        if (nameEl) nameEl.textContent = '👑 ' + cleanName;
-        if (roleEl) roleEl.textContent = roleLabel;
+        var emailStr = session.email || (cleanName.toLowerCase() + '@miniapp.com');
 
         var actions = document.querySelector('.navbar-actions');
-        if (actions && !document.getElementById('admin-profile-badge')) {
+        if (actions) {
+          var existingBadge = document.getElementById('admin-profile-badge');
+          if (existingBadge) existingBadge.remove();
+
           var badge = document.createElement('div');
           badge.id = 'admin-profile-badge';
-          badge.className = 'dropdown d-inline-block me-3';
-          badge.innerHTML = '<button class="btn p-0 border-0 d-flex align-items-center gap-2 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="' + cleanName + ' (' + roleLabel + ')">' +
-            '<div class="rounded-circle bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 d-flex align-items-center justify-content-center shadow-sm" style="width:38px;height:38px;font-size:17px;cursor:pointer;">' +
-              '<i class="bi bi-person-fill"></i>' +
+          badge.className = 'dropdown d-inline-block me-2';
+          badge.innerHTML = '<button class="btn p-1 border-0 d-flex align-items-center gap-2 rounded-pill bg-body-tertiary shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="' + cleanName + ' (' + roleLabel + ')">' +
+            '<div class="position-relative">' +
+              '<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width:36px;height:36px;font-size:18px;">' +
+                '<i class="bi bi-person-circle"></i>' +
+              '</div>' +
+              '<span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle"></span>' +
             '</div>' +
+            '<div class="text-start d-none d-sm-block pe-1">' +
+              '<div class="fw-bold text-body small leading-tight mb-0">👑 ' + cleanName + '</div>' +
+              '<div class="text-primary text-uppercase font-monospace" style="font-size: 10px; font-weight: 600;">' + roleLabel + '</div>' +
+            '</div>' +
+            '<i class="bi bi-chevron-down text-muted small me-1"></i>' +
           '</button>' +
-          '<ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 p-2" style="min-width:180px;">' +
-            '<li class="px-3 py-2 border-bottom">' +
-              '<p class="fw-bold mb-0 text-primary font-monospace small" id="admin-profile-name">👑 ' + cleanName + '</p>' +
-              '<span class="badge bg-primary bg-opacity-10 text-primary small mt-1" id="admin-profile-role">' + roleLabel + '</span>' +
+          '<ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 p-3" style="min-width:250px;">' +
+            '<li class="d-flex align-items-center gap-3 pb-3 border-bottom mb-2">' +
+              '<div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width:44px;height:44px;font-size:22px;">' +
+                '<i class="bi bi-person-badge-fill"></i>' +
+              '</div>' +
+              '<div class="overflow-hidden">' +
+                '<h6 class="fw-bold mb-0 text-truncate">👑 ' + cleanName + '</h6>' +
+                '<span class="badge bg-primary bg-opacity-10 text-primary small mt-1 font-monospace">' + roleLabel + '</span>' +
+              '</div>' +
             '</li>' +
-            '<li class="mt-1">' +
-              '<a class="dropdown-item text-danger py-2 rounded-2 d-flex align-items-center gap-2 small font-semibold" href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')">' +
+            '<li class="py-1">' +
+              '<div class="small text-muted mb-2 d-flex align-items-center justify-content-between"><span><i class="bi bi-shield-check text-success me-1"></i> Status:</span> <strong class="text-success">Active 🟢</strong></div>' +
+              '<div class="small text-muted mb-2 d-flex align-items-center justify-content-between"><span><i class="bi bi-person me-1"></i> User:</span> <strong class="text-body font-monospace">' + cleanName + '</strong></div>' +
+              '<div class="small text-muted d-flex align-items-center justify-content-between"><span><i class="bi bi-envelope me-1"></i> Email:</span> <strong class="text-body">' + emailStr + '</strong></div>' +
+            '</li>' +
+            '<li><hr class="dropdown-divider my-2"></li>' +
+            '<li>' +
+              '<a class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2 small font-semibold" href="users.html">' +
+                '<i class="bi bi-gear text-primary"></i> Account & Staff Settings' +
+              '</a>' +
+            '</li>' +
+            '<li>' +
+              '<a class="dropdown-item text-danger py-2 rounded-2 d-flex align-items-center gap-2 small font-semibold mt-1" href="login.html" onclick="window.localStorage.removeItem(\'mini_app_admin_session\')">' +
                 '<i class="bi bi-box-arrow-right"></i> Sign Out' +
               '</a>' +
             '</li>' +

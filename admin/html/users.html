@@ -3,85 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="adminHMD professional admin dashboard template">
-  <title>Users | adminHMD</title>
-
-  <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="../assets/vendors/bootstrap-icons/bootstrap-icons.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <meta name="description" content="Manage users — Mini App Admin">
+  <title>Users | Mini App Admin</title>
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
-
 <body>
   <div class="admin-shell">
     <div class="sidebar-backdrop" data-sidebar-close></div>
 
     <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
       <div class="sidebar-header">
-        <a class="brand-mark" href="index.html" aria-label="adminHMD dashboard">
+        <a class="brand-mark" href="index.html" aria-label="Mini App Admin">
           <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
           <span class="brand-copy">
-            <span class="brand-title">adminHMD</span>
-            <span class="brand-subtitle">Admin Template</span>
+            <span class="brand-title">Mini App</span>
+            <span class="brand-subtitle">Admin Panel</span>
           </span>
         </a>
       </div>
 
       <nav class="sidebar-nav">
         <a class="nav-link" href="index.html">
-          <span class="nav-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
+          <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
           <span class="nav-text">Dashboard</span>
         </a>
+        <a class="nav-link" href="products.html">
+          <span class="nav-icon"><i class="bi bi-box-seam"></i></span>
+          <span class="nav-text">Products Catalog</span>
+        </a>
+        <a class="nav-link" href="banners.html">
+          <span class="nav-icon"><i class="bi bi-images"></i></span>
+          <span class="nav-text">Hero Banners</span>
+        </a>
+        <a class="nav-link" href="promos.html">
+          <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
+          <span class="nav-text">Promo Codes</span>
+        </a>
         <a class="nav-link active" href="users.html" aria-current="page">
-          <span class="nav-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+          <span class="nav-icon"><i class="bi bi-people"></i></span>
           <span class="nav-text">Users</span>
         </a>
-        <a class="nav-link" href="add-user.html">
-          <span class="nav-icon"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
-          <span class="nav-text">Add User</span>
-        </a>
-        <a class="nav-link" href="profile.html">
-          <span class="nav-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
-          <span class="nav-text">Profile</span>
-        </a>
-        <a class="nav-link" href="charts.html">
-          <span class="nav-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
-          <span class="nav-text">Charts</span>
-        </a>
-        <a class="nav-link" href="tables.html">
-          <span class="nav-icon"><i class="bi bi-table" aria-hidden="true"></i></span>
-          <span class="nav-text">Tables</span>
-        </a>
-        <a class="nav-link" href="forms.html">
-          <span class="nav-icon"><i class="bi bi-ui-checks-grid" aria-hidden="true"></i></span>
-          <span class="nav-text">Forms</span>
-        </a>
-        <a class="nav-link" href="components.html">
-          <span class="nav-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span>
-          <span class="nav-text">Components</span>
-        </a>
-        <a class="nav-link" href="alerts.html">
-          <span class="nav-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
-          <span class="nav-text">Alerts</span>
-        </a>
-        <a class="nav-link" href="modals.html">
-          <span class="nav-icon"><i class="bi bi-window-stack" aria-hidden="true"></i></span>
-          <span class="nav-text">Modals</span>
-        </a>
-        <a class="nav-link" href="settings.html">
-          <span class="nav-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
-          <span class="nav-text">Settings</span>
-        </a>
-        <a class="nav-link" href="blank.html">
-          <span class="nav-icon"><i class="bi bi-file-earmark" aria-hidden="true"></i></span>
-          <span class="nav-text">Blank Page</span>
+        <a class="nav-link" href="payments.html">
+          <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
+          <span class="nav-text">Payment History</span>
         </a>
       </nav>
-
-      <div class="sidebar-user">
-        <img class="avatar-img avatar-md sidebar-user-avatar" src="../assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-        <strong>Admin Hasan</strong>
-        <small>Active Workspace</small>
-      </div>
 
       <div class="sidebar-footer">
         <span class="status-dot"></span>
@@ -93,246 +61,274 @@
       <nav class="navbar admin-navbar navbar-expand bg-white">
         <div class="container-fluid px-3 px-lg-4">
           <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="adminSidebar" aria-expanded="true" aria-label="Toggle sidebar">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
           </button>
-
-          <form class="d-none d-md-flex ms-3 flex-grow-1" role="search">
-            <input class="form-control search-input" type="search" placeholder="Search users, roles, teams" aria-label="Search">
-          </form>
-
-          <div class="navbar-actions ms-auto">
-            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
-              <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
-            </button>
-            <div class="dropdown">
-              <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                <span class="notification-dot"></span>
-                <i class="bi bi-bell" aria-hidden="true"></i>
+          <div class="navbar-actions ms-auto d-flex align-items-center gap-2">
+            <div class="dropdown d-inline-block me-3" id="admin-profile-badge">
+              <button class="btn p-0 border-0 d-flex align-items-center gap-2 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Admin Profile">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 d-flex align-items-center justify-content-center shadow-sm" style="width:38px;height:38px;font-size:17px;cursor:pointer;">
+                  <i class="bi bi-person-fill"></i>
+                </div>
               </button>
-              <div class="dropdown-menu dropdown-menu-end notification-menu">
-                <div class="dropdown-header fw-bold text-body">Notifications</div>
-                <a class="dropdown-item" href="users.html">
-                  <span class="notification-title">New user registered</span>
-                  <span class="notification-time">4 minutes ago</span>
-                </a>
-                <a class="dropdown-item" href="charts.html">
-                  <span class="notification-title">Revenue target reached</span>
-                  <span class="notification-time">32 minutes ago</span>
-                </a>
-                <a class="dropdown-item" href="settings.html">
-                  <span class="notification-title">Security review completed</span>
-                  <span class="notification-time">1 hour ago</span>
-                </a>
-              </div>
-            </div>
-
-            <div class="dropdown">
-              <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-                <span class="profile-name d-none d-sm-inline">Admin Hasan</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
-                <li><a class="dropdown-item" href="settings.html">Account settings</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="login.html">Sign out</a></li>
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 p-2" style="min-width:180px;">
+                <li class="px-3 py-2 border-bottom">
+                  <p class="fw-bold mb-0 text-primary font-monospace small" id="admin-profile-name">👑 Seavik</p>
+                  <span class="badge bg-primary bg-opacity-10 text-primary small mt-1" id="admin-profile-role">Super Admin</span>
+                </li>
+                <li class="mt-1">
+                  <a class="dropdown-item text-danger py-2 rounded-2 d-flex align-items-center gap-2 small font-semibold" href="login.html" onclick="window.localStorage.removeItem('mini_app_admin_session')">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                  </a>
+                </li>
               </ul>
             </div>
+
+            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme">
+              <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </nav>
 
       <main class="dashboard-content">
         <div class="container-fluid px-3 px-lg-4 py-4">
+
+          <!-- Page Heading -->
           <div class="page-heading">
             <div class="page-heading-copy">
               <span class="page-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
               <div>
                 <p class="eyebrow mb-1">Management</p>
                 <h1 class="h3 mb-1">Users</h1>
-                <p class="text-muted mb-0">Review accounts, roles, account status, and team ownership.</p>
+                <p class="text-muted mb-0">View, search and manage all Telegram Mini App users.</p>
               </div>
             </div>
-            <div class="heading-actions"><a class="btn btn-outline-secondary btn-sm" href="tables.html"><i class="bi bi-download" aria-hidden="true"></i> Export</a><a class="btn btn-primary btn-sm" href="add-user.html"><i class="bi bi-person-plus" aria-hidden="true"></i> Add User</a></div>
           </div>
 
-          <section class="row g-3 mt-1" aria-label="User summary">
+          <!-- Stats -->
+          <section class="row g-3 mt-1">
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-primary">
                 <div class="metric-top">
                   <span class="metric-label">Total Users</span>
-                  <span class="metric-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                  <span class="metric-icon"><i class="bi bi-people"></i></span>
                 </div>
-                <div class="metric-value">8,742</div>
-                <div class="metric-meta">
-                  <span class="text-success">+5.1%</span>
-                  <span>this month</span>
-                </div>
+                <div class="metric-value" id="stat-users"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>registered</span></div>
               </article>
             </div>
-
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-success">
                 <div class="metric-top">
                   <span class="metric-label">Active</span>
-                  <span class="metric-icon"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+                  <span class="metric-icon"><i class="bi bi-check2-circle"></i></span>
                 </div>
-                <div class="metric-value">7,980</div>
-                <div class="metric-meta">
-                  <span class="text-success">91%</span>
-                  <span>healthy accounts</span>
-                </div>
+                <div class="metric-value" id="stat-active"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>not blocked</span></div>
               </article>
             </div>
-
-            <div class="col-12 col-sm-6 col-xl-3">
-              <article class="metric-card metric-warning">
-                <div class="metric-top">
-                  <span class="metric-label">Pending</span>
-                  <span class="metric-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
-                </div>
-                <div class="metric-value">184</div>
-                <div class="metric-meta">
-                  <span class="text-warning">12</span>
-                  <span>need approval</span>
-                </div>
-              </article>
-            </div>
-
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-danger">
                 <div class="metric-top">
-                  <span class="metric-label">Suspended</span>
-                  <span class="metric-icon"><i class="bi bi-slash-circle" aria-hidden="true"></i></span>
+                  <span class="metric-label">Blocked</span>
+                  <span class="metric-icon"><i class="bi bi-slash-circle"></i></span>
                 </div>
-                <div class="metric-value">38</div>
-                <div class="metric-meta">
-                  <span class="text-danger">4</span>
-                  <span>flagged today</span>
+                <div class="metric-value" id="stat-blocked"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>suspended</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-warning">
+                <div class="metric-top">
+                  <span class="metric-label">Total Orders</span>
+                  <span class="metric-icon"><i class="bi bi-bag-check"></i></span>
                 </div>
+                <div class="metric-value" id="stat-orders"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>all time</span></div>
               </article>
             </div>
           </section>
 
-          <section class="panel mt-3">
-            <div class="panel-header">
-              <div>
-                <h2 class="h5 mb-1 section-title"><i class="bi bi-table" aria-hidden="true"></i><span>User List</span></h2>
-                <p class="text-muted mb-0">Search, review, and manage team member accounts.</p>
+          <!-- Admin Staff & Access Control Table (OVER Customer User List) -->
+          <section class="panel mt-4 border-0 shadow-lg overflow-hidden">
+            <div class="panel-header text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); padding: 1.25rem;">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-indigo-500 bg-opacity-25 text-white p-2" style="width: 42px; height: 42px;">
+                  <i class="bi bi-shield-lock-fill fs-4 text-warning"></i>
+                </div>
+                <div>
+                  <h2 class="h5 mb-0 text-white fw-bold">Admin Staff & Role Access Control</h2>
+                  <p class="text-indigo-200 small mb-0 opacity-75" id="admins-count">Manage system administrators, roles, and privileges.</p>
+                </div>
               </div>
-              <div class="d-flex flex-wrap gap-2">
-                <input class="form-control form-control-sm table-search" type="search" placeholder="Search users" data-table-search="usersTable" aria-label="Search users">
-                <a class="btn btn-primary btn-sm" href="add-user.html"><i class="bi bi-person-plus" aria-hidden="true"></i> Add User</a>
-              </div>
+              <button class="btn btn-warning btn-sm fw-bold px-3 py-2 shadow-sm rounded-3 text-dark border-0" onclick="openAddAdminModal()" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
+                <i class="bi bi-person-plus-fill me-1"></i> Add Admin Staff
+              </button>
             </div>
             <div class="table-responsive">
-              <table class="table align-middle mb-0" id="usersTable" data-searchable-table>
-                <thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Team</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col" class="text-end">Action</th></tr></thead>
-                <tbody>
+              <table class="table align-middle mb-0 table-hover">
+                <thead class="table-dark">
                   <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-1.jpg" alt="Sarah Ahmed">
-                        <div>
-                          <p class="fw-semibold mb-0">Sarah Ahmed</p>
-                          <p class="text-muted small mb-0">sarah@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Admin</td>
-                    <td>Operations</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Jan 12, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
+                    <th scope="col" class="py-3 ps-3">Admin User</th>
+                    <th scope="col" class="py-3">Role & Privileges</th>
+                    <th scope="col" class="py-3">Status</th>
+                    <th scope="col" class="py-3">Created Date</th>
+                    <th scope="col" class="py-3 text-end pe-3">Actions</th>
                   </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-2.jpg" alt="Rafi Khan">
-                        <div>
-                          <p class="fw-semibold mb-0">Rafi Khan</p>
-                          <p class="text-muted small mb-0">rafi@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Manager</td>
-                    <td>Sales</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Feb 03, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-3.jpg" alt="Nadia Islam">
-                        <div>
-                          <p class="fw-semibold mb-0">Nadia Islam</p>
-                          <p class="text-muted small mb-0">nadia@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Editor</td>
-                    <td>Content</td>
-                    <td><span class="badge text-bg-warning">Pending</span></td>
-                    <td>Mar 18, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-4.jpg" alt="Mina Torres">
-                        <div>
-                          <p class="fw-semibold mb-0">Mina Torres</p>
-                          <p class="text-muted small mb-0">mina@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Viewer</td>
-                    <td>Finance</td>
-                    <td><span class="badge text-bg-secondary">Suspended</span></td>
-                    <td>Apr 07, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-5.jpg" alt="Jon Oliver">
-                        <div>
-                          <p class="fw-semibold mb-0">Jon Oliver</p>
-                          <p class="text-muted small mb-0">jon@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Analyst</td>
-                    <td>Data</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Apr 22, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
+                </thead>
+                <tbody id="admins-tbody">
+                  <tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading admin staff...</td></tr>
                 </tbody>
               </table>
             </div>
-            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-3">
-              <p class="text-muted small mb-0">Showing 1 to 5 of 124 users</p>
-              <nav aria-label="Users pagination"><ul class="pagination pagination-sm mb-0"><li class="page-item disabled"><a class="page-link" href="#">Previous</a></li><li class="page-item active"><a class="page-link" href="#">1</a></li><li class="page-item"><a class="page-link" href="#">2</a></li><li class="page-item"><a class="page-link" href="#">Next</a></li></ul></nav>
+          </section>
+
+          <!-- Customer User List Table -->
+          <section class="panel mt-4">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-people-fill"></i><span>Customer / Store User List</span></h2>
+                <p class="text-muted mb-0" id="users-count">Loading...</p>
+              </div>
+              <div class="d-flex flex-wrap gap-2">
+                <input class="form-control form-control-sm" type="search" id="user-search" placeholder="Search by name, username, Telegram ID..." style="min-width:260px;" aria-label="Search users">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Telegram ID</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Refer Code</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Joined</th>
+                    <th scope="col" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody">
+                  <tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-3 px-3 pb-3">
+              <p class="text-muted small mb-0" id="users-count-bottom"></p>
+              <nav aria-label="Users pagination">
+                <ul class="pagination pagination-sm mb-0" id="users-pagination"></ul>
+              </nav>
             </div>
           </section>
+
         </div>
       </main>
 
       <footer class="admin-footer">
         <div class="container-fluid px-3 px-lg-4">
-          <span>Copyright 2026 adminHMD. <br> Developed by <a target="_blank" class="fw-bold text-success" href="https://github.com/HasanMahmudDev">Md. Hasan Mahmud</a> • Distributed by <a target="_blank" class="fw-bold text-success" href="https://themewagon.com">ThemeWagon</a> </span>
-          <span>Professional dashboard template.</span>
-          <span>User management dashboard.</span>
+          <span>Mini App Admin Panel &copy; 2026</span>
         </div>
       </footer>
     </div>
   </div>
 
-  <script src="../assets/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/main.js"></script>
+  <!-- Add Admin Staff Modal -->
+  <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header text-white border-0 py-3 px-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
+          <h5 class="modal-title font-bold text-white d-flex align-items-center gap-2" id="addAdminModalLabel">
+            <span class="p-1.5 bg-warning text-dark rounded-2 fs-6"><i class="bi bi-person-plus-fill"></i></span>
+            Add Admin Staff Member
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="admin-staff-form" onsubmit="saveAdminStaff(event)">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold small" for="new-admin-username">Admin Username <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-person-badge"></i></span>
+                <input type="text" id="new-admin-username" class="form-control border-start-0 ps-0" placeholder="e.g. seavik_manager" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small" for="new-admin-email">Email Address <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+                <input type="email" id="new-admin-email" class="form-control border-start-0 ps-0" placeholder="e.g. staff@miniapp.com" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small" for="new-admin-role">Admin Role & Access Level</label>
+              <select id="new-admin-role" class="form-select fw-semibold">
+                <option value="SUPER_ADMIN">👑 Super Admin (Full System Access)</option>
+                <option value="ADMIN" selected>🛡️ Admin Manager (Products & Orders)</option>
+                <option value="OPERATOR">⚡ Catalog Operator (Products Only)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small" for="new-admin-password">Initial Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-lock"></i></span>
+                <input type="password" id="new-admin-password" class="form-control border-start-0 ps-0" placeholder="••••••••" minlength="4" required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 p-3 bg-light bg-opacity-75">
+            <button type="button" class="btn btn-outline-secondary font-semibold px-4 rounded-3" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary font-bold px-4 rounded-3 border-0" style="background: linear-gradient(135deg, #4f46e5, #6366f1);"><i class="bi bi-check-lg me-1"></i> Issue Admin Credentials</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Super Admin Edit Credentials Modal (Email / Gmail & Password) -->
+  <div class="modal fade" id="editAdminCredentialsModal" tabindex="-1" aria-labelledby="editAdminCredentialsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header text-dark border-0 py-3 px-4" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+          <h5 class="modal-title font-bold text-dark d-flex align-items-center gap-2" id="editAdminCredentialsModalLabel">
+            <span class="p-1.5 bg-warning text-dark rounded-2 fs-6"><i class="bi bi-key-fill"></i></span>
+            Super Admin: Update Email & Password
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="edit-credentials-form" onsubmit="saveAdminCredentials(event)">
+          <input type="hidden" id="edit-admin-id">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold small">Target Account Username</label>
+              <input type="text" id="edit-admin-username" class="form-control bg-light font-monospace fw-bold text-primary" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small" for="edit-admin-email">New Email / Gmail Address <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+                <input type="email" id="edit-admin-email" class="form-control border-start-0 ps-0" placeholder="e.g. user@gmail.com" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold small" for="edit-admin-password">New Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-shield-lock"></i></span>
+                <input type="password" id="edit-admin-password" class="form-control border-start-0 ps-0" placeholder="Enter new password" minlength="4" required>
+              </div>
+              <small class="text-muted mt-1.5 d-block"><i class="bi bi-info-circle me-1"></i> As Super Admin (Seavik), you can reset password and Gmail for any account role.</small>
+            </div>
+          </div>
+          <div class="modal-footer border-0 p-3 bg-light bg-opacity-75">
+            <button type="button" class="btn btn-outline-secondary font-semibold px-4 rounded-3" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-warning font-bold px-4 rounded-3 text-dark border-0" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);"><i class="bi bi-shield-check me-1"></i> Save Updated Credentials</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js?v=20260726_2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/users.js"></script>
 </body>
 </html>

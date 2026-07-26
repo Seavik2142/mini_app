@@ -3,31 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="adminHMD professional admin dashboard template">
-  <title>Dashboard | adminHMD</title>
+  <meta name="description" content="Dashboard — Mini App Admin">
+  <title>Dashboard | Mini App Admin</title>
 
-  <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="../assets/vendors/bootstrap-icons/bootstrap-icons.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260726_v5">
 </head>
 
 <body>
   <div class="admin-shell">
     <div class="sidebar-backdrop" data-sidebar-close></div>
 
+
     <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
       <div class="sidebar-header">
-        <a class="brand-mark" href="index.html" aria-label="adminHMD dashboard">
+        <a class="brand-mark" href="index.html" aria-label="Mini App Admin">
           <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
           <span class="brand-copy">
-            <span class="brand-title">adminHMD</span>
-            <span class="brand-subtitle">Admin Template</span>
+            <span class="brand-title">Mini App</span>
+            <span class="brand-subtitle">Admin Panel</span>
           </span>
         </a>
       </div>
 
       <nav class="sidebar-nav">
-        <a class="nav-link active" href="index.html">
+        <a class="nav-link active" href="index.html" aria-current="page">
           <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
           <span class="nav-text">Dashboard</span>
         </a>
@@ -39,25 +40,19 @@
           <span class="nav-icon"><i class="bi bi-images"></i></span>
           <span class="nav-text">Hero Banners</span>
         </a>
-        <a class="nav-link" href="users.html">
-          <span class="nav-icon"><i class="bi bi-people"></i></span>
-          <span class="nav-text">Users & Admin Roles</span>
-        </a>
         <a class="nav-link" href="promos.html">
           <span class="nav-icon"><i class="bi bi-ticket-perforated"></i></span>
           <span class="nav-text">Promo Codes</span>
+        </a>
+        <a class="nav-link" href="users.html">
+          <span class="nav-icon"><i class="bi bi-people"></i></span>
+          <span class="nav-text">Users</span>
         </a>
         <a class="nav-link" href="payments.html">
           <span class="nav-icon"><i class="bi bi-credit-card"></i></span>
           <span class="nav-text">Payment History</span>
         </a>
       </nav>
-
-      <div class="sidebar-user">
-        <img class="avatar-img avatar-md sidebar-user-avatar" src="../assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-        <strong>Admin Hasan</strong>
-        <small>Active Workspace</small>
-      </div>
 
       <div class="sidebar-footer">
         <span class="status-dot"></span>
@@ -74,66 +69,49 @@
             <span></span>
           </button>
 
-          <form class="d-none d-md-flex ms-3 flex-grow-1" role="search">
-            <input class="form-control search-input" type="search" placeholder="Search users, orders, reports" aria-label="Search">
-          </form>
+          <div class="navbar-actions ms-auto d-flex align-items-center gap-2">
+            <div class="dropdown d-inline-block me-3" id="admin-profile-badge">
+              <button class="btn p-0 border-0 d-flex align-items-center gap-2 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Admin Profile">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 d-flex align-items-center justify-content-center shadow-sm" style="width:38px;height:38px;font-size:17px;cursor:pointer;">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 p-2" style="min-width:180px;">
+                <li class="px-3 py-2 border-bottom">
+                  <p class="fw-bold mb-0 text-primary font-monospace small" id="admin-profile-name">👑 Seavik</p>
+                  <span class="badge bg-primary bg-opacity-10 text-primary small mt-1" id="admin-profile-role">Super Admin</span>
+                </li>
+                <li class="mt-1">
+                  <a class="dropdown-item text-danger py-2 rounded-2 d-flex align-items-center gap-2 small font-semibold" href="login.html" onclick="window.localStorage.removeItem('mini_app_admin_session')">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-          <div class="navbar-actions ms-auto">
             <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
               <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
             </button>
-            <div class="dropdown">
-              <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                <span class="notification-dot"></span>
-                <i class="bi bi-bell" aria-hidden="true"></i>
-              </button>
-              <div class="dropdown-menu dropdown-menu-end notification-menu">
-                <div class="dropdown-header fw-bold text-body">Notifications</div>
-                <a class="dropdown-item" href="users.html">
-                  <span class="notification-title">New user registered</span>
-                  <span class="notification-time">4 minutes ago</span>
-                </a>
-                <a class="dropdown-item" href="charts.html">
-                  <span class="notification-title">Revenue target reached</span>
-                  <span class="notification-time">32 minutes ago</span>
-                </a>
-                <a class="dropdown-item" href="settings.html">
-                  <span class="notification-title">Security review completed</span>
-                  <span class="notification-time">1 hour ago</span>
-                </a>
-              </div>
-            </div>
-
-            <div class="dropdown">
-              <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar.jpg" alt="Admin Hasan">
-                <span class="profile-name d-none d-sm-inline">Admin Hasan</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
-                <li><a class="dropdown-item" href="settings.html">Account settings</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="login.html">Sign out</a></li>
-              </ul>
-            </div>
           </div>
         </div>
       </nav>
 
       <main class="dashboard-content">
         <div class="container-fluid px-3 px-lg-4 py-4">
+
+          <!-- Page Heading -->
           <div class="page-heading">
             <div class="page-heading-copy">
               <span class="page-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
               <div>
                 <p class="eyebrow mb-1">Overview</p>
                 <h1 class="h3 mb-1">Dashboard</h1>
-                <p class="text-muted mb-0">Monitor performance, sales, users, and support from one clean workspace.</p>
+                <p class="text-muted mb-0">Monitor store metrics, users, products, and order activity.</p>
               </div>
             </div>
-            <div class="heading-actions"><button class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-download" aria-hidden="true"></i> Export</button><button class="btn btn-primary btn-sm" type="button"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Create Report</button></div>
           </div>
 
+          <!-- Top Metric Cards -->
           <section class="row g-3 mt-1" aria-label="Dashboard metrics">
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-primary">
@@ -141,11 +119,8 @@
                   <span class="metric-label">Revenue</span>
                   <span class="metric-icon"><i class="bi bi-currency-dollar" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">$48,240</div>
-                <div class="metric-meta">
-                  <span class="text-success">+12.5%</span>
-                  <span>from last month</span>
-                </div>
+                <div class="metric-value" id="stat-revenue"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>total revenue</span></div>
               </article>
             </div>
 
@@ -155,192 +130,103 @@
                   <span class="metric-label">Orders</span>
                   <span class="metric-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">1,284</div>
-                <div class="metric-meta">
-                  <span class="text-success">+8.2%</span>
-                  <span>new orders</span>
-                </div>
+                <div class="metric-value" id="stat-orders"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>total orders</span></div>
               </article>
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-warning">
                 <div class="metric-top">
-                  <span class="metric-label">Customers</span>
+                  <span class="metric-label">Users</span>
                   <span class="metric-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">8,742</div>
-                <div class="metric-meta">
-                  <span class="text-success">+5.1%</span>
-                  <span>active users</span>
-                </div>
+                <div class="metric-value" id="stat-users"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>registered users</span></div>
               </article>
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-danger">
                 <div class="metric-top">
-                  <span class="metric-label">Tickets</span>
-                  <span class="metric-icon"><i class="bi bi-life-preserver" aria-hidden="true"></i></span>
+                  <span class="metric-label">Products</span>
+                  <span class="metric-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">36</div>
-                <div class="metric-meta">
-                  <span class="text-danger">3 urgent</span>
-                  <span>need review</span>
-                </div>
+                <div class="metric-value" id="stat-products"><span class="spinner-border spinner-border-sm"></span></div>
+                <div class="metric-meta"><span>in catalog</span></div>
               </article>
             </div>
           </section>
 
-          <section class="row g-3 mt-1">
-            <div class="col-12 col-xl-8">
-              <div class="panel">
-                <div class="panel-header">
-                  <div>
-                    <h2 class="h5 mb-1 section-title"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Sales Performance</span></h2>
-                    <p class="text-muted mb-0">Monthly revenue compared with operational targets.</p>
-                  </div>
-                  <a class="btn btn-light btn-sm" href="charts.html">View Details</a>
-                </div>
-
-                <div class="chart-bars" aria-label="Sales performance chart">
-                  <div class="chart-column bar-42"><span></span><small>Jan</small></div>
-                  <div class="chart-column bar-58"><span></span><small>Feb</small></div>
-                  <div class="chart-column bar-51"><span></span><small>Mar</small></div>
-                  <div class="chart-column bar-72"><span></span><small>Apr</small></div>
-                  <div class="chart-column bar-66"><span></span><small>May</small></div>
-                  <div class="chart-column bar-83"><span></span><small>Jun</small></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-xl-4">
-              <div class="panel h-100">
-                <div class="panel-header">
-                  <div>
-                    <h2 class="h5 mb-1 section-title"><i class="bi bi-activity" aria-hidden="true"></i><span>Team Activity</span></h2>
-                    <p class="text-muted mb-0">Recent operational updates.</p>
-                  </div>
-                </div>
-
-                <div class="activity-list">
-                  <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">New campaign launched</p><p class="text-muted small mb-0">Marketing team published the May offer.</p></div></div>
-                  <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Payment batch cleared</p><p class="text-muted small mb-0">246 invoices were processed successfully.</p></div></div>
-                  <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Support queue rising</p><p class="text-muted small mb-0">Average first response time is 18 minutes.</p></div></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="panel mt-3">
+          <!-- Recent Users Panel -->
+          <section class="panel mt-4">
             <div class="panel-header">
               <div>
                 <h2 class="h5 mb-1 section-title"><i class="bi bi-people" aria-hidden="true"></i><span>Recent Users</span></h2>
-                <p class="text-muted mb-0">Latest account activity across the workspace.</p>
+                <p class="text-muted mb-0">Latest registered accounts.</p>
               </div>
               <a class="btn btn-outline-secondary btn-sm" href="users.html">Manage Users</a>
             </div>
             <div class="table-responsive">
               <table class="table align-middle mb-0">
-                <thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Team</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col" class="text-end">Action</th></tr></thead>
-                <tbody>
+                <thead>
                   <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-1.jpg" alt="Sarah Ahmed">
-                        <div>
-                          <p class="fw-semibold mb-0">Sarah Ahmed</p>
-                          <p class="text-muted small mb-0">sarah@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Admin</td>
-                    <td>Operations</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Jan 12, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
+                    <th scope="col">User</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Joined</th>
+                    <th scope="col" class="text-end">Action</th>
                   </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-2.jpg" alt="Rafi Khan">
-                        <div>
-                          <p class="fw-semibold mb-0">Rafi Khan</p>
-                          <p class="text-muted small mb-0">rafi@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Manager</td>
-                    <td>Sales</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Feb 03, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-3.jpg" alt="Nadia Islam">
-                        <div>
-                          <p class="fw-semibold mb-0">Nadia Islam</p>
-                          <p class="text-muted small mb-0">nadia@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Editor</td>
-                    <td>Content</td>
-                    <td><span class="badge text-bg-warning">Pending</span></td>
-                    <td>Mar 18, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-4.jpg" alt="Mina Torres">
-                        <div>
-                          <p class="fw-semibold mb-0">Mina Torres</p>
-                          <p class="text-muted small mb-0">mina@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Viewer</td>
-                    <td>Finance</td>
-                    <td><span class="badge text-bg-secondary">Suspended</span></td>
-                    <td>Apr 07, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar-5.jpg" alt="Jon Oliver">
-                        <div>
-                          <p class="fw-semibold mb-0">Jon Oliver</p>
-                          <p class="text-muted small mb-0">jon@example.com</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Analyst</td>
-                    <td>Data</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Apr 22, 2026</td>
-                    <td class="text-end"><a class="btn btn-light btn-sm" href="user-details.html">View</a></td>
-                  </tr>
+                </thead>
+                <tbody id="recent-users-tbody">
+                  <tr><td colspan="5" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading users...</td></tr>
                 </tbody>
               </table>
             </div>
           </section>
+
+          <!-- Recent Orders Panel -->
+          <section class="panel mt-4">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-bag-check" aria-hidden="true"></i><span>Recent Orders</span></h2>
+                <p class="text-muted mb-0">Latest customer purchases.</p>
+              </div>
+              <a class="btn btn-outline-secondary btn-sm" href="payments.html">View All Orders</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Order #</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Payment Status</th>
+                    <th scope="col">Order Status</th>
+                    <th scope="col">Date</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-orders-tbody">
+                  <tr><td colspan="6" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading orders...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
         </div>
       </main>
 
       <footer class="admin-footer">
         <div class="container-fluid px-3 px-lg-4">
-          <span>Copyright 2026 adminHMD. <br> Developed by <a target="_blank" class="fw-bold text-success" href="https://github.com/HasanMahmudDev">Md. Hasan Mahmud</a> • Distributed by <a target="_blank" class="fw-bold text-success" href="https://themewagon.com">ThemeWagon</a> </span>
-          <span>Professional dashboard template.</span>
+          <span>Mini App Admin Panel &copy; 2026</span>
         </div>
       </footer>
     </div>
   </div>
 
-  <script src="../assets/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/main.js"></script>
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js?v=20260726_v5"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
