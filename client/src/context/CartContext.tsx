@@ -491,7 +491,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       paymentMethod,
       paymentStatus: 'PAID',
       orderStatus: 'DELIVERED',
-      contactPhone: phone || '+855 12 345 678',
+      contactPhone: phone || '',
       createdAt: new Date().toISOString(),
       items: newOrderItems
     };

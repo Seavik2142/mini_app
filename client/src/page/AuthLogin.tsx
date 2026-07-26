@@ -201,7 +201,7 @@ const AuthLogin: React.FC = () => {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+855 12 345 678"
+                  placeholder="e.g. 012 345 678"
                   className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all shadow-inner"
                 />
                 <p className="text-[10px] text-slate-400">

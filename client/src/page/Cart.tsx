@@ -253,7 +253,7 @@ const Cart: React.FC = () => {
           type="text"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+855 12 345 678"
+          placeholder="Enter phone number..."
           className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
         />
       </div>

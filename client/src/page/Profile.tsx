@@ -67,8 +67,8 @@ const Profile: React.FC = () => {
     toast.info("📱 Requesting Telegram Contact info...");
     setTimeout(() => {
       setIsSending(false);
-      const randomPhone = inputPhone || "+855 96 " + Math.floor(100000 + Math.random() * 900000);
-      updateVerifiedPhone(randomPhone);
+      const phoneToSet = inputPhone.trim();
+      if (phoneToSet) updateVerifiedPhone(phoneToSet);
       setShowVerifyModal(false);
       setStep("PHONE");
     }, 800);
@@ -300,7 +300,7 @@ const Profile: React.FC = () => {
                     type="text"
                     value={inputPhone}
                     onChange={(e) => setInputPhone(e.target.value)}
-                    placeholder="+855 12 345 678"
+                    placeholder="e.g. 012 345 678"
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white focus:outline-none focus:border-indigo-500"
                   />
                   <p className="text-[10px] text-slate-400">Enter your number with country code (+855...)</p>
