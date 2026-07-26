@@ -9,6 +9,7 @@ import { init } from '@telegram-apps/sdk'
 import { Toaster } from 'sonner'
 
 import { CartProvider } from './context/CartContext'
+import { LanguageProvider } from './context/LanguageContext'
 
 try {
   init();
@@ -20,10 +21,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <Provider store={Store}>
-        <CartProvider>
-          <Toaster position="top-center" richColors theme="dark" />
-          <RouterProvider router={Routes} />
-        </CartProvider>
+        <LanguageProvider>
+          <CartProvider>
+            <Toaster position="top-center" richColors theme="dark" />
+            <RouterProvider router={Routes} />
+          </CartProvider>
+        </LanguageProvider>
       </Provider>
     </div>
   </React.StrictMode>,

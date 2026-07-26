@@ -1,32 +1,34 @@
 import { FaKey, FaShoppingCart, FaShieldAlt, FaUser } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const BottomDock = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { totalItems } = useCart();
+    const { t } = useLanguage();
 
     const dock = [
         {
             href: "/app",
-            title: "Keys",
+            title: t("navKeys"),
             icon: <FaKey className="text-base" />
         },
         {
             href: "/app/cart",
-            title: "Cart",
+            title: t("navCart"),
             badge: totalItems,
             icon: <FaShoppingCart className="text-base" />
         },
         {
             href: "/app/orders",
-            title: "Vault",
+            title: t("navVault"),
             icon: <FaShieldAlt className="text-base" />
         },
         {
             href: "/app/profile",
-            title: "Profile",
+            title: t("navProfile"),
             icon: <FaUser className="text-base" />
         },
     ];

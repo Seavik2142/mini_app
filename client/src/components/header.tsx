@@ -1,10 +1,12 @@
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { FaShoppingBag } from 'react-icons/fa';
 import logoImg from '../assets/logo.jpeg';
 
 const Header = () => {
     const { totalItems } = useCart();
+    const { language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
 
     return (
@@ -30,8 +32,17 @@ const Header = () => {
                 </div>
             </div>
 
-            {/* Header Right Action: Cart Button */}
+            {/* Header Right Actions: Language Switcher & Cart */}
             <div className="flex items-center gap-2">
+                <button
+                    onClick={toggleLanguage}
+                    className="px-2.5 py-1.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition-all text-xs font-bold text-slate-200 flex items-center gap-1 shadow-sm"
+                    aria-label="Change Language"
+                >
+                    <span className="text-sm">{language === 'km' ? '🇰🇭' : '🇬🇧'}</span>
+                    <span className="hidden sm:inline">{language === 'km' ? 'ខ្មែរ' : 'EN'}</span>
+                </button>
+
                 <button 
                     onClick={() => navigate('/app/cart')}
                     className="relative p-2.5 bg-slate-900/90 hover:bg-slate-800 active:scale-95 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition-all text-slate-200 hover:text-white shadow-sm"

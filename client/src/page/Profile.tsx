@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaCheck } from "react-icons/fa";
+import { FaShieldAlt, FaKey, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaCheck, FaGlobe } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { orders, telegramUser, isPhoneVerified, verifiedPhone, verifyPhone, sendOtpCode, updateVerifiedPhone, logout } = useCart();
+  const { language, setLanguage, t } = useLanguage();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [inputPhone, setInputPhone] = useState(verifiedPhone || "");
   const [otpCode, setOtpCode] = useState("");
@@ -173,6 +175,35 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
+          {/* Language Selector Card */}
+          <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2.5 shadow-lg">
+            <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+              <FaGlobe className="text-indigo-400" /> {t("language")} / Select Language
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setLanguage("km")}
+                className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 border transition-all ${
+                  language === "km"
+                    ? "bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30"
+                    : "bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700"
+                }`}
+              >
+                <span>🇰🇭</span> <span>{t("khmer")}</span>
+              </button>
+              <button
+                onClick={() => setLanguage("en")}
+                className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 border transition-all ${
+                  language === "en"
+                    ? "bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30"
+                    : "bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700"
+                }`}
+              >
+                <span>🇬🇧</span> <span>{t("english")}</span>
+              </button>
+            </div>
+          </div>
+
           {/* Account Actions / Logout */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg">
             <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
@@ -183,7 +214,7 @@ const Profile: React.FC = () => {
               onClick={logout}
               className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-extrabold text-xs rounded-xl border border-rose-500/30 flex items-center justify-center gap-2 transition-all shadow-sm"
             >
-              <FaSignOutAlt /> Sign Out / Switch Telegram Account
+              <FaSignOutAlt /> {t("logout")}
             </button>
           </div>
         </>

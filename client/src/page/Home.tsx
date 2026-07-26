@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaSearch, FaStar, FaKey, FaTimes, FaShieldAlt } from "react-icons/fa";
 import { Product } from "../type";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 
 import chatGptImg from "../assets/ChatGPT.jpg";
 import geminiImg from "../assets/gemini.jpeg";
@@ -13,9 +14,9 @@ const BANNER_SLIDES = [
   { id: 3, image: claudeImg }
 ];
 
-
 const Home: React.FC = () => {
   const { products, bannerSlides, addToCart, formatKHR, requireAuth } = useCart();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalQuantity, setModalQuantity] = useState<number>(1);
@@ -82,7 +83,7 @@ const Home: React.FC = () => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search keys, Steam, Telegram Premium, VPN..."
+          placeholder={t("searchPlaceholder")}
           className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm"
         />
         {searchQuery && (
@@ -151,7 +152,7 @@ const Home: React.FC = () => {
                   onClick={() => requireAuth(() => addToCart(product))}
                   className="w-full py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all"
                 >
-                  <FaKey className="text-xs" /> Buy Key
+                  <FaKey className="text-xs" /> {t("buyNow")}
                 </button>
               </div>
             </div>
