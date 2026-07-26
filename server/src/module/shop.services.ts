@@ -429,7 +429,7 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
         const dbProduct = await prisma.product.findUnique({ where: { id: Number(item.productId) } });
         if (dbProduct) {
           activationInstructions = dbProduct.description || activationInstructions;
-          unitPrice = paymentMethod === 'TON' ? dbProduct.tonPrice : (paymentMethod === 'STARS' ? dbProduct.starsPrice : dbProduct.price);
+          unitPrice = paymentMethod === 'TON' ? (dbProduct.tonPrice || 0) : (paymentMethod === 'STARS' ? (dbProduct.starsPrice || 0) : (dbProduct.price || 0));
           
           const availableKeys = dbProduct.digitalKeys || [];
           if (availableKeys.length > 0) {
@@ -465,10 +465,17 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
 
       processedItems.push({
         ...item,
+        price: unitPrice,
         digitalKeys: deliveredKeys,
         activationInstructions
       });
     }
+
+    const prismaOrderItems = processedItems.map((pi: any) => ({
+      productId: Number(pi.productId),
+      quantity: Number(pi.quantity || 1),
+      price: Number(pi.price || 0)
+    }));
 
     const newOrder = await prisma.order.create({
       data: {
@@ -479,9 +486,16 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
         orderStatus: 'DELIVERED',
         contactPhone: contactPhone || 'Telegram User',
         userId: userId,
-        items: processedItems
+        items: {
+          create: prismaOrderItems
+        }
       }
     });
+
+    const responseOrder = {
+      ...newOrder,
+      items: processedItems
+    };
 
     if (recipientChatId) {
       let keyDetailsMarkdown = "";
@@ -513,7 +527,7 @@ Redeem keys in app or software settings.
     res.status(201).json({
       success: true,
       message: "Digital keys delivered to Telegram Bot & Vault!",
-      data: newOrder
+      data: responseOrder
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
