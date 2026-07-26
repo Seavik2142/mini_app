@@ -228,12 +228,21 @@
       body.classList.add("sidebar-mini");
     }
 
+    var lastToggleTime = 0;
+    function handleToggleEvent(e) {
+      var now = Date.now();
+      if (now - lastToggleTime < 350) {
+        return;
+      }
+      lastToggleTime = now;
+      toggleSidebar();
+    }
+
     if (sidebarToggle) {
-      sidebarToggle.addEventListener("click", toggleSidebar);
+      sidebarToggle.addEventListener("click", handleToggleEvent);
       sidebarToggle.addEventListener("touchstart", function(e) {
-        e.preventDefault();
-        toggleSidebar();
-      });
+        handleToggleEvent(e);
+      }, { passive: true });
     }
 
     var backdrop = document.querySelector(".sidebar-backdrop");
