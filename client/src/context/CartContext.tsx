@@ -222,10 +222,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentOtpCode, setCurrentOtpCode] = useState<string>("");
 
   // 🛡️ Global Admin State & Stores
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem("mini_app_products");
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
-  });
+  // Always start with hardcoded products; API fetch below will immediately replace with live DB data
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
 
   const [bannerSlides, setBannerSlides] = useState<BannerSlide[]>(() => {
     const saved = localStorage.getItem("mini_app_banners");
@@ -242,11 +240,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : INITIAL_USERS;
   });
 
-  // Sync Products & Banners from Server API (Non-blocking with 4s timeout)
+  // Sync Products, Banners & Promos from live server API on every app load
+  // Always replace state with API response so admin changes (add/edit/delete) are reflected instantly
   useEffect(() => {
     const fetchWithTimeout = async (url: string) => {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 4000);
+      const id = setTimeout(() => controller.abort(), 10000);
       try {
         const res = await fetch(url, { signal: controller.signal });
         clearTimeout(id);
@@ -258,28 +257,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    // Products — always replace with live DB data (respects admin add/edit/delete)
     fetchWithTimeout(`${API_BASE_URL}/shop/products`).then(data => {
-      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-        setProducts(data.data);
+      if (data && Array.isArray(data.data)) {
+        // If DB has products, use them. If empty, keep INITIAL_PRODUCTS as fallback.
+        if (data.data.length > 0) {
+          setProducts(data.data);
+        }
+        // else: keep INITIAL_PRODUCTS so store doesn't look empty
       }
     });
 
     fetchWithTimeout(`${API_BASE_URL}/shop/banners`).then(data => {
-      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+      if (data && Array.isArray(data.data) && data.data.length > 0) {
         setBannerSlides(data.data);
       }
     });
 
     fetchWithTimeout(`${API_BASE_URL}/shop/promos`).then(data => {
-      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+      if (data && Array.isArray(data.data) && data.data.length > 0) {
         setPromoCodesList(data.data);
       }
     });
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("mini_app_products", JSON.stringify(products));
-  }, [products]);
+  // Do NOT cache products in localStorage — always use live API data so admin changes sync instantly
 
   useEffect(() => {
     localStorage.setItem("mini_app_banners", JSON.stringify(bannerSlides));
