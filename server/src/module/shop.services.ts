@@ -315,8 +315,7 @@ export const seedDatabaseIfEmpty = async () => {
     console.error("Seed notice:", e);
   }
 };
-seedDatabaseIfEmpty();
-
+};
 export const getProducts: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { category, search, featured } = req.query;
