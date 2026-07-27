@@ -49,7 +49,7 @@ const Profile: React.FC = () => {
   };
 
   const handleSendOtp = async () => {
-    let cleanPhone = inputPhone.trim().replace(/\s+/g, '');
+    const cleanPhone = inputPhone.trim().replace(/\s+/g, '');
     if (!cleanPhone || cleanPhone.length < 8) {
       toast.error("Please enter a valid phone number");
       return;

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaPhoneAlt, FaLock, FaShieldAlt, FaCheck, FaTelegram, FaExternalLinkAlt, FaRedo, FaRocket } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
-import logoImg from "../assets/logo.jpeg";
+import logoImg from "../assets/logo.jpg";
 
 import { openTelegramLink } from "@telegram-apps/sdk";
 

@@ -2,7 +2,7 @@ import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { FaShoppingBag } from 'react-icons/fa';
-import logoImg from '../assets/logo.jpeg';
+import logoImg from '../assets/logo.jpg';
 
 const Header = () => {
     const { totalItems } = useCart();
