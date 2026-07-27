@@ -301,8 +301,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ rating, tgId: telegramUser.id })
       });
       const data = await res.json();
-      if (data.success && data.product) {
-        setProducts(prev => prev.map(p => p.id === productId ? data.product : p));
+      if (data.success && data.data) {
+        setProducts(prev => prev.map(p => p.id === productId ? data.data : p));
         toast.success("⭐ Thanks for rating!");
         return true;
       }
