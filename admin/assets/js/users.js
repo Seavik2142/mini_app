@@ -57,7 +57,7 @@ async function loadUsers(page = 1, search = '') {
 
   tbody.innerHTML = usersList.map(u => `
     <tr>
-      <td>
+      <td data-label="User">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold" style="width:36px;height:36px;min-width:36px;font-size:13px;">
             ${(u.name || 'U')[0].toUpperCase()}
@@ -68,11 +68,11 @@ async function loadUsers(page = 1, search = '') {
           </div>
         </div>
       </td>
-      <td><code class="small">${escHtml(u.tgId)}</code></td>
-      <td>${formatCurrency(u.balance)}</td>
-      <td><code class="small">${escHtml(u.referCode || '—')}</code></td>
-      <td>${statusBadge(u.isBlock ? 'BLOCKED' : 'ACTIVE')}</td>
-      <td>${formatDate(u.joinedAt)}</td>
+      <td data-label="TG ID"><code class="small">${escHtml(u.tgId)}</code></td>
+      <td data-label="Balance">${formatCurrency(u.balance)}</td>
+      <td data-label="Refer Code"><code class="small">${escHtml(u.referCode || '—')}</code></td>
+      <td data-label="Status">${statusBadge(u.isBlock ? 'BLOCKED' : 'ACTIVE')}</td>
+      <td data-label="Joined">${formatDate(u.joinedAt)}</td>
       <td class="text-end d-flex gap-1 justify-content-end">
         <a href="user-details.html?id=${u.id}" class="btn btn-light btn-sm">View</a>
         <button class="btn btn-sm ${u.isBlock ? 'btn-success' : 'btn-warning'}" onclick="toggleBlock(${u.id}, ${u.isBlock})">

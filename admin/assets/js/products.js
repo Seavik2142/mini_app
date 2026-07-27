@@ -50,24 +50,24 @@ function renderProductsList(products) {
     const keysCount = p.digitalKeys?.length || 0;
     return `
     <tr>
-      <td>
+      <td data-label="Image">
         ${p.images?.[0]
           ? `<img src="${escHtml(p.images[0])}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'">`
           : '<div style="width:44px;height:44px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-image text-muted"></i></div>'}
       </td>
-      <td>
+      <td data-label="Product">
         <p class="fw-semibold mb-0">${escHtml(p.name)}</p>
         <p class="text-muted small mb-0">${escHtml(p.category?.name || 'General')}</p>
       </td>
-      <td>${formatCurrency(p.price)}</td>
-      <td>
+      <td data-label="Price">${formatCurrency(p.price)}</td>
+      <td data-label="Keys Inventory">
         <button class="btn btn-sm ${keysCount > 0 ? 'btn-outline-success' : 'btn-outline-warning'} font-monospace py-0 px-2" onclick="openKeysViewModal(${p.id})">
           <i class="bi bi-key-fill me-1"></i> ${keysCount} Keys
         </button>
       </td>
-      <td>${p.stock ?? '—'}</td>
-      <td>${p.rating ?? '5.0'} ⭐</td>
-      <td>
+      <td data-label="Stock">${p.stock ?? '—'}</td>
+      <td data-label="Rating">${p.rating ?? '5.0'} ⭐</td>
+      <td data-label="Flags">
         ${p.isFeatured ? '<span class="badge bg-primary me-1">Featured</span>' : ''}
         ${p.isNew ? '<span class="badge bg-success me-1">New</span>' : ''}
         ${p.isOnSale ? '<span class="badge bg-warning text-dark">Sale</span>' : ''}

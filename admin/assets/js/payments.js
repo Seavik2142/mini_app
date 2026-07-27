@@ -18,19 +18,19 @@ async function loadOrders(page = 1) {
 
     tbody.innerHTML = orders.map(o => `
       <tr>
-        <td><span class="fw-semibold">#${escHtml(o.orderNumber)}</span></td>
-        <td>${escHtml(o.user?.name || '—')}</td>
-        <td>${formatCurrency(o.totalAmount)}</td>
-        <td><span class="badge bg-light text-dark border">${escHtml(o.paymentMethod)}</span></td>
-        <td>${statusBadge(o.paymentStatus)}</td>
-        <td>
+        <td data-label="Order"><span class="fw-semibold">#${escHtml(o.orderNumber)}</span></td>
+        <td data-label="User">${escHtml(o.user?.name || '—')}</td>
+        <td data-label="Amount">${formatCurrency(o.totalAmount)}</td>
+        <td data-label="Method"><span class="badge bg-light text-dark border">${escHtml(o.paymentMethod)}</span></td>
+        <td data-label="Payment">${statusBadge(o.paymentStatus)}</td>
+        <td data-label="Status">
           <select class="form-select form-select-sm" style="width:140px" onchange="updateOrderStatus(${o.id}, this.value)">
             ${['PROCESSING','SHIPPED','DELIVERED','CANCELLED'].map(s =>
               `<option value="${s}" ${o.orderStatus === s ? 'selected' : ''}>${s}</option>`
             ).join('')}
           </select>
         </td>
-        <td>${formatDate(o.createdAt)}</td>
+        <td data-label="Date">${formatDate(o.createdAt)}</td>
       </tr>
     `).join('') || `<tr><td colspan="7" class="text-center text-muted py-4">No orders yet</td></tr>`;
 
