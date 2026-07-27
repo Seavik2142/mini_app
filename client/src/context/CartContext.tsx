@@ -90,12 +90,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const getApiBaseUrl = () => {
   return "https://mini-app-mzu6.onrender.com";
 };
-const KHR_RATE = 4000;
 const API_BASE_URL = getApiBaseUrl();
-
-export const formatKHR = (usdAmount: number): string => {
-  return (Math.round(usdAmount * KHR_RATE)).toLocaleString() + " ៛";
-};
 
 const generateRandomKey = (prefix: string = "KEY") => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -145,6 +140,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Telegram SDK initData restore notice:", e);
     }
   }, []);
+
+  const [khrRate, setKhrRate] = useState<number>(4000);
+
+  useEffect(() => {
+    fetch("https://open.er-api.com/v6/latest/USD")
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.rates && data.rates.KHR) {
+          setKhrRate(data.rates.KHR);
+        }
+      })
+      .catch(err => console.error("Failed to fetch live KHR rate", err));
+  }, []);
+
+  const formatKHR = (usdAmount: number): string => {
+    return (Math.round(usdAmount * khrRate)).toLocaleString() + " ៛";
+  };
 
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem("mini_app_cart");
@@ -473,7 +485,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const discount = (subtotal * discountPercent) / 100;
   const totalPrice = Math.max(0, subtotal - discount);
-  const totalRiel = totalPrice * KHR_RATE;
+  const totalRiel = totalPrice * khrRate;
 
   const placeOrder = async (paymentMethod: 'ABA' | 'BAKONG' | 'CARD' | 'PAYPAL', phone: string): Promise<Order | null> => {
     if (cart.length === 0) {
