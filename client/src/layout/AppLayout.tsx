@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import BottomDock from "../components/bottomDock";
 import Header from "../components/header";
 import { Toaster } from "sonner";
-import { FaTelegram, FaUserShield, FaCommentDots, FaTimes } from "react-icons/fa";
+import { FaTelegram, FaUserShield, FaCommentDots, FaTimes, FaRobot } from "react-icons/fa";
 
 const FloatingButtons = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -113,6 +113,18 @@ const FloatingButtons = () => {
                     </span>
                     <div className="w-12 h-12 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 border border-blue-400/30">
                         <FaTelegram className="text-2xl" />
+                    </div>
+                </button>
+                <button
+                    onClick={() => { setIsOpen(false); window.open('https://t.me/Sik_mybot', '_blank'); }}
+                    className={`flex items-center gap-3 group active:scale-95 transition-transform w-max ${isLeftEdge ? 'flex-row-reverse' : ''}`}
+                    aria-label="Telegram Bot"
+                >
+                    <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
+                        Open Bot
+                    </span>
+                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-lime-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/40 border border-emerald-400/30">
+                        <FaRobot className="text-xl" />
                     </div>
                 </button>
             </div>
