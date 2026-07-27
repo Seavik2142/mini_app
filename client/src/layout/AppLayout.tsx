@@ -104,7 +104,7 @@ const FloatingButtons = () => {
                     </div>
                 </button>
                 <button
-                    onClick={() => { setIsOpen(false); window.open('https://t.me/your_channel', '_blank'); }}
+                    onClick={() => { setIsOpen(false); window.open('https://t.me/MGDigitalKeys', '_blank'); }}
                     className={`flex items-center gap-3 group active:scale-95 transition-transform w-max ${isLeftEdge ? 'flex-row-reverse' : ''}`}
                     aria-label="Telegram Channel"
                 >
