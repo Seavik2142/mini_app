@@ -15,12 +15,33 @@ const BANNER_SLIDES = [
 ];
 
 const Home: React.FC = () => {
-  const { products, bannerSlides, addToCart, formatKHR, requireAuth } = useCart();
+  const { products, bannerSlides, addToCart, formatKHR, requireAuth, rateProduct } = useCart();
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalQuantity, setModalQuantity] = useState<number>(1);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [hoveredStar, setHoveredStar] = useState<number>(0);
+  const [isRating, setIsRating] = useState(false);
+
+  const handleRateProduct = (rate: number) => {
+    if (!selectedProduct || isRating) return;
+    requireAuth(async () => {
+      setIsRating(true);
+      const success = await rateProduct(selectedProduct.id, rate);
+      if (success) {
+        setSelectedProduct(prev => {
+          if (!prev) return prev;
+          const count = prev.reviewCount || 0;
+          const currentRating = prev.rating || 5;
+          const newCount = count + 1;
+          const newRating = ((currentRating * count) + rate) / newCount;
+          return { ...prev, rating: Number(newRating.toFixed(1)), reviewCount: newCount };
+        });
+      }
+      setIsRating(false);
+    });
+  };
 
   // Reset modal quantity whenever product changes
   useEffect(() => {
@@ -185,10 +206,24 @@ const Home: React.FC = () => {
             </div>
 
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <h2 className="text-lg font-extrabold text-white">{selectedProduct.name}</h2>
-                <div className="flex items-center gap-1 text-amber-300 text-xs font-bold bg-slate-800/80 border border-slate-700/80 px-2 py-1 rounded-lg">
-                  <FaStar className="text-amber-400" /> {selectedProduct.rating} ({selectedProduct.reviewCount})
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1 text-amber-300 text-xs font-bold bg-slate-800/80 border border-slate-700/80 px-2 py-1 rounded-lg shadow-inner">
+                    <FaStar className="text-amber-400" /> {selectedProduct.rating} ({selectedProduct.reviewCount})
+                  </div>
+                  <div className="flex items-center gap-1 mt-1 bg-slate-900 border border-slate-800 px-2 py-1 rounded-lg">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar
+                        key={star}
+                        className={`text-[11px] cursor-pointer transition-transform ${star <= (hoveredStar || 0) ? 'text-amber-400 scale-110' : 'text-slate-600'} ${isRating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onMouseEnter={() => !isRating && setHoveredStar(star)}
+                        onMouseLeave={() => !isRating && setHoveredStar(0)}
+                        onClick={() => handleRateProduct(star)}
+                      />
+                    ))}
+                    <span className="text-[9px] text-slate-500 ml-1">Rate</span>
+                  </div>
                 </div>
               </div>
 

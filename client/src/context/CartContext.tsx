@@ -83,6 +83,7 @@ interface CartContextType {
   toggleUserBlock: (userId: number) => void;
   dbUserProfile: any;
   updateUserProfileData: (email: string) => Promise<boolean>;
+  rateProduct: (productId: number, rating: number) => Promise<boolean>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -290,6 +291,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteProduct = (id: number) => {
     setProducts(prev => prev.filter(p => p.id !== id));
     toast.success("Product removed");
+  };
+
+  const rateProduct = async (productId: number, rating: number): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/shop/products/${productId}/rate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, tgId: telegramUser.id })
+      });
+      const data = await res.json();
+      if (data.success && data.product) {
+        setProducts(prev => prev.map(p => p.id === productId ? data.product : p));
+        toast.success("⭐ Thanks for rating!");
+        return true;
+      }
+    } catch (e) {
+      // Optimistic offline fallback
+      setProducts(prev => prev.map(p => {
+        if (p.id === productId) {
+           const count = (p.reviewCount || 1);
+           const currentRating = (p.rating || 5);
+           const newCount = count + 1;
+           const newRating = ((currentRating * count) + rating) / newCount;
+           return { ...p, rating: Number(newRating.toFixed(1)), reviewCount: newCount };
+        }
+        return p;
+      }));
+      toast.success("⭐ Thanks for rating!");
+      return true;
+    }
+    return false;
   };
 
   const updateBannerSlide = (id: number, updatedFields: Partial<BannerSlide>) => {
@@ -808,6 +840,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         totalPrice,
         totalRiel,
         formatKHR,
+        rateProduct,
 
         // 🛡️ Admin Controls
         products,
