@@ -89,7 +89,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const getApiBaseUrl = () => {
-  return "https://mini-app-2z1.pages.dev";
+  return "https://mini-app-mzu6.onrender.com";
 };
 const API_BASE_URL = getApiBaseUrl();
 
