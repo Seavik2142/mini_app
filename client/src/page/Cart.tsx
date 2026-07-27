@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaTimes, FaPhoneAlt, FaPaypal } from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaTimes, FaPhoneAlt, FaRegCreditCard } from "react-icons/fa";
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 
@@ -24,89 +24,91 @@ const Cart: React.FC = () => {
 
   const navigate = useNavigate();
   const [inputCode, setInputCode] = useState("");
-  const paymentMethod = "PAYPAL";
+  const paymentMethod = "ABA";
   const [phone, setPhone] = useState("");
-  const [showKHQRModal, setShowKHQRModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [paypalData, setPaypalData] = useState<any>(null);
+  const [abaData, setAbaData] = useState<any>(null);
 
   const handleOpenPayment = async () => {
     requireAuth(async () => {
       if (cart.length === 0) return;
       setIsVerifying(true);
-      setShowKHQRModal(true);
+      setShowModal(true);
 
       try {
-        const res = await fetch(`${API_BASE_URL}/shop/paypal-checkout`, {
+        const res = await fetch(`${API_BASE_URL}/shop/aba-checkout`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}` // if your API requires it
+          },
           body: JSON.stringify({
             items: cart.map(i => ({ productId: i.product.id, name: i.product.name, quantity: i.quantity, price: i.product.price })),
-            totalAmount: totalPrice
+            totalAmount: totalPrice,
+            phone: phone
           })
         });
         const data = await res.json();
         if (data.success && data.data) {
-          setPaypalData(data.data);
+          setAbaData(data.data);
+        } else {
+          toast.error("Failed to initialize ABA checkout.");
+          setShowModal(false);
         }
       } catch (e) {
-        console.log("Checkout API error:", e);
+        console.log("ABA Checkout API error:", e);
+        toast.error("An error occurred connecting to ABA.");
+        setShowModal(false);
       } finally {
         setIsVerifying(false);
       }
     });
   };
 
-  useEffect(() => {
-    if (showKHQRModal) {
-      const clientId = paypalData?.clientId || "Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe";
-      const scriptId = "paypal-js-sdk";
-      
-      const renderButtons = () => {
-        const container = document.getElementById("paypal-button-container");
-        if (container && (window as any).paypal) {
-          container.innerHTML = "";
-          try {
-            (window as any).paypal.Buttons({
-              style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
-              createOrder: (_data: any, actions: any) => {
-                return actions.order.create({
-                  purchase_units: [{ amount: { value: totalPrice.toFixed(2) } }]
-                });
-              },
-              onApprove: async (_data: any, actions: any) => {
-                setIsVerifying(true);
-                try {
-                  await actions.order.capture();
-                } catch (e) {
-                  console.log("Capture notice:", e);
-                }
-                toast.success("🎉 PayPal Payment Approved! Auto-delivering digital keys...");
-                const order = await placeOrder("PAYPAL", phone);
-                setIsVerifying(false);
-                setShowKHQRModal(false);
-                if (order) {
-                  navigate("/app/orders");
-                }
-              }
-            }).render("#paypal-button-container");
-          } catch (e) {
-            console.log("PayPal Buttons render fallback:", e);
-          }
-        }
+  const submitAbaForm = () => {
+    if (!abaData) return;
+    
+    // Auto-complete order in our system immediately for this mock flow
+    // In full production, this is handled by ABA webhook.
+    placeOrder("ABA", phone).then(() => {
+      // Create and submit the ABA form
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = abaData.apiUrl;
+      form.target = "_blank"; // open in new tab
+
+      const addField = (name: string, value: string) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
       };
 
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
-        script.onload = renderButtons;
-        document.body.appendChild(script);
-      } else {
-        renderButtons();
-      }
-    }
-  }, [showKHQRModal, paypalData, totalPrice]);
+      addField("hash", abaData.hash);
+      addField("tran_id", abaData.tran_id);
+      addField("amount", abaData.amount);
+      addField("items", abaData.items);
+      addField("firstname", abaData.firstname);
+      addField("lastname", abaData.lastname);
+      addField("email", abaData.email);
+      addField("phone", abaData.phone);
+      addField("req_time", abaData.req_time);
+      addField("merchant_id", abaData.merchantId);
+      addField("return_url", abaData.return_url);
+      addField("continue_success_url", abaData.continue_success_url);
+      addField("payment_option", abaData.payment_option);
+      addField("type", abaData.type);
+
+      document.body.appendChild(form);
+      form.submit();
+      
+      toast.success("Redirecting to ABA PayWay...");
+      setShowModal(false);
+      navigate("/app/orders");
+    });
+  };
 
   // Telegram Native MainButton integration
   useEffect(() => {
@@ -118,8 +120,8 @@ const Cart: React.FC = () => {
         }
         if (mb.setParams?.isAvailable) {
           mb.setParams({
-            text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)}) VIA PAYPAL`,
-            backgroundColor: '#0070ba',
+            text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)}) VIA ABA`,
+            backgroundColor: '#0054a6',
             textColor: '#ffffff',
             isVisible: true,
             isEnabled: true,
@@ -224,7 +226,7 @@ const Cart: React.FC = () => {
             type="text"
             value={inputCode}
             onChange={(e) => setInputCode(e.target.value)}
-            placeholder="Try code TELEGRAM10 or ABA10"
+            placeholder="Try code SIK10"
             className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white uppercase tracking-wider focus:outline-none focus:border-indigo-500"
           />
           <button
@@ -236,7 +238,7 @@ const Cart: React.FC = () => {
         </div>
         {promoCode && (
           <p className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-            <FaCheck /> Active Code: {promoCode} (15% OFF applied)
+            <FaCheck /> Active Code: {promoCode} applied!
           </p>
         )}
       </div>
@@ -255,29 +257,29 @@ const Cart: React.FC = () => {
         />
       </div>
 
-      {/* Payment Selection (PayPal Exclusive) */}
+      {/* Payment Selection */}
       <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-md">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-            <FaPaypal className="text-indigo-400 text-sm" /> Payment Method
+            <FaRegCreditCard className="text-[#0054a6] text-sm" /> Payment Method
           </h3>
-          <span className="text-[10px] bg-indigo-500/20 text-indigo-300 font-extrabold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-            PAYPAL ONLINE ⚡
+          <span className="text-[10px] bg-[#0054a6]/20 text-[#0054a6] font-extrabold px-2.5 py-0.5 rounded-full border border-[#0054a6]/30">
+            ABA PAYWAY ⚡
           </span>
         </div>
 
-        {/* PayPal Option Box */}
-        <div className="p-3 bg-slate-950 border-2 border-indigo-500/60 rounded-xl flex items-center justify-between shadow-inner">
+        {/* ABA Option Box */}
+        <div className="p-3 bg-slate-950 border-2 border-[#0054a6]/60 rounded-xl flex items-center justify-between shadow-inner">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white text-lg font-black rounded-xl flex items-center justify-center shadow-md">
-              <FaPaypal />
+            <div className="w-10 h-10 bg-gradient-to-tr from-[#0054a6] to-[#00b0e3] text-white text-lg font-black rounded-xl flex items-center justify-center shadow-md">
+              KH
             </div>
             <div>
-              <p className="text-xs font-black text-white">PayPal Express Checkout</p>
-              <p className="text-[10px] text-slate-400">Direct instant checkout via PayPal</p>
+              <p className="text-xs font-black text-white">ABA PayWay Checkout</p>
+              <p className="text-[10px] text-slate-400">Secure payment via ABA App</p>
             </div>
           </div>
-          <span className="text-xs text-indigo-400 font-extrabold flex items-center gap-1">
+          <span className="text-xs text-[#00b0e3] font-extrabold flex items-center gap-1">
             <FaCheck /> Selected
           </span>
         </div>
@@ -291,7 +293,7 @@ const Cart: React.FC = () => {
         </div>
         {discount > 0 && (
           <div className="flex justify-between text-emerald-400 font-semibold">
-            <span>Discount (15%)</span>
+            <span>Discount Applied</span>
             <span>-${discount.toFixed(2)} (-{formatKHR(discount)})</span>
           </div>
         )}
@@ -311,28 +313,28 @@ const Cart: React.FC = () => {
       {/* Proceed to Payment Button */}
       <button
         onClick={handleOpenPayment}
-        className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/30 active:scale-[0.99] transition-all"
+        className="w-full py-3.5 bg-gradient-to-r from-[#0054a6] to-[#00b0e3] hover:from-[#00428a] hover:to-[#008fbc] text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-[#0054a6]/30 active:scale-[0.99] transition-all"
       >
-        <FaPaypal className="text-lg" />
-        Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via PayPal <FaArrowRight className="text-xs" />
+        <FaRegCreditCard className="text-lg" />
+        Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via ABA <FaArrowRight className="text-xs" />
       </button>
 
-      {/* PayPal Checkout Modal */}
-      {showKHQRModal && (
+      {/* ABA Checkout Modal */}
+      {showModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl text-center animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-left">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-600 text-white text-base">
-                  <FaPaypal />
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#0054a6] text-white text-base">
+                  <FaRegCreditCard />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-sm text-white">PayPal Express Checkout</h3>
-                  <p className="text-[10px] text-slate-400">Pay via PayPal Gateway</p>
+                  <h3 className="font-extrabold text-sm text-white">ABA PayWay Checkout</h3>
+                  <p className="text-[10px] text-slate-400">Pay securely via ABA Bank</p>
                 </div>
               </div>
               <button
-                onClick={() => setShowKHQRModal(false)}
+                onClick={() => setShowModal(false)}
                 className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800"
               >
                 <FaTimes />
@@ -342,32 +344,48 @@ const Cart: React.FC = () => {
             {/* Total Amount Badge */}
             <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-0.5">
               <p className="text-[10px] text-slate-400 uppercase font-semibold">
-                {isVerifying ? "Verifying & Delivering Keys..." : "Total Amount Payable"}
+                {isVerifying ? "Verifying Transaction..." : "Total Amount Payable"}
               </p>
               <p className="text-2xl font-black text-white font-mono">${totalPrice.toFixed(2)}</p>
               <p className="text-xs font-black text-emerald-400 font-mono">{formatKHR(totalPrice)}</p>
             </div>
 
-            {/* Official PayPal Buttons Container */}
             <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-center">
               <div className="flex items-center justify-center gap-2 text-white text-xs font-bold mb-2">
-                <FaPaypal className="text-lg text-indigo-400" /> Official PayPal Checkout
+                <FaRegCreditCard className="text-lg text-[#00b0e3]" /> Official ABA PayWay
               </div>
               
-              {/* PayPal SDK Buttons Render Target */}
-              <div id="paypal-button-container" className="min-h-[100px] flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const paypalWebUrl = paypalData?.approvalUrl || `https://www.paypal.com/checkoutnow?token=${paypalData?.orderId || ""}`;
-                    window.open(paypalWebUrl, "_blank");
-                  }}
-                  className="w-full py-3.5 bg-[#ffc439] hover:bg-[#f2ba32] text-black font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
-                >
-                  <FaPaypal className="text-lg text-[#003087]" /> Pay with PayPal
-                </button>
+              <div className="flex flex-col gap-3">
+                {abaData ? (
+                  <>
+                    <button
+                      onClick={submitAbaForm}
+                      className="w-full py-3.5 bg-[#0054a6] hover:bg-[#00428a] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
+                    >
+                      Continue to ABA App
+                    </button>
+                    {abaData.deeplink && (
+                      <button
+                        onClick={() => {
+                          placeOrder("ABA", phone).then(() => {
+                            window.open(abaData.deeplink, "_blank");
+                            setShowModal(false);
+                            navigate("/app/orders");
+                          });
+                        }}
+                        className="w-full py-3 border border-[#0054a6] text-[#00b0e3] font-bold text-xs rounded-xl hover:bg-[#0054a6]/10 transition-colors"
+                      >
+                        Open ABA Mobile (Deep Link)
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="py-4 text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
+                    <span className="animate-spin text-lg">⏳</span> Generating ABA Payment...
+                  </div>
+                )}
               </div>
-              <p className="text-[10px] text-slate-400">Automatic Key Delivery upon Payment ⚡</p>
+              <p className="text-[10px] text-slate-400 mt-3">Automatic Key Delivery upon Payment ⚡</p>
             </div>
           </div>
         </div>

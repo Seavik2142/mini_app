@@ -582,7 +582,21 @@ export const createAbaPayment: RequestHandler = (req, res): void => {
     // RSA Signature
     let rsaSignature = "";
     try {
-      const privateKey = (process.env.ABA_PAYWAY_RSA_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+      const privateKey = (process.env.ABA_PAYWAY_RSA_PRIVATE_KEY || `-----BEGIN RSA PRIVATE KEY-----
+MIICWwIBAAKBgQCRZ783LyvzGy9rmlfFqWcF+FkX54zbV4kZ63hsZhoV9m0jJY/x
+a47oov2ML2N2VzKWg3svG6QaklsBTubVQo2J1sebCNR7Vuc3xRLzXIYkP619pgBE
+hkRS2Kea3FFby8keGss+55B5F90h+TxGq8OKduPrLnEICAoUBR/lnPlCcQIDAQAB
+AoGAGkv9kJDm7WoauuaofhaDi9hc4I5fcqHTqUzlNBGJITS2izc1X6+Yomkr2skN
+P29ItmDkC+J/XNDgRY3MAICvURnqFBfmnVfBciXqmMbz9OzZLPJGwEArYAprENQU
+xzb7KoNzPJwrZKe6AKLOJqllHe3TXUpJBHbRIhKyh99gxbkCQQDpWYzZBQ9VVia+
+XRtYUx8wF3D96JK4BXWXjeYrv3vvT70kBZkTyg3sOPg3B3cmzSi3K5TjAiGYHfL4
+MpFAVXClAkEAn4TinJEMz+eddDNDk9OOPTuprloZe1BuLRCxm9UowGt65A0gtHev
+Fdr+pAbLiI14KK8Z4SkOExlvXFU35Ye03QJADFOksxonUzS32zqD5UiOzzWNzHvq
+tDnlmlnunMUCwQOPVEXPblIwJhhkVFPaoXwY+IQe21cTezupyB6zuZhJ2QJAOPdP
+pfH2zVg9Vn3oKCZoqV1hHy514x+5+MX5Z1kcEHtRi5dUkp4bHIb0YMc8cCt1ObIu
+X8Y1jISMzEBykbmA0QJALlt5a+KXBm39qPy424dLdOgX7rKY0Pcr+W5MSAEsCRfD
++symbU58ZNKkMHVFXzmaiGUofr2k2e26DFhQSQRxfw==
+-----END RSA PRIVATE KEY-----`).replace(/\\n/g, "\n");
       if (privateKey) {
         const signer = crypto.createSign("RSA-SHA256");
         signer.update(rawData);
