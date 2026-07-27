@@ -4,6 +4,28 @@ import { Outlet } from "react-router-dom";
 import BottomDock from "../components/bottomDock";
 import Header from "../components/header";
 import { Toaster } from "sonner";
+import { FaTelegram, FaUserShield } from "react-icons/fa";
+
+const FloatingButtons = () => {
+    return (
+        <div className="fixed bottom-28 right-4 z-50 flex flex-col gap-3">
+            <button
+                onClick={() => window.open('https://t.me/your_admin', '_blank')}
+                className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-600/40 border border-orange-400/30 transition-all active:scale-90 group relative"
+                aria-label="Contact Admin"
+            >
+                <FaUserShield className="text-xl" />
+            </button>
+            <button
+                onClick={() => window.open('https://t.me/your_channel', '_blank')}
+                className="w-12 h-12 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 border border-blue-400/30 transition-all active:scale-90 group relative"
+                aria-label="Telegram Channel"
+            >
+                <FaTelegram className="text-2xl" />
+            </button>
+        </div>
+    );
+};
 
 const MainContent = () => {
     return (
@@ -12,6 +34,7 @@ const MainContent = () => {
             <main className="px-3 pt-3 max-w-md mx-auto">
                 <Outlet />
             </main>
+            <FloatingButtons />
             <BottomDock />
             <Toaster position="top-center" richColors theme="dark" />
         </div>
