@@ -35,18 +35,7 @@ const Profile: React.FC = () => {
   const [step, setStep] = useState<"PHONE" | "OTP">("PHONE");
   const [isSending, setIsSending] = useState(false);
 
-  const handleQuickTelegramLogin = () => {
-    if (telegramUser.id || telegramUser.firstName) {
-      updateVerifiedPhone("", {
-        tgId: String(telegramUser.id || "tg_user"),
-        name: `${telegramUser.firstName || ''} ${telegramUser.lastName || ''}`.trim() || "Telegram User",
-        username: telegramUser.username || null
-      });
-      toast.success(`🎉 Welcome, ${telegramUser.firstName || 'Telegram User'}!`);
-    } else {
-      navigate("/auth");
-    }
-  };
+
 
   const handleSendOtp = async () => {
     const cleanPhone = inputPhone.trim().replace(/\s+/g, '');
@@ -62,17 +51,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleQuickTelegramShare = () => {
-    setIsSending(true);
-    toast.info("📱 Requesting Telegram Contact info...");
-    setTimeout(() => {
-      setIsSending(false);
-      const phoneToSet = inputPhone.trim();
-      if (phoneToSet) updateVerifiedPhone(phoneToSet);
-      setShowVerifyModal(false);
-      setStep("PHONE");
-    }, 800);
-  };
+
 
   const handleConfirmOtp = () => {
     if (!otpCode.trim()) {
@@ -109,18 +88,7 @@ const Profile: React.FC = () => {
           </div>
 
           <div className="space-y-2 pt-1">
-            {/* Option 1: Quick 1-Tap Login if inside Telegram */}
-            {telegramUser.firstName && (
-              <button
-                onClick={handleQuickTelegramLogin}
-                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <FaBolt className="text-sm" />
-                Quick Login as {telegramUser.firstName}
-              </button>
-            )}
-
-            {/* Option 2: Verify via Bot OTP */}
+            {/* Verify via Bot OTP */}
             <button
               onClick={() => navigate("/auth")}
               className="w-full py-3 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
@@ -336,19 +304,7 @@ const Profile: React.FC = () => {
                   {isSending ? "Sending OTP Code..." : "📱 Send Telegram OTP Code"}
                 </button>
 
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-slate-800"></div>
-                  <span className="flex-shrink mx-2 text-[10px] text-slate-500 font-bold uppercase">Or</span>
-                  <div className="flex-grow border-t border-slate-800"></div>
-                </div>
 
-                <button
-                  onClick={handleQuickTelegramShare}
-                  disabled={isSending}
-                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-fuchsia-300 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
-                >
-                  <FaTelegram className="text-base text-fuchsia-400" /> ⚡ 1-Tap Share Telegram Contact
-                </button>
               </div>
             ) : (
               <div className="space-y-3 text-left">

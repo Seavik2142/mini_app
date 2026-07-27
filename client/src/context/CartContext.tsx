@@ -179,7 +179,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (saved === "true") return true;
     const savedProfile = localStorage.getItem("mini_app_user_profile");
     if (savedProfile) return true;
-    if (realTgUser?.id || realTgUser?.first_name) return true;
     return false;
   });
 
