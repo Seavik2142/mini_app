@@ -45,7 +45,7 @@ const Orders: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <FaKey className="text-indigo-400" /> Digital Key Vault
+            <FaKey className="text-indigo-400" /> Digital Keys
           </h1>
           <p className="text-xs text-slate-400">Your purchased license keys & activation codes</p>
         </div>
@@ -58,7 +58,7 @@ const Orders: React.FC = () => {
           </div>
           <p className="text-sm font-bold text-slate-200">No Digital Keys Purchased Yet</p>
           <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            Purchase Telegram Premium, Steam Gift Cards, VPN passes, or Bot License keys to store them in your vault.
+            Purchase Telegram Premium, Steam Gift Cards, VPN passes, or Bot License keys to store them in your Digital Keys.
           </p>
         </div>
       ) : (

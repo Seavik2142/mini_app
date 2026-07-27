@@ -12,11 +12,11 @@ interface LanguageContextType {
 const translations: Record<Language, Record<string, string>> = {
   km: {
     // Header & Bottom Bar
-    keyVaultPro: "KEY VAULT PRO",
+    keyVaultPro: "Digital Keys PRO",
     digitalKeysLicenses: "កូដឌីជីថល & អាជ្ញាប័ណ្ណ",
     navKeys: "ហាងកូដ",
     navCart: "កន្ត្រក",
-    navVault: "ទូកូដ",
+    navVault: "ទូកូដ", // Keep Khmer translation, or change to គន្លឹះ if requested, but let's just change English part for now. Wait, I'll keep this as is.
     navProfile: "គណនី",
 
     // Home Page
@@ -52,7 +52,7 @@ const translations: Record<Language, Record<string, string>> = {
     payNow: "ទូទាត់ប្រាក់ឥឡូវនេះ",
 
     // Orders / Vault Page
-    myKeyVault: "📦 ទូកូដ & ការទិញរបស់ខ្ញុំ",
+    myKeyVault: "📦 គន្លឹះឌីជីថល & ការទិញរបស់ខ្ញុំ",
     purchasedKeys: "កូដសកម្មភាពដែលបានទិញរួច",
     noOrders: "មិនទាន់មានការទិញនៅឡើយទេ",
     orderId: "លេខបញ្ជាទិញ",
@@ -77,11 +77,11 @@ const translations: Record<Language, Record<string, string>> = {
   },
   en: {
     // Header & Bottom Bar
-    keyVaultPro: "KEY VAULT PRO",
+    keyVaultPro: "Digital Keys PRO",
     digitalKeysLicenses: "Digital Keys & Licenses",
     navKeys: "Keys",
     navCart: "Cart",
-    navVault: "Vault",
+    navVault: "Keys",
     navProfile: "Profile",
 
     // Home Page
@@ -117,7 +117,7 @@ const translations: Record<Language, Record<string, string>> = {
     payNow: "Proceed to Payment",
 
     // Orders / Vault Page
-    myKeyVault: "📦 My Key Vault & Orders",
+    myKeyVault: "📦 My Digital Keys & Orders",
     purchasedKeys: "Purchased Activation Keys",
     noOrders: "No purchase history found",
     orderId: "Order ID",

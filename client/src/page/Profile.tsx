@@ -91,7 +91,7 @@ const Profile: React.FC = () => {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold text-white">My Account</h1>
-        <p className="text-xs text-slate-400">Telegram Identity & Digital Key Vault</p>
+        <p className="text-xs text-slate-400">Telegram Identity & Digital Keys</p>
       </div>
 
       {!isPhoneVerified ? (
@@ -104,7 +104,7 @@ const Profile: React.FC = () => {
           <div className="space-y-1 max-w-xs mx-auto">
             <h2 className="text-base font-extrabold text-white">Telegram Account Verification</h2>
             <p className="text-xs text-slate-400 leading-relaxed font-medium">
-              Connect your Telegram account to activate your Key Vault and manage your digital key purchases.
+              Connect your Telegram account to activate your Digital Keys and manage your digital key purchases.
             </p>
           </div>
 
@@ -202,7 +202,7 @@ const Profile: React.FC = () => {
           </div>
 
 
-          {/* Key Vault Real Database Statistics */}
+          {/* Digital Keys Real Database Statistics */}
           <div className="grid grid-cols-3 gap-2.5">
             <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg text-center">
               <span className="text-[10px] text-slate-400 font-bold block">Keys Owned</span>

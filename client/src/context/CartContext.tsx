@@ -399,7 +399,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("mini_app_verified_phone");
     localStorage.removeItem("mini_app_user_profile");
     localStorage.removeItem("mini_app_orders");
-    toast.info("Logged out: Vault and session cleared");
+    toast.info("Logged out: Digital Keys and session cleared");
   };
 
   const verifyPhone = (phone: string, code: string): boolean => {
@@ -533,7 +533,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearCart();
         setPromoCode("");
         setDiscountPercent(0);
-        toast.success("🎉 Payment Successful! Digital Keys delivered to your Telegram Bot & Vault");
+        toast.success("🎉 Payment Successful! Digital Keys delivered to your Telegram Bot & Account");
         return data.data;
       }
     } catch (e) {
@@ -544,7 +544,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearCart();
     setPromoCode("");
     setDiscountPercent(0);
-    toast.success("🎉 Payment Successful! Digital Keys delivered to your Vault");
+    toast.success("🎉 Payment Successful! Digital Keys delivered to your Account");
     return localOrder;
   };
 

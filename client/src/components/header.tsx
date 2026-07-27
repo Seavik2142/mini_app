@@ -26,7 +26,7 @@ const Header = () => {
                 </div>
                 <div className="flex flex-col">
                     <span className="font-extrabold text-sm tracking-tight text-white group-hover:text-indigo-300 transition-colors flex items-center gap-1">
-                        KEY VAULT <span className="bg-indigo-500/20 text-indigo-400 text-[10px] px-1.5 py-0.2 rounded border border-indigo-500/30">PRO</span>
+                        Digital Keys <span className="bg-indigo-500/20 text-indigo-400 text-[10px] px-1.5 py-0.2 rounded border border-indigo-500/30">PRO</span>
                     </span>
                     <span className="text-[10px] text-slate-400 font-medium">Digital Keys & Licenses</span>
                 </div>
