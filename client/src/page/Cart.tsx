@@ -32,6 +32,7 @@ const Cart: React.FC = () => {
   
   const [abaData, setAbaData] = useState<any>(null);
   const [paypalData, setPaypalData] = useState<any>(null);
+  const [abaQrResponse, setAbaQrResponse] = useState<any>(null);
 
   const handleOpenPayment = async () => {
     requireAuth(async () => {
@@ -41,6 +42,7 @@ const Cart: React.FC = () => {
       
       setAbaData(null);
       setPaypalData(null);
+      setAbaQrResponse(null);
 
       try {
         const endpoint = paymentMethod === "ABA" ? "/shop/aba-checkout" : "/shop/paypal-checkout";
@@ -79,83 +81,50 @@ const Cart: React.FC = () => {
     });
   };
 
-  const submitAbaForm = () => {
+  const submitAbaForm = async () => {
     if (!abaData) return;
+    setIsVerifying(true);
     
-    // Remove existing form if any
-    const existingForm = document.getElementById("aba_merchant_request");
-    if (existingForm) existingForm.remove();
+    const form = new FormData();
+    form.append("hash", abaData.hash);
+    form.append("tran_id", abaData.tran_id);
+    form.append("amount", abaData.amount);
+    form.append("currency", "USD");
+    if (abaData.items) form.append("items", abaData.items);
+    if (abaData.shipping) form.append("shipping", abaData.shipping);
+    form.append("firstname", abaData.firstname);
+    form.append("lastname", abaData.lastname);
+    form.append("email", abaData.email);
+    form.append("phone", abaData.phone);
+    form.append("req_time", abaData.req_time);
+    form.append("merchant_id", abaData.merchantId);
+    form.append("return_url", abaData.return_url);
+    form.append("continue_success_url", abaData.continue_success_url);
+    if (abaData.payment_option) form.append("payment_option", abaData.payment_option);
+    form.append("type", abaData.type);
 
-    // Create and submit the ABA form
-    const form = document.createElement("form");
-    form.id = "aba_merchant_request";
-    form.method = "POST";
-    form.action = abaData.apiUrl;
-    form.target = "aba_webservice"; // MUST be aba_webservice for the popup plugin
-    form.enctype = "multipart/form-data"; 
-
-    const addField = (name: string, value: string) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    };
-
-    addField("hash", abaData.hash);
-    addField("tran_id", abaData.tran_id);
-    addField("amount", abaData.amount);
-    addField("currency", "USD");
-    if (abaData.items) addField("items", abaData.items);
-    if (abaData.shipping) addField("shipping", abaData.shipping);
-    addField("firstname", abaData.firstname);
-    addField("lastname", abaData.lastname);
-    addField("email", abaData.email);
-    addField("phone", abaData.phone);
-    addField("req_time", abaData.req_time);
-    addField("merchant_id", abaData.merchantId);
-    addField("return_url", abaData.return_url);
-    addField("continue_success_url", abaData.continue_success_url);
-    if (abaData.payment_option) addField("payment_option", abaData.payment_option);
-    addField("type", abaData.type);
-
-    document.body.appendChild(form);
-    
-    // Call the ABA PayWay JS checkout plugin!
-    // We add a tiny delay just in case the script is still downloading.
-    let retries = 0;
-    const tryCheckout = () => {
-      if ((window as any).AbaPayway && (window as any).AbaPayway.checkout) {
-        (window as any).AbaPayway.checkout();
-      } else if (retries < 5) {
-        retries++;
-        setTimeout(tryCheckout, 200);
+    try {
+      const res = await fetch(abaData.apiUrl, {
+        method: "POST",
+        body: form
+      });
+      const data = await res.json();
+      
+      if (data && data.qrImage) {
+        setAbaQrResponse(data);
+        setIsVerifying(false);
       } else {
-        // Fallback if script completely failed to load
-        form.submit();
+        toast.error("Failed to generate ABA QR Code");
+        setShowModal(false);
       }
-    };
-    tryCheckout();
-    
-    toast.success("Opening ABA PayWay...");
-    setShowModal(false);
-    clearCart();
+    } catch (err) {
+      toast.error("Error connecting to ABA PayWay");
+      setShowModal(false);
+    }
   };
 
-  // Script Injection for ABA and PayPal
+  // Script Injection for PayPal
   useEffect(() => {
-    // ABA PayWay Script
-    if (showModal && paymentMethod === "ABA") {
-      const scriptId = "aba-payway-js";
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
-        script.async = true;
-        document.body.appendChild(script);
-      }
-    }
-
     // PayPal Script
     if (showModal && paymentMethod === "PAYPAL") {
       const clientId = paypalData?.clientId || "Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe";
@@ -510,24 +479,47 @@ const Cart: React.FC = () => {
                 {paymentMethod === "ABA" ? (
                   abaData ? (
                     <>
-                      <button
-                        onClick={submitAbaForm}
-                        className="w-full py-3.5 bg-[#0054a6] hover:bg-[#00428a] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
-                      >
-                        Continue to ABA App
-                      </button>
-                      {abaData.deeplink && (
-                        <button
-                          onClick={() => {
-                            placeOrder("ABA", phone).then(() => {
-                              window.open(abaData.deeplink, "_blank");
+                      {abaQrResponse ? (
+                        <div className="flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
+                          <p className="text-[10px] text-slate-400 font-medium">Scan this QR Code using ABA Mobile</p>
+                          <div className="bg-white p-3 rounded-2xl shadow-xl w-60 h-60 flex items-center justify-center mx-auto">
+                            <img src={abaQrResponse.qrImage} alt="ABA KHQR" className="w-full h-full object-contain" />
+                          </div>
+                          {abaQrResponse.abapay_deeplink && (
+                            <a
+                              href={abaQrResponse.abapay_deeplink}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={() => {
+                                placeOrder("ABA", phone);
+                                setShowModal(false);
+                                clearCart();
+                                navigate("/app/orders");
+                              }}
+                              className="w-full py-3.5 bg-[#0054a6] hover:bg-[#00428a] text-white font-black text-xs rounded-xl flex items-center justify-center shadow transition-all active:scale-95"
+                            >
+                              Pay with ABA Mobile App
+                            </a>
+                          )}
+                          <button
+                            onClick={() => {
+                              placeOrder("ABA", phone);
                               setShowModal(false);
+                              clearCart();
                               navigate("/app/orders");
-                            });
-                          }}
-                          className="w-full py-3 border border-[#0054a6] text-[#00b0e3] font-bold text-xs rounded-xl hover:bg-[#0054a6]/10 transition-colors"
+                            }}
+                            className="w-full py-2.5 border border-slate-700 text-slate-400 hover:bg-slate-800 font-bold text-xs rounded-xl transition-colors"
+                          >
+                            I have already paid
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={submitAbaForm}
+                          disabled={isVerifying}
+                          className="w-full py-3.5 bg-[#0054a6] hover:bg-[#00428a] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95 disabled:opacity-50"
                         >
-                          Open ABA Mobile (Deep Link)
+                          {isVerifying ? "Generating QR..." : "Generate ABA QR Code"}
                         </button>
                       )}
                     </>
