@@ -20,6 +20,7 @@ const Cart: React.FC = () => {
     formatKHR,
     placeOrder,
     requireAuth,
+    clearCart,
   } = useCart();
 
   const navigate = useNavigate();
@@ -116,6 +117,8 @@ const Cart: React.FC = () => {
     
     toast.success("Redirecting to ABA PayWay...");
     setShowModal(false);
+    clearCart();
+    navigate("/app/orders");
   };
 
   // PayPal Script Injection & Rendering
