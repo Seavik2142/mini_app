@@ -9,6 +9,7 @@ import { FaTelegram, FaUserShield, FaCommentDots, FaTimes } from "react-icons/fa
 const FloatingButtons = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [pos, setPos] = useState({ x: typeof window !== 'undefined' ? window.innerWidth - 70 : 300, y: typeof window !== 'undefined' ? window.innerHeight - 150 : 600 });
+    const [isSnapping, setIsSnapping] = useState(false);
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, moved: false });
 
     useEffect(() => {
@@ -19,6 +20,7 @@ const FloatingButtons = () => {
         const move = (e: MouseEvent | TouchEvent) => {
             if (!dragRef.current.isDragging) return;
             if (e.cancelable) e.preventDefault();
+            setIsSnapping(false);
             
             const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
             const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
@@ -32,7 +34,16 @@ const FloatingButtons = () => {
             dragRef.current.moved = true;
             setPos({ x: newX, y: newY });
         };
-        const up = () => { dragRef.current.isDragging = false; };
+        const up = () => {
+            if (dragRef.current.isDragging && dragRef.current.moved) {
+                setIsSnapping(true);
+                setPos(prev => {
+                    const snapX = prev.x < window.innerWidth / 2 ? 10 : window.innerWidth - 66;
+                    return { ...prev, x: snapX };
+                });
+            }
+            dragRef.current.isDragging = false; 
+        };
 
         window.addEventListener('mousemove', move, { passive: false });
         window.addEventListener('touchmove', move, { passive: false });
@@ -65,16 +76,22 @@ const FloatingButtons = () => {
         dragRef.current.moved = false; // Reset for next click
     };
 
+    const isLeftEdge = pos.x < (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
+
     return (
         <div 
-            className="fixed z-50 flex flex-col items-end gap-3"
-            style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+            className={`fixed z-50 flex flex-col gap-3 ${isLeftEdge ? 'items-start' : 'items-end'}`}
+            style={{ 
+                left: `${pos.x}px`, 
+                top: `${pos.y}px`,
+                transition: isSnapping ? 'left 0.3s ease-out, top 0.3s ease-out' : 'none'
+            }}
         >
             {/* Expanded Menu */}
-            <div className={`absolute bottom-[120%] right-0 flex flex-col items-end gap-3 transition-all duration-300 origin-bottom-right ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
+            <div className={`absolute bottom-[120%] flex flex-col gap-3 transition-all duration-300 ${isLeftEdge ? 'left-0 items-start origin-bottom-left' : 'right-0 items-end origin-bottom-right'} ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
                 <button
                     onClick={() => { setIsOpen(false); window.open('https://t.me/your_admin', '_blank'); }}
-                    className="flex items-center justify-end gap-3 group active:scale-95 transition-transform w-max"
+                    className={`flex items-center gap-3 group active:scale-95 transition-transform w-max ${isLeftEdge ? 'flex-row-reverse' : ''}`}
                     aria-label="Contact Admin"
                 >
                     <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
@@ -86,7 +103,7 @@ const FloatingButtons = () => {
                 </button>
                 <button
                     onClick={() => { setIsOpen(false); window.open('https://t.me/your_channel', '_blank'); }}
-                    className="flex items-center justify-end gap-3 group active:scale-95 transition-transform w-max"
+                    className={`flex items-center gap-3 group active:scale-95 transition-transform w-max ${isLeftEdge ? 'flex-row-reverse' : ''}`}
                     aria-label="Telegram Channel"
                 >
                     <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
