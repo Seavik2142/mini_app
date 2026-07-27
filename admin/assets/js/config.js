@@ -4,7 +4,7 @@
  * Change API_BASE to your Render backend URL when deployed.
  */
 
-const API_BASE = 'https://mini-app-mzu6.onrender.com';
+const API_BASE = 'https://mini-app-2z1.pages.dev';
 
 const API = {
   stats:         `${API_BASE}/admin-api/stats`,

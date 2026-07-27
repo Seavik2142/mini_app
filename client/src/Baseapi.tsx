@@ -6,7 +6,7 @@ const getApiBaseUrl = () => {
     if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
         return "http://localhost:3000";
     }
-    return "https://mini-app-2z1.pages.dev";
+    return "https://mini-app-mzu6.onrender.com";
 };
 
 const BaseApi = createApi({
