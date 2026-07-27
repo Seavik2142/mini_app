@@ -1,27 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaShieldAlt, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaCheck, FaGlobe, FaEnvelope, FaEdit } from "react-icons/fa";
+import { FaShieldAlt, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaCheck, FaGlobe } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { orders, telegramUser, isPhoneVerified, verifiedPhone, dbUserProfile, updateUserProfileData, verifyPhone, sendOtpCode, logout } = useCart();
+  const { orders, telegramUser, isPhoneVerified, verifiedPhone, dbUserProfile, verifyPhone, sendOtpCode, logout } = useCart();
   const { language, setLanguage, t } = useLanguage();
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [inputEmail, setInputEmail] = useState(dbUserProfile?.email || "");
-
-  const handleSaveEmail = async () => {
-    if (!inputEmail.includes("@")) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-    const success = await updateUserProfileData(inputEmail.trim());
-    if (success) {
-      setShowEmailModal(false);
-    }
-  };
 
   const realKeysCount = dbUserProfile?.keysOwned ?? orders.reduce((sum, order) => {
     return sum + order.items.reduce((iSum, item) => iSum + (item.digitalKeys?.length || item.quantity), 0);
@@ -143,30 +130,6 @@ const Profile: React.FC = () => {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Real Email Address Card */}
-          <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl flex items-center justify-between shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-fuchsia-500/10 text-fuchsia-400 rounded-xl flex items-center justify-center text-base border border-fuchsia-500/20">
-                <FaEnvelope />
-              </div>
-              <div>
-                <span className="text-[10px] font-bold uppercase text-slate-400 block">Email Address</span>
-                <p className="text-xs font-bold text-white font-mono">
-                  {dbUserProfile?.email || "No email linked"}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setInputEmail(dbUserProfile?.email || "");
-                setShowEmailModal(true);
-              }}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-fuchsia-300 font-bold text-xs rounded-xl border border-slate-700 active:scale-95 transition-all flex items-center gap-1"
-            >
-              <FaEdit className="text-[10px]" /> {dbUserProfile?.email ? "Edit" : "Add Email"}
-            </button>
           </div>
 
 
@@ -339,53 +302,6 @@ const Profile: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Edit Email Modal */}
-      {showEmailModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-fuchsia-600 text-white text-base">
-                  <FaEnvelope />
-                </div>
-                <h3 className="font-extrabold text-sm text-white">Update Email Address</h3>
-              </div>
-              <button onClick={() => setShowEmailModal(false)} className="p-1.5 text-slate-400 hover:text-white rounded-full bg-slate-800">
-                <FaTimes />
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Email Address</label>
-              <input
-                type="email"
-                value={inputEmail}
-                onChange={(e) => setInputEmail(e.target.value)}
-                placeholder="your.name@gmail.com"
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono placeholder:text-slate-600 focus:outline-none focus:border-fuchsia-500"
-              />
-            </div>
-
-            <div className="flex gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setShowEmailModal(false)}
-                className="w-1/3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveEmail}
-                className="w-2/3 py-2.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-black text-xs rounded-xl shadow-lg shadow-fuchsia-600/30 active:scale-95 transition-all flex items-center justify-center gap-1.5"
-              >
-                <FaCheck /> Save Email
-              </button>
-            </div>
           </div>
         </div>
       )}
