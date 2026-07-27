@@ -659,7 +659,7 @@ function getControlReplyKeyboard(chatId?: number) {
   };
 }
 
-async function sendWelcome(bot: TelegramBot, chatId: number, firstName: string, tgUser?: TelegramBot.User) {
+async function sendWelcome(bot: TelegramBot, chatId: number, firstName: string, tgUser?: any) {
   const lang = getUserLanguage(chatId);
   const t = i18n[lang];
 
