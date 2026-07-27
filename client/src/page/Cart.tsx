@@ -87,6 +87,7 @@ const Cart: React.FC = () => {
     form.method = "POST";
     form.action = abaData.apiUrl;
     form.target = "_self"; // open in same frame to avoid popup blockers in Telegram
+    form.enctype = "multipart/form-data"; // MUST be multipart/form-data for ABA Payway HTML UI
 
     const addField = (name: string, value: string) => {
       const input = document.createElement("input");
