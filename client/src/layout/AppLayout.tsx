@@ -8,14 +8,15 @@ import { FaTelegram, FaUserShield, FaCommentDots, FaTimes } from "react-icons/fa
 
 const FloatingButtons = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [pos, setPos] = useState({ x: typeof window !== 'undefined' ? window.innerWidth - 70 : 300, y: typeof window !== 'undefined' ? window.innerHeight - 150 : 600 });
+    const [pos, setPos] = useState({ x: typeof window !== 'undefined' ? window.innerWidth - 70 : 300, y: typeof window !== 'undefined' ? window.innerHeight - 180 : 600 });
     const [isSnapping, setIsSnapping] = useState(false);
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, moved: false });
 
     useEffect(() => {
         // Safe check for window
         if (typeof window === 'undefined') return;
-        setPos({ x: window.innerWidth - 70, y: window.innerHeight - 150 });
+        const bottomLimit = window.innerHeight - 120;
+        setPos({ x: window.innerWidth - 70, y: bottomLimit });
         
         const move = (e: MouseEvent | TouchEvent) => {
             if (!dragRef.current.isDragging) return;
@@ -27,9 +28,10 @@ const FloatingButtons = () => {
             
             let newX = clientX - dragRef.current.startX;
             let newY = clientY - dragRef.current.startY;
+            const bottomLimit = window.innerHeight - 120;
             
             newX = Math.max(10, Math.min(newX, window.innerWidth - 66));
-            newY = Math.max(10, Math.min(newY, window.innerHeight - 66));
+            newY = Math.max(10, Math.min(newY, bottomLimit));
             
             dragRef.current.moved = true;
             setPos({ x: newX, y: newY });
@@ -80,7 +82,7 @@ const FloatingButtons = () => {
 
     return (
         <div 
-            className={`fixed z-50 flex flex-col gap-3 ${isLeftEdge ? 'items-start' : 'items-end'}`}
+            className={`fixed z-[60] flex flex-col gap-3 ${isLeftEdge ? 'items-start' : 'items-end'}`}
             style={{ 
                 left: `${pos.x}px`, 
                 top: `${pos.y}px`,
