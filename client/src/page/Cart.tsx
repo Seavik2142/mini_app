@@ -233,7 +233,7 @@ const Cart: React.FC = () => {
   if (cart.length === 0) {
     return (
       <div className="text-center py-16 space-y-4">
-        <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl shadow-xl">
+        <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-3xl flex items-center justify-center mx-auto text-fuchsia-400 text-3xl shadow-xl">
           <FaShoppingBag />
         </div>
         <div className="space-y-1">
@@ -242,7 +242,7 @@ const Cart: React.FC = () => {
         </div>
         <button
           onClick={() => navigate("/app")}
-          className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
+          className="px-6 py-2.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-fuchsia-600/30 transition-all"
         >
           Browse Digital Keys
         </button>
@@ -309,7 +309,7 @@ const Cart: React.FC = () => {
       {/* Promo Code Input */}
       <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2 shadow-md">
         <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <FaTag className="text-indigo-400" /> Promo Code
+          <FaTag className="text-fuchsia-400" /> Promo Code
         </label>
         <div className="flex gap-2">
           <input
@@ -317,11 +317,11 @@ const Cart: React.FC = () => {
             value={inputCode}
             onChange={(e) => setInputCode(e.target.value)}
             placeholder="Try code SIK10"
-            className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white uppercase tracking-wider focus:outline-none focus:border-indigo-500"
+            className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white uppercase tracking-wider focus:outline-none focus:border-fuchsia-500"
           />
           <button
             onClick={() => applyPromoCode(inputCode)}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+            className="px-4 py-2 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-bold text-xs rounded-xl shadow-md transition-all"
           >
             Apply
           </button>
@@ -336,14 +336,14 @@ const Cart: React.FC = () => {
       {/* Contact Phone */}
       <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2 shadow-md">
         <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <FaPhoneAlt className="text-indigo-400" /> Telegram / Phone Number
+          <FaPhoneAlt className="text-fuchsia-400" /> Telegram / Phone Number
         </label>
         <input
           type="text"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Enter phone number..."
-          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-fuchsia-500"
         />
       </div>
 
@@ -378,12 +378,12 @@ const Cart: React.FC = () => {
             onClick={() => setPaymentMethod("PAYPAL")}
             className={`p-3 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${
               paymentMethod === "PAYPAL"
-                ? "bg-indigo-500/10 border-indigo-500"
+                ? "bg-fuchsia-500/10 border-fuchsia-500"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
             }`}
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md ${
-              paymentMethod === "PAYPAL" ? "bg-gradient-to-tr from-indigo-600 to-violet-600 text-white" : "bg-slate-800 text-slate-500"
+              paymentMethod === "PAYPAL" ? "bg-gradient-to-tr from-fuchsia-600 to-orange-600 text-white" : "bg-slate-800 text-slate-500"
             }`}>
               <FaPaypal />
             </div>
@@ -423,7 +423,7 @@ const Cart: React.FC = () => {
         className={`w-full py-3.5 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl active:scale-[0.99] transition-all ${
           paymentMethod === "ABA"
             ? "bg-gradient-to-r from-[#0054a6] to-[#00b0e3] hover:from-[#00428a] hover:to-[#008fbc] shadow-[#0054a6]/30"
-            : "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-600/30"
+            : "bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 shadow-fuchsia-600/30"
         }`}
       >
         {paymentMethod === "ABA" ? <img src={abaLogo} className="w-5 h-5 rounded-md" alt="ABA" /> : <FaPaypal className="text-lg" />}
@@ -437,7 +437,7 @@ const Cart: React.FC = () => {
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-left">
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-base overflow-hidden ${
-                  paymentMethod === "ABA" ? "bg-[#0054a6]" : "bg-indigo-600"
+                  paymentMethod === "ABA" ? "bg-[#0054a6]" : "bg-fuchsia-600"
                 }`}>
                   {paymentMethod === "ABA" ? <img src={abaLogo} className="w-full h-full object-cover" alt="ABA" /> : <FaPaypal />}
                 </div>
@@ -472,7 +472,7 @@ const Cart: React.FC = () => {
                 {paymentMethod === "ABA" ? (
                   <><img src={abaLogo} className="w-6 h-6 rounded-md shadow" alt="ABA" /> Official ABA PayWay</>
                 ) : (
-                  <><FaPaypal className="text-lg text-indigo-400" /> Official PayPal Checkout</>
+                  <><FaPaypal className="text-lg text-fuchsia-400" /> Official PayPal Checkout</>
                 )}
               </div>
               

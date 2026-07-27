@@ -49,7 +49,7 @@ const Home: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Original Size Hero Banner Carousel (Zero Text Overlays in Front) */}
-      <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl border border-indigo-500/30 bg-slate-950 aspect-[21/9] sm:aspect-[24/9] min-h-[170px]">
+      <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl border border-fuchsia-500/30 bg-slate-950 aspect-[21/9] sm:aspect-[24/9] min-h-[170px]">
         {/* Full Image Slide in Original Hero Size */}
         <img
           src={activeSlide.image}
@@ -67,7 +67,7 @@ const Home: React.FC = () => {
                 aria-label={`Slide ${idx + 1}`}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   idx === currentSlide
-                    ? "w-5 bg-indigo-400 shadow-sm shadow-indigo-500/50"
+                    ? "w-5 bg-fuchsia-400 shadow-sm shadow-fuchsia-500/50"
                     : "w-1.5 bg-slate-500 hover:bg-slate-300"
                 }`}
               />
@@ -84,7 +84,7 @@ const Home: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t("searchPlaceholder")}
-          className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm"
+          className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all shadow-sm"
         />
         {searchQuery && (
           <button
@@ -101,7 +101,7 @@ const Home: React.FC = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="group bg-slate-900/80 border border-slate-800/80 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-950/30 transition-all duration-300 flex flex-col justify-between"
+            className="group bg-slate-900/80 border border-slate-800/80 rounded-2xl overflow-hidden hover:border-fuchsia-500/50 hover:shadow-xl hover:shadow-fuchsia-950/30 transition-all duration-300 flex flex-col justify-between"
           >
             <div
               className="relative aspect-square overflow-hidden cursor-pointer bg-slate-950"
@@ -129,12 +129,12 @@ const Home: React.FC = () => {
 
             <div className="p-3 flex-1 flex flex-col justify-between space-y-2.5">
               <div>
-                <span className="text-[10px] font-bold uppercase text-indigo-400 tracking-wider block mb-0.5">
+                <span className="text-[10px] font-bold uppercase text-fuchsia-400 tracking-wider block mb-0.5">
                   {product.categoryName}
                 </span>
                 <h3
                   onClick={() => setSelectedProduct(product)}
-                  className="font-bold text-xs line-clamp-1 text-slate-100 cursor-pointer hover:text-indigo-300 transition-colors"
+                  className="font-bold text-xs line-clamp-1 text-slate-100 cursor-pointer hover:text-fuchsia-300 transition-colors"
                 >
                   {product.name}
                 </h3>
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
 
                 <button
                   onClick={() => requireAuth(() => addToCart(product))}
-                  className="w-full py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all"
+                  className="w-full py-2 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-fuchsia-600/30 transition-all"
                 >
                   <FaKey className="text-xs" /> {t("buyNow")}
                 </button>
@@ -165,7 +165,7 @@ const Home: React.FC = () => {
         <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5 space-y-4 max-h-[88vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 shadow-2xl relative">
             <div className="flex items-center justify-between sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 py-1 -mt-1">
-              <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider flex items-center gap-1">
+              <span className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider flex items-center gap-1">
                 <FaShieldAlt /> {selectedProduct.categoryName}
               </span>
               <button
@@ -201,9 +201,9 @@ const Home: React.FC = () => {
               <p className="text-xs text-slate-300 leading-relaxed font-medium">{selectedProduct.description}</p>
 
               {selectedProduct.keyFormat && (
-                <div className="p-3 bg-slate-950 rounded-xl border border-indigo-500/30 text-xs space-y-1">
-                  <span className="text-[10px] text-indigo-400 uppercase font-semibold">Key Format Preview:</span>
-                  <p className="font-mono text-indigo-300 font-bold">{selectedProduct.keyFormat}</p>
+                <div className="p-3 bg-slate-950 rounded-xl border border-fuchsia-500/30 text-xs space-y-1">
+                  <span className="text-[10px] text-fuchsia-400 uppercase font-semibold">Key Format Preview:</span>
+                  <p className="font-mono text-fuchsia-300 font-bold">{selectedProduct.keyFormat}</p>
                 </div>
               )}
 
@@ -221,10 +221,10 @@ const Home: React.FC = () => {
               </div>
 
               {/* Interactive Quantity Controller (- Qty +) */}
-              <div className="p-3 bg-slate-950/90 rounded-2xl border border-indigo-500/30 flex items-center justify-between">
+              <div className="p-3 bg-slate-950/90 rounded-2xl border border-fuchsia-500/30 flex items-center justify-between">
                 <div>
                   <span className="text-[11px] font-bold text-slate-300 block">Select Quantity:</span>
-                  <span className="text-xs text-indigo-400 font-extrabold">
+                  <span className="text-xs text-fuchsia-400 font-extrabold">
                     Total: ${(selectedProduct.price * modalQuantity).toFixed(2)} USD ({formatKHR(selectedProduct.price * modalQuantity)})
                   </span>
                 </div>
@@ -240,7 +240,7 @@ const Home: React.FC = () => {
                   </span>
                   <button
                     onClick={() => setModalQuantity(prev => Math.min(100, prev + 1))}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm active:scale-95 transition-all shadow"
+                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-extrabold text-sm active:scale-95 transition-all shadow"
                   >
                     +
                   </button>
@@ -256,7 +256,7 @@ const Home: React.FC = () => {
                     setSelectedProduct(null);
                   });
                 }}
-                className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/30 active:scale-[0.98] transition-all"
+                className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-fuchsia-600/30 active:scale-[0.98] transition-all"
               >
                 <FaKey /> Add {modalQuantity > 1 ? `${modalQuantity} Keys` : "Key"} to Cart (${(selectedProduct.price * modalQuantity).toFixed(2)})
               </button>

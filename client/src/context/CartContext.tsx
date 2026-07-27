@@ -851,10 +851,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     To purchase, verify your identity via Telegram:
                   </p>
                   <ol className="text-[10px] text-slate-400 space-y-1 list-none">
-                    <li className="flex items-start gap-2"><span className="text-indigo-400 font-black">1.</span> Click the button below</li>
-                    <li className="flex items-start gap-2"><span className="text-indigo-400 font-black">2.</span> Open @Sik_mybot in Telegram</li>
-                    <li className="flex items-start gap-2"><span className="text-indigo-400 font-black">3.</span> Bot sends you a 6-digit code</li>
-                    <li className="flex items-start gap-2"><span className="text-indigo-400 font-black">4.</span> Enter it here to continue</li>
+                    <li className="flex items-start gap-2"><span className="text-fuchsia-400 font-black">1.</span> Click the button below</li>
+                    <li className="flex items-start gap-2"><span className="text-fuchsia-400 font-black">2.</span> Open @Sik_mybot in Telegram</li>
+                    <li className="flex items-start gap-2"><span className="text-fuchsia-400 font-black">3.</span> Bot sends you a 6-digit code</li>
+                    <li className="flex items-start gap-2"><span className="text-fuchsia-400 font-black">4.</span> Enter it here to continue</li>
                   </ol>
                 </div>
                 <button
@@ -893,8 +893,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             {/* ── STEP 3: Enter Code ── */}
             {modalStep === "CODE" && (
               <form onSubmit={handleModalVerifyCode} className="space-y-3">
-                <div className="p-4 bg-slate-950 border border-indigo-500/40 rounded-2xl text-center space-y-1">
-                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-wider block">
+                <div className="p-4 bg-slate-950 border border-fuchsia-500/40 rounded-2xl text-center space-y-1">
+                  <label className="text-[10px] font-black text-fuchsia-400 uppercase tracking-wider block">
                     <FaLock className="inline mr-1" /> 6-Digit Code from Telegram
                   </label>
                   <input

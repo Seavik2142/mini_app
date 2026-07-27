@@ -45,7 +45,7 @@ const BottomDock = () => {
                             key={i}
                             className={`relative flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-all duration-200 ${
                                 isActive
-                                    ? 'text-white font-extrabold scale-105 bg-gradient-to-r from-indigo-600/90 to-violet-600/90 border border-indigo-500/50 shadow-lg shadow-indigo-600/25 ring-1 ring-indigo-400/30'
+                                    ? 'text-white font-extrabold scale-105 bg-gradient-to-r from-fuchsia-600/90 to-orange-600/90 border border-fuchsia-500/50 shadow-lg shadow-fuchsia-600/25 ring-1 ring-fuchsia-400/30'
                                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                             }`}
                         >

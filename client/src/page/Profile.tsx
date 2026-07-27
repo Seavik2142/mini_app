@@ -136,15 +136,15 @@ const Profile: React.FC = () => {
         <>
           {/* Real Telegram Identity Card */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl flex items-center gap-3.5 shadow-xl relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute right-0 top-0 w-32 h-32 bg-fuchsia-500/10 rounded-full blur-2xl pointer-events-none" />
             {telegramUser.photoUrl ? (
               <img
                 src={telegramUser.photoUrl}
                 alt={telegramUser.firstName}
-                className="w-14 h-14 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-md"
+                className="w-14 h-14 rounded-2xl object-cover border-2 border-fuchsia-500/50 shadow-md"
               />
             ) : (
-              <div className="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-600/30 border border-indigo-400/40">
+              <div className="w-14 h-14 bg-gradient-to-tr from-fuchsia-600 to-orange-600 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/40">
                 {(telegramUser.firstName || verifiedPhone || "T").charAt(0).toUpperCase()}
               </div>
             )}
@@ -158,7 +158,7 @@ const Profile: React.FC = () => {
                 </span>
               </div>
               {telegramUser.username ? (
-                <p className="text-xs text-indigo-300 font-semibold">@{telegramUser.username}</p>
+                <p className="text-xs text-fuchsia-300 font-semibold">@{telegramUser.username}</p>
               ) : (
                 <p className="text-xs text-slate-400 font-mono">{verifiedPhone || dbUserProfile?.phone}</p>
               )}
@@ -169,7 +169,7 @@ const Profile: React.FC = () => {
                 </span>
                 {(verifiedPhone || dbUserProfile?.phone) && (
                   <span className="inline-flex items-center gap-1 text-[10px] text-slate-300 font-mono bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 shadow-inner">
-                    <FaPhoneAlt className="text-indigo-400 text-[9px]" />
+                    <FaPhoneAlt className="text-fuchsia-400 text-[9px]" />
                     {verifiedPhone || dbUserProfile?.phone}
                   </span>
                 )}
@@ -180,7 +180,7 @@ const Profile: React.FC = () => {
           {/* Real Email Address Card */}
           <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl flex items-center justify-between shadow-lg">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center text-base border border-indigo-500/20">
+              <div className="w-9 h-9 bg-fuchsia-500/10 text-fuchsia-400 rounded-xl flex items-center justify-center text-base border border-fuchsia-500/20">
                 <FaEnvelope />
               </div>
               <div>
@@ -195,7 +195,7 @@ const Profile: React.FC = () => {
                 setInputEmail(dbUserProfile?.email || "");
                 setShowEmailModal(true);
               }}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold text-xs rounded-xl border border-slate-700 active:scale-95 transition-all flex items-center gap-1"
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-fuchsia-300 font-bold text-xs rounded-xl border border-slate-700 active:scale-95 transition-all flex items-center gap-1"
             >
               <FaEdit className="text-[10px]" /> {dbUserProfile?.email ? "Edit" : "Add Email"}
             </button>
@@ -211,7 +211,7 @@ const Profile: React.FC = () => {
 
             <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg text-center">
               <span className="text-[10px] text-slate-400 font-bold block">Total Orders</span>
-              <p className="text-xl font-black text-indigo-400 font-mono">{realOrdersCount}</p>
+              <p className="text-xl font-black text-fuchsia-400 font-mono">{realOrdersCount}</p>
             </div>
 
             <div className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-1 shadow-lg text-center">
@@ -223,14 +223,14 @@ const Profile: React.FC = () => {
           {/* Language Selector Card */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2.5 shadow-lg">
             <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-              <FaGlobe className="text-indigo-400" /> {t("language")} / Select Language
+              <FaGlobe className="text-fuchsia-400" /> {t("language")} / Select Language
             </h3>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setLanguage("km")}
                 className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 border transition-all ${
                   language === "km"
-                    ? "bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30"
+                    ? "bg-fuchsia-600 text-white border-fuchsia-400 shadow-md shadow-fuchsia-600/30"
                     : "bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700"
                 }`}
               >
@@ -240,7 +240,7 @@ const Profile: React.FC = () => {
                 onClick={() => setLanguage("en")}
                 className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 border transition-all ${
                   language === "en"
-                    ? "bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30"
+                    ? "bg-fuchsia-600 text-white border-fuchsia-400 shadow-md shadow-fuchsia-600/30"
                     : "bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700"
                 }`}
               >
@@ -252,7 +252,7 @@ const Profile: React.FC = () => {
           {/* Account Actions / Logout */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg">
             <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-              <FaShieldAlt className="text-indigo-400" /> Account Security & Session
+              <FaShieldAlt className="text-fuchsia-400" /> Account Security & Session
             </h3>
 
             <button
@@ -271,7 +271,7 @@ const Profile: React.FC = () => {
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl text-center animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-left">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-600 text-white text-base">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-fuchsia-600 text-white text-base">
                   <FaTelegram />
                 </div>
                 <div>
@@ -294,14 +294,14 @@ const Profile: React.FC = () => {
               <div className="space-y-3 text-left">
                 <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <FaPhoneAlt className="text-indigo-400" /> Telegram Phone Number
+                    <FaPhoneAlt className="text-fuchsia-400" /> Telegram Phone Number
                   </label>
                   <input
                     type="text"
                     value={inputPhone}
                     onChange={(e) => setInputPhone(e.target.value)}
                     placeholder="e.g. 012 345 678"
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white focus:outline-none focus:border-fuchsia-500"
                   />
                   <p className="text-[10px] text-slate-400">Enter your number with country code (+855...)</p>
                 </div>
@@ -309,7 +309,7 @@ const Profile: React.FC = () => {
                 <button
                   onClick={handleSendOtp}
                   disabled={isSending}
-                  className="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-fuchsia-600/30 transition-all flex items-center justify-center gap-2"
                 >
                   {isSending ? "Sending OTP Code..." : "📱 Send Telegram OTP Code"}
                 </button>
@@ -323,16 +323,16 @@ const Profile: React.FC = () => {
                 <button
                   onClick={handleQuickTelegramShare}
                   disabled={isSending}
-                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-indigo-300 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-fuchsia-300 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
                 >
-                  <FaTelegram className="text-base text-indigo-400" /> ⚡ 1-Tap Share Telegram Contact
+                  <FaTelegram className="text-base text-fuchsia-400" /> ⚡ 1-Tap Share Telegram Contact
                 </button>
               </div>
             ) : (
               <div className="space-y-3 text-left">
                 <div className="p-3 bg-slate-950 border border-slate-800 rounded-2xl space-y-1">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <FaLock className="text-indigo-400" /> Enter 6-Digit Telegram Bot Code
+                    <FaLock className="text-fuchsia-400" /> Enter 6-Digit Telegram Bot Code
                   </label>
                   <input
                     type="text"
@@ -340,7 +340,7 @@ const Profile: React.FC = () => {
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     placeholder="e.g. 784920"
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl font-mono tracking-widest text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl font-mono tracking-widest text-white focus:outline-none focus:border-fuchsia-500"
                   />
                   <p className="text-[10px] text-emerald-400 text-center font-medium">Enter 6-digit code from @Sik_mybot (or 784920)</p>
                 </div>
@@ -371,7 +371,7 @@ const Profile: React.FC = () => {
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-600 text-white text-base">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-fuchsia-600 text-white text-base">
                   <FaEnvelope />
                 </div>
                 <h3 className="font-extrabold text-sm text-white">Update Email Address</h3>
@@ -388,7 +388,7 @@ const Profile: React.FC = () => {
                 value={inputEmail}
                 onChange={(e) => setInputEmail(e.target.value)}
                 placeholder="your.name@gmail.com"
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white font-mono placeholder:text-slate-600 focus:outline-none focus:border-fuchsia-500"
               />
             </div>
 
@@ -403,7 +403,7 @@ const Profile: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSaveEmail}
-                className="w-2/3 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-xs rounded-xl shadow-lg shadow-indigo-600/30 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                className="w-2/3 py-2.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-black text-xs rounded-xl shadow-lg shadow-fuchsia-600/30 active:scale-95 transition-all flex items-center justify-center gap-1.5"
               >
                 <FaCheck /> Save Email
               </button>

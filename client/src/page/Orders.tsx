@@ -45,7 +45,7 @@ const Orders: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <FaKey className="text-indigo-400" /> Digital Keys
+            <FaKey className="text-fuchsia-400" /> Digital Keys
           </h1>
           <p className="text-xs text-slate-400">Your purchased license keys & activation codes</p>
         </div>
@@ -53,7 +53,7 @@ const Orders: React.FC = () => {
 
       {orders.length === 0 ? (
         <div className="text-center py-16 space-y-3 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl">
-          <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center text-indigo-400 text-3xl mx-auto border border-slate-800">
+          <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center text-fuchsia-400 text-3xl mx-auto border border-slate-800">
             <FaKey />
           </div>
           <p className="text-sm font-bold text-slate-200">No Digital Keys Purchased Yet</p>
@@ -72,7 +72,7 @@ const Orders: React.FC = () => {
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <div>
                   <h3 className="font-black text-xs text-white font-mono tracking-wider flex items-center gap-1.5">
-                    <FaShieldAlt className="text-indigo-400" /> {order.orderNumber}
+                    <FaShieldAlt className="text-fuchsia-400" /> {order.orderNumber}
                   </h3>
                   <p className="text-[10px] text-slate-400 mt-0.5">
                     {new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -131,10 +131,10 @@ const Orders: React.FC = () => {
                           return (
                             <div
                               key={kIdx}
-                              className="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl font-mono text-xs shadow-inner"
+                              className="flex items-center justify-between p-2.5 bg-slate-900 border border-fuchsia-500/30 rounded-xl font-mono text-xs shadow-inner"
                             >
                               <div className="flex items-center gap-2 truncate pr-2">
-                                <FaKey className="text-indigo-400 text-xs shrink-0" />
+                                <FaKey className="text-fuchsia-400 text-xs shrink-0" />
                                 <span className="font-bold text-white tracking-wide">
                                   {isRevealed ? digitalKey : digitalKey.replace(/.[^--]/g, "*")}
                                 </span>
@@ -160,7 +160,7 @@ const Orders: React.FC = () => {
                                 ) : null}
                                 <button
                                   onClick={() => copyToClipboard(digitalKey)}
-                                  className="px-2.5 py-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-[10px] rounded-lg flex items-center gap-1 shadow-md transition-all"
+                                  className="px-2.5 py-1 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-bold text-[10px] rounded-lg flex items-center gap-1 shadow-md transition-all"
                                 >
                                   {copiedKey === digitalKey ? <FaCheck /> : <FaCopy />} Copy
                                 </button>

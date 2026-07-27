@@ -142,14 +142,14 @@ const AuthLogin: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0b0f17] text-slate-100 font-sans flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Ambient glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-indigo-600/15 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-80 h-80 bg-violet-600/15 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-fuchsia-600/15 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-orange-600/15 blur-[130px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-sm space-y-6 relative z-10">
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="relative inline-block">
-            <img src={logoImg} alt="Logo" className="w-20 h-20 rounded-3xl object-cover border-2 border-indigo-500/50 shadow-2xl mx-auto shadow-indigo-600/30" />
+            <img src={logoImg} alt="Logo" className="w-20 h-20 rounded-3xl object-cover border-2 border-fuchsia-500/50 shadow-2xl mx-auto shadow-fuchsia-600/30" />
             <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-slate-950 p-1.5 rounded-full border-2 border-[#0b0f17] text-xs font-black shadow">
               <FaShieldAlt />
             </div>
@@ -170,7 +170,7 @@ const AuthLogin: React.FC = () => {
             {(["REQUEST", "WAITING", "CODE", "VERIFIED_SUCCESS"] as const).map((s, i) => (
               <div key={s} className="flex items-center gap-1.5">
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black border transition-all ${
-                  step === s ? "bg-indigo-600 border-indigo-400 text-white" :
+                  step === s ? "bg-fuchsia-600 border-fuchsia-400 text-white" :
                   (["REQUEST", "WAITING", "CODE", "VERIFIED_SUCCESS"].indexOf(step) > i) ? "bg-emerald-500 border-emerald-400 text-slate-950" :
                   "bg-slate-800 border-slate-700 text-slate-500"
                 }`}>
@@ -192,14 +192,14 @@ const AuthLogin: React.FC = () => {
             <form onSubmit={handleRequestOtp} className="space-y-4">
               <div className="space-y-2 text-left">
                 <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <FaPhoneAlt className="text-indigo-400 text-xs" /> Phone Number (optional)
+                  <FaPhoneAlt className="text-fuchsia-400 text-xs" /> Phone Number (optional)
                 </label>
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="e.g. 012 345 678"
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all shadow-inner"
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/30 transition-all shadow-inner"
                 />
                 <p className="text-[10px] text-slate-400">
                   Your phone number is optional. The code is sent via Telegram.
@@ -208,7 +208,7 @@ const AuthLogin: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-black text-sm rounded-xl shadow-lg shadow-fuchsia-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 {isLoading ? "Creating session..." : <><FaTelegram /> Get Verification Code</>}
               </button>
@@ -258,8 +258,8 @@ const AuthLogin: React.FC = () => {
                 <p className="text-xs text-slate-400">
                   Enter the 6-digit code sent to you by <span className="text-blue-300 font-bold">@Sik_mybot</span>
                 </p>
-                <div className="p-4 bg-slate-950 border border-indigo-500/40 rounded-2xl space-y-1">
-                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-wider block">
+                <div className="p-4 bg-slate-950 border border-fuchsia-500/40 rounded-2xl space-y-1">
+                  <label className="text-[10px] font-black text-fuchsia-400 uppercase tracking-wider block">
                     <FaLock className="inline mr-1" /> 6-Digit Code
                   </label>
                   <input
@@ -340,7 +340,7 @@ const AuthLogin: React.FC = () => {
 
                 <button
                   onClick={() => navigate("/app", { replace: true })}
-                  className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-black text-sm rounded-xl shadow-lg shadow-fuchsia-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <FaRocket /> Continue to Web App
                 </button>
