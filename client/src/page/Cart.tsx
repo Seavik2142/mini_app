@@ -6,7 +6,7 @@ import abaLogo from "../assets/aba-icon.svg";
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 
-const API_BASE_URL = "https://mini-app-mzu6.onrender.com";
+const API_BASE_URL = "https://mini-app-2z1.pages.dev";
 
 const Cart: React.FC = () => {
   const {

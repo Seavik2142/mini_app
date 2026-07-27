@@ -588,7 +588,7 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const payment_option = ""; // Empty string shows full checkout (QR + Cards)
     
     // Success Return and Callback URLs
-    const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app-one-flax.vercel.app/app";
+    const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app-2z1.pages.dev/app";
     const continue_success_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
     const return_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
 

@@ -150,10 +150,7 @@ const i18n = {
 
 // Helper to construct exact, clean Mini App URLs for subpages (/app, /app/orders, /app/profile)
 export const getMiniAppUrl = (path: string = ''): string => {
-  let baseUrl = (process.env.MINI_APP_URL || 'https://mini-app-one-flax.vercel.app/app').trim();
-  if (baseUrl.includes('mini-app1-one.vercel.app')) {
-    baseUrl = baseUrl.replace('mini-app1-one.vercel.app', 'mini-app-one-flax.vercel.app');
-  }
+  let baseUrl = (process.env.MINI_APP_URL || 'https://mini-app-2z1.pages.dev/app').trim();
   baseUrl = baseUrl.replace(/\/+$/, '');
   
   if (!baseUrl.endsWith('/app')) {
@@ -404,7 +401,7 @@ export const initBot = () => {
     // 10. /admin — Store Admin Control Panel Launcher
     // ──────────────────────────────────────────────────
     bot.onText(/\/admin/, (msg) => {
-      const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-mzu6.onrender.com/admin').trim();
+      const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-2z1.pages.dev/admin').trim();
       const lang = getUserLanguage(msg.chat.id);
       const t = i18n[lang];
 
@@ -465,7 +462,7 @@ export const initBot = () => {
     });
 
     bot.onText(/⚙️|Admin Panel|ផ្ទាំងគ្រប់គ្រង/, (msg) => {
-      const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-mzu6.onrender.com/admin').trim();
+      const adminUrl = (process.env.ADMIN_URL || 'https://mini-app-2z1.pages.dev/admin').trim();
       const lang = getUserLanguage(msg.chat.id);
       const t = i18n[lang];
       bot.sendMessage(msg.chat.id, t.adminTitle(adminUrl), {
