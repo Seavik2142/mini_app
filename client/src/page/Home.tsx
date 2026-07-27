@@ -163,7 +163,12 @@ const Home: React.FC = () => {
 
               <div className="space-y-2">
                 <div>
-                  <span className="text-base font-black text-white">${product.price.toFixed(2)}</span>
+                  <span className="text-base font-black text-white">
+                    ${product.price.toFixed(2)}
+                    {product.isOnSale && product.discount && product.originalPrice && (
+                      <span className="text-[10px] text-slate-500 line-through ml-1">${product.originalPrice.toFixed(2)}</span>
+                    )}
+                  </span>
                   <span className="text-[11px] text-emerald-400 font-extrabold block">
                     {formatKHR(product.price)}
                   </span>
@@ -245,7 +250,12 @@ const Home: React.FC = () => {
               <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] text-slate-400 font-medium">Price per Key</p>
-                  <p className="text-lg font-black text-white">${selectedProduct.price.toFixed(2)}</p>
+                  <p className="text-lg font-black text-white">
+                    ${selectedProduct.price.toFixed(2)}
+                    {selectedProduct.isOnSale && selectedProduct.discount && selectedProduct.originalPrice && (
+                      <span className="text-xs text-slate-500 line-through ml-1.5">${selectedProduct.originalPrice.toFixed(2)}</span>
+                    )}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] text-slate-400 font-medium">Price in Riel Khmer</p>

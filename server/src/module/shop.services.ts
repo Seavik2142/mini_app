@@ -429,7 +429,11 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
         const dbProduct = await prisma.product.findUnique({ where: { id: Number(item.productId) } });
         if (dbProduct) {
           activationInstructions = dbProduct.description || activationInstructions;
-          unitPrice = paymentMethod === 'TON' ? (dbProduct.tonPrice || 0) : (paymentMethod === 'STARS' ? (dbProduct.starsPrice || 0) : (dbProduct.price || 0));
+          let basePrice = paymentMethod === 'TON' ? (dbProduct.tonPrice || 0) : (paymentMethod === 'STARS' ? (dbProduct.starsPrice || 0) : (dbProduct.price || 0));
+          if (dbProduct.isOnSale && dbProduct.discount) {
+            basePrice = basePrice * (1 - dbProduct.discount / 100);
+          }
+          unitPrice = basePrice;
           
           const availableKeys = dbProduct.digitalKeys || [];
           if (availableKeys.length > 0) {
