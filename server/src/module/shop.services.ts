@@ -554,24 +554,13 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const req_time = `${YYYY}${MM}${DD}${HH}${mm}${ss}`;
     
     const tran_id = `TR${Date.now()}`;
-    const itemsFormatted = (items || []).map((i: any) => ({
-      name: i.productName || i.name || "Digital Key",
-      quantity: String(i.quantity || 1),
-      price: Number(i.price || 0).toFixed(2)
-    }));
-
-    // Recalculate amount to strictly match ABA PayWay requirement (sum of items + shipping)
-    let calculatedAmount = 0;
-    itemsFormatted.forEach((i: any) => {
-      calculatedAmount += Number(i.quantity) * Number(i.price);
-    });
-    const amount = calculatedAmount.toFixed(2);
-
+    const amount = Number(totalAmount || 0).toFixed(2);
+    
     await prisma.order.create({
       data: {
         orderNumber: tran_id,
         userId: req.user.id,
-        totalAmount: calculatedAmount,
+        totalAmount: Number(totalAmount || 0),
         paymentMethod: "ABA",
         paymentStatus: "PENDING",
         orderStatus: "PROCESSING",
@@ -586,9 +575,8 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
       }
     });
 
-    const itemsBase64 = Buffer.from(JSON.stringify(itemsFormatted)).toString("base64");
-    
-    const shipping = "0.00";
+    const itemsBase64 = "";
+    const shipping = "";
     const fName = firstname || "Telegram";
     const lName = lastname || "User";
     const userEmail = email || "customer@miniapp.com";
@@ -602,6 +590,7 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const return_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
 
     // HMAC SHA-512 Hash Generation according to ABA PayWay Purchase spec
+    // When items and shipping are empty, we just pass empty strings in the hash
     const rawData = `${req_time}${merchantId}${tran_id}${amount}${itemsBase64}${shipping}${fName}${lName}${userEmail}${userPhone}${type}${payment_option}${continue_success_url}${return_url}`;
     const hash = crypto.createHmac("sha512", publicKey).update(rawData).digest("base64");
 
