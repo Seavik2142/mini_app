@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js"></script>
+</head>
+<body>
+    <button onclick="test()">Test ABA UI</button>
+    <script>
+        function test() {
+            if (window.AbaPayway && window.AbaPayway.checkout) {
+                console.log("AbaPayway is available");
+            } else {
+                console.log("AbaPayway is NOT available");
+            }
+        }
+    </script>
+</body>
+</html>

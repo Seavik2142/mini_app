@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+<script>
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-WHDS4FC');</script>
+<link rel="stylesheet" href="/_nuxt/entry.Bs6uw8gP.css" crossorigin>
+<link rel="modulepreload" as="script" crossorigin href="/_nuxt/B-cXcjd7.js">
+<script type="module" src="/_nuxt/B-cXcjd7.js" crossorigin></script>
+<link rel="prefetch" as="style" crossorigin href="/_nuxt/default.JGBlqoqa.css">
+<link rel="prefetch" as="style" crossorigin href="/_nuxt/the-footer.4OerZtWx.css">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/DT3D5RJR.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/DpB6PXAN.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/uwsIczG7.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/BpQmWTfY.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/DG5tGCLL.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/CSdbftXY.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/xm7b1ptT.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/CjvZvvkO.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/BnZfb9Es.js">
+<link rel="prefetch" as="style" crossorigin href="/_nuxt/developer.Cu1YBiBG.css">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/BTup1K8h.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/DTyMUmV8.js">
+<link rel="prefetch" as="script" crossorigin href="/_nuxt/DSmTki84.js"><script>"use strict";(()=>{const t=window,e=document.documentElement,c=["dark","light"],n=getStorageValue("localStorage","color-mode")||"system";let i=n==="system"?u():n;const r=e.getAttribute("data-color-mode-forced");r&&(i=r),l(i),t["__NUXT_COLOR_MODE__"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=""+o+"",a="";e.classList?e.classList.add(s):e.className+=" "+s,a&&e.setAttribute("data-"+a,o)}function d(o){const s=""+o+"",a="";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,"g"),""),a&&e.removeAttribute("data-"+a)}function f(o){return t.matchMedia("(prefers-color-scheme"+o+")")}function u(){if(t.matchMedia&&f("").media!=="not all"){for(const o of c)if(f(":"+o).matches)return o}return"light"}})();function getStorageValue(t,e){switch(t){case"localStorage":return window.localStorage.getItem(e);case"sessionStorage":return window.sessionStorage.getItem(e);case"cookie":return getCookie(e);default:return null}}function getCookie(t){const c=("; "+window.document.cookie).split("; "+t+"=");if(c.length===2)return c.pop()?.split(";").shift()}</script></head><body><div id="__nuxt"></div><div id="teleports"></div><script>window.__NUXT__={};window.__NUXT__.config={public:{apiBase:"https://sandbox.payway.com.kh/api",ga4:"G-34DH752D42",ga4_enable_debugger:false,gtmId:"GTM-WHDS4FC",register_sandbox_url:"https://sandbox.payway.com.kh/register-sandbox/",gMapKey:"AIzaSyARYGK4Aw2-yLhEvk-IRxsA1vlGVejHZGU",SENTRY_DNS:"https://ff06086aa3f3af483c980a2af6657fc4@o438621.ingest.us.sentry.io/4509585375952896",SENTRY_ENVIRONMENT:"PRODUCTION",displayNavi:true,i18n:{baseUrl:"",defaultLocale:"en",defaultDirection:"ltr",strategy:"prefix_except_default",lazy:true,rootRedirect:"",routesNameSeparator:"___",defaultLocaleRouteNameSuffix:"default",skipSettingLocaleOnNavigate:false,differentDomains:false,trailingSlash:false,configLocales:[{code:"en",files:["/app/src/locales/en-US.json"]},{code:"km",files:["/app/src/locales/km-KH.json"]},{code:"zh",files:["/app/src/locales/zh-CN.json"]}],locales:{en:{domain:""},km:{domain:""},zh:{domain:""}},detectBrowserLanguage:{alwaysRedirect:false,cookieCrossOrigin:false,cookieDomain:"",cookieKey:"i18n_redirected",cookieSecure:false,fallbackLocale:"",redirectOn:"root",useCookie:true},experimental:{localeDetector:"",switchLocalePathLinkSSR:false,autoImportTranslationFunctions:false},multiDomainLocales:false},naiveUI:{themeOverrides:""}},app:{baseURL:"/",buildId:"76546ad8-cf17-418b-b7ee-f89a5eb18418",buildAssetsDir:"/_nuxt/",cdnURL:""}}</script>
+<script type="application/json" data-nuxt-data="nuxt-app" data-ssr="false" id="__NUXT_DATA__">[{"prerenderedAt":1,"serverRendered":2},1780475361912,false]</script></body></html>
