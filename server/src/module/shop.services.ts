@@ -554,19 +554,24 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const req_time = `${YYYY}${MM}${DD}${HH}${mm}${ss}`;
     
     const tran_id = `TR${Date.now()}`;
-    const amount = Number(totalAmount || 0).toFixed(2);
-    
     const itemsFormatted = (items || []).map((i: any) => ({
       name: i.productName || i.name || "Digital Key",
       quantity: String(i.quantity || 1),
       price: Number(i.price || 0).toFixed(2)
     }));
-    
+
+    // Recalculate amount to strictly match ABA PayWay requirement (sum of items + shipping)
+    let calculatedAmount = 0;
+    itemsFormatted.forEach((i: any) => {
+      calculatedAmount += Number(i.quantity) * Number(i.price);
+    });
+    const amount = calculatedAmount.toFixed(2);
+
     await prisma.order.create({
       data: {
         orderNumber: tran_id,
         userId: req.user.id,
-        totalAmount: Number(totalAmount || 0),
+        totalAmount: calculatedAmount,
         paymentMethod: "ABA",
         paymentStatus: "PENDING",
         orderStatus: "PROCESSING",
