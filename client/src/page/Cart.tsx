@@ -5,8 +5,9 @@ import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, 
 import abaLogo from "../assets/aba-icon.svg";
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
+import { getApiBaseUrl } from "../Baseapi";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com";
+const API_BASE_URL = getApiBaseUrl();
 
 const Cart: React.FC = () => {
   const {

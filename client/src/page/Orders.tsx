@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { FaKey, FaCopy, FaCheck, FaEye, FaEyeSlash, FaShieldAlt, FaStar, FaTimes } from "react-icons/fa";
 import { toast } from "sonner";
+import { getApiBaseUrl } from "../Baseapi";
 
 const Orders: React.FC = () => {
   const { orders } = useCart();
@@ -25,7 +26,7 @@ const Orders: React.FC = () => {
   const submitRating = async () => {
     if (!ratingProduct) return;
     try {
-      const API_BASE_URL = `${import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com"}/shop`;
+      const API_BASE_URL = `${getApiBaseUrl()}/shop`;
 
       await fetch(`${API_BASE_URL}/products/${ratingProduct.id}/rate`, {
         method: "POST",

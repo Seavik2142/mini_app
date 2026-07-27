@@ -3,6 +3,7 @@ import { Product, CartItem, Order } from "../type";
 import { toast } from "sonner";
 import { initData, openTelegramLink } from "@telegram-apps/sdk";
 import { FaTimes, FaShieldAlt, FaLock, FaCheck, FaTelegram } from "react-icons/fa";
+import { getApiBaseUrl } from "../Baseapi";
 
 import chatGptImg from "../assets/ChatGPT.jpg";
 import geminiImg from "../assets/gemini.jpeg";
@@ -88,9 +89,6 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const getApiBaseUrl = () => {
-  return (import.meta.env.VITE_API_URL as string | undefined) || "https://mini-app-mzu6.onrender.com";
-};
 const API_BASE_URL = getApiBaseUrl();
 
 const generateRandomKey = (prefix: string = "KEY") => {

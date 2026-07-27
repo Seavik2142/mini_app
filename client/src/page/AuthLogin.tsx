@@ -6,8 +6,9 @@ import { useCart } from "../context/CartContext";
 import logoImg from "../assets/logo.jpg";
 
 import { openTelegramLink } from "@telegram-apps/sdk";
+import { getApiBaseUrl } from "../Baseapi";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com";
+const API_BASE_URL = getApiBaseUrl();
 
 const AuthLogin: React.FC = () => {
   const navigate = useNavigate();
