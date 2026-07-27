@@ -192,7 +192,7 @@ export const initBot = () => {
       const t = i18n[lang];
 
       if (!sessionId) {
-        return sendWelcome(bot, chatId, firstName);
+        return sendWelcome(bot, chatId, firstName, msg.from);
       }
 
       const session = getSession(sessionId);
@@ -249,7 +249,7 @@ export const initBot = () => {
     // 2. Plain /start — New User Start / Welcome
     // ──────────────────────────────────────────────────
     bot.onText(/^\/start$/, (msg) => {
-      sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User');
+      sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User', msg.from);
     });
 
     // ──────────────────────────────────────────────────
@@ -352,7 +352,7 @@ export const initBot = () => {
     // 7. /shop — Marketplace Launcher
     // ──────────────────────────────────────────────────
     bot.onText(/\/shop/, (msg) => {
-      sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User');
+      sendWelcome(bot, msg.chat.id, msg.from?.first_name || 'User', msg.from);
     });
 
     // ──────────────────────────────────────────────────
@@ -659,9 +659,31 @@ function getControlReplyKeyboard(chatId?: number) {
   };
 }
 
-function sendWelcome(bot: TelegramBot, chatId: number, firstName: string) {
+async function sendWelcome(bot: TelegramBot, chatId: number, firstName: string, tgUser?: TelegramBot.User) {
   const lang = getUserLanguage(chatId);
   const t = i18n[lang];
+
+  if (tgUser) {
+    try {
+      const tgId = String(tgUser.id || chatId);
+      const name = `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || 'User';
+      const username = tgUser.username || null;
+      await prisma.user.upsert({
+        where: { tgId },
+        update: { name, username, lastSeenAt: new Date() },
+        create: {
+          tgId,
+          name,
+          username,
+          referCode: tgId.slice(-6),
+          referBy: "0",
+          balance: 0,
+        }
+      });
+    } catch (e) {
+      console.error("Bot auto-register error:", e);
+    }
+  }
 
   bot.sendMessage(
     chatId,
