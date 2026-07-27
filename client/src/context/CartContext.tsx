@@ -128,6 +128,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     try {
       initData.restore();
+      
+      // Auto-register/login user to backend using raw initData
+      const rawData = (window as any).Telegram?.WebApp?.initData;
+      if (rawData) {
+        fetch(`${API_BASE_URL}/user/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: rawData })
+        })
+        .then(res => res.json())
+        .then(data => console.log("Auto-login via initData:", data))
+        .catch(err => console.log("Auto-login error:", err));
+      }
     } catch (e) {
       console.log("Telegram SDK initData restore notice:", e);
     }
