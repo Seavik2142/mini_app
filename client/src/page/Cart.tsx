@@ -45,6 +45,7 @@ const Cart: React.FC = () => {
         const endpoint = paymentMethod === "ABA" ? "/shop/aba-checkout" : "/shop/paypal-checkout";
         const res = await fetch(`${API_BASE_URL}${endpoint}`, {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
