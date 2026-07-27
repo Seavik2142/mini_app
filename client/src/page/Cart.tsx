@@ -86,7 +86,7 @@ const Cart: React.FC = () => {
     const form = document.createElement("form");
     form.method = "POST";
     form.action = abaData.apiUrl;
-    form.target = "_blank"; // open in new tab
+    form.target = "_self"; // open in same frame to avoid popup blockers in Telegram
 
     const addField = (name: string, value: string) => {
       const input = document.createElement("input");
@@ -110,7 +110,7 @@ const Cart: React.FC = () => {
     addField("merchant_id", abaData.merchantId);
     addField("return_url", abaData.return_url);
     addField("continue_success_url", abaData.continue_success_url);
-    addField("payment_option", abaData.payment_option);
+    if (abaData.payment_option) addField("payment_option", abaData.payment_option);
     addField("type", abaData.type);
 
     document.body.appendChild(form);
@@ -119,7 +119,6 @@ const Cart: React.FC = () => {
     toast.success("Redirecting to ABA PayWay...");
     setShowModal(false);
     clearCart();
-    navigate("/app/orders");
   };
 
   // PayPal Script Injection & Rendering
