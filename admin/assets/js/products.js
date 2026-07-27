@@ -171,6 +171,14 @@ function cleanProductKeysFormat() {
   showToast('✨ Formatted to 1 link per line cleanly!');
 }
 
+function toggleDiscountField() {
+  const isSale = document.getElementById('product-sale')?.checked;
+  const container = document.getElementById('discount-container');
+  if (container) {
+    container.style.display = isSale ? 'block' : 'none';
+  }
+}
+
 function openAddModal() {
   editingId = null;
   const labelEl = document.getElementById('productModalLabel');
@@ -179,6 +187,7 @@ function openAddModal() {
   if (formEl) formEl.reset();
   updateProductImagePreview('');
   updateKeysCount('');
+  toggleDiscountField();
   loadCategoriesForForm();
   const modalEl = document.getElementById('productModal');
   if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).show();
@@ -205,6 +214,8 @@ function openEditModal(id) {
   setCheck('product-featured', product.isFeatured);
   setCheck('product-new', product.isNew);
   setCheck('product-sale', product.isOnSale);
+  setField('product-discount', product.discount || '');
+  toggleDiscountField();
 
   loadCategoriesForForm().then(() => setField('product-category', product.categoryId));
 
@@ -252,6 +263,7 @@ async function saveProduct() {
     isFeatured: getCheck('product-featured'),
     isNew: getCheck('product-new'),
     isOnSale: getCheck('product-sale'),
+    discount: getCheck('product-sale') ? (parseFloat(getField('product-discount')) || 0) : 0,
   };
 
   // Capture editingId before clearing it
