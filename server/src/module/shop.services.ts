@@ -551,7 +551,7 @@ export const createAbaPayment: RequestHandler = (req, res): void => {
     const ss = String(now.getUTCSeconds()).padStart(2, '0');
     const req_time = `${YYYY}${MM}${DD}${HH}${mm}${ss}`;
     
-    const tran_id = `TRANS_${Date.now()}_${Math.floor(100 + Math.random() * 900)}`;
+    const tran_id = `TR${Date.now()}`;
     const amount = Number(totalAmount || 0).toFixed(2);
     
     const itemsFormatted = (items || []).map((i: any) => ({
