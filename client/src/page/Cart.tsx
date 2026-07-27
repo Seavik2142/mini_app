@@ -80,43 +80,42 @@ const Cart: React.FC = () => {
 
   const submitAbaForm = () => {
     if (!abaData) return;
-    placeOrder("ABA", phone).then(() => {
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = abaData.apiUrl;
-      form.target = "_blank";
+    
+    // Create and submit the ABA form
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = abaData.apiUrl;
+    form.target = "_blank"; // open in new tab
 
-      const addField = (name: string, value: string) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
-      };
+    const addField = (name: string, value: string) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    };
 
-      addField("hash", abaData.hash);
-      addField("tran_id", abaData.tran_id);
-      addField("amount", abaData.amount);
-      addField("items", abaData.items);
-      addField("shipping", abaData.shipping);
-      addField("firstname", abaData.firstname);
-      addField("lastname", abaData.lastname);
-      addField("email", abaData.email);
-      addField("phone", abaData.phone);
-      addField("req_time", abaData.req_time);
-      addField("merchant_id", abaData.merchantId);
-      addField("return_url", abaData.return_url);
-      addField("continue_success_url", abaData.continue_success_url);
-      addField("payment_option", abaData.payment_option);
-      addField("type", abaData.type);
+    addField("hash", abaData.hash);
+    addField("tran_id", abaData.tran_id);
+    addField("amount", abaData.amount);
+    addField("items", abaData.items);
+    addField("shipping", abaData.shipping);
+    addField("firstname", abaData.firstname);
+    addField("lastname", abaData.lastname);
+    addField("email", abaData.email);
+    addField("phone", abaData.phone);
+    addField("req_time", abaData.req_time);
+    addField("merchant_id", abaData.merchantId);
+    addField("return_url", abaData.return_url);
+    addField("continue_success_url", abaData.continue_success_url);
+    addField("payment_option", abaData.payment_option);
+    addField("type", abaData.type);
 
-      document.body.appendChild(form);
-      form.submit();
-      
-      toast.success("Redirecting to ABA PayWay...");
-      setShowModal(false);
-      navigate("/app/orders");
-    });
+    document.body.appendChild(form);
+    form.submit();
+    
+    toast.success("Redirecting to ABA PayWay...");
+    setShowModal(false);
   };
 
   // PayPal Script Injection & Rendering

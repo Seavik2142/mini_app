@@ -534,7 +534,7 @@ Redeem keys in app or software settings.
   }
 };
 
-export const createAbaPayment: RequestHandler = (req, res): void => {
+export const createAbaPayment: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { items, totalAmount, firstname, lastname, phone, email } = req.body;
     
@@ -560,6 +560,25 @@ export const createAbaPayment: RequestHandler = (req, res): void => {
       price: Number(i.price || 0).toFixed(2)
     }));
     
+    await prisma.order.create({
+      data: {
+        orderNumber: tran_id,
+        userId: req.user.id,
+        totalAmount: Number(totalAmount || 0),
+        paymentMethod: "ABA",
+        paymentStatus: "PENDING",
+        orderStatus: "PROCESSING",
+        contactPhone: phone || "Telegram User",
+        items: {
+          create: (items || []).map((i: any) => ({
+            productId: Number(i.productId),
+            quantity: Number(i.quantity || 1),
+            price: Number(i.price || 0)
+          }))
+        }
+      }
+    });
+
     const itemsBase64 = Buffer.from(JSON.stringify(itemsFormatted)).toString("base64");
     
     const shipping = "0.00";
@@ -637,14 +656,62 @@ X8Y1jISMzEBykbmA0QJALlt5a+KXBm39qPy424dLdOgX7rKY0Pcr+W5MSAEsCRfD
   }
 };
 
-export const abaWebhook: RequestHandler = (req, res): void => {
+export const abaWebhook: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { status, tran_id, amount, hash } = req.body;
     console.log(`[ABA PAYWAY WEBHOOK] Order ID: ${tran_id} | Status: ${status} | Amount: ${amount}`);
     
     // Status 0 / PAID indicates successful transaction from ABA Sandbox
     if (String(status) === "0" || String(status) === "PAID" || String(status) === "200") {
-      console.log(`✅ Order ${tran_id} marked as PAID. Digital keys delivered to customer.`);
+      const dbOrder = await prisma.order.findUnique({
+        where: { orderNumber: tran_id },
+        include: { items: { include: { product: true } }, user: true }
+      });
+      if (dbOrder && dbOrder.paymentStatus !== "PAID") {
+        const allDeliveredKeysForTelegram: { productName: string; keys: string[] }[] = [];
+        for (const item of dbOrder.items) {
+          let deliveredKeys: string[] = [];
+          const dbProduct = item.product;
+          if (dbProduct) {
+            const availableKeys = dbProduct.digitalKeys || [];
+            if (availableKeys.length > 0) {
+              const takeQty = Math.min(item.quantity, availableKeys.length);
+              deliveredKeys = availableKeys.slice(0, takeQty);
+              await prisma.product.update({
+                where: { id: dbProduct.id },
+                data: {
+                  digitalKeys: availableKeys.slice(takeQty),
+                  stock: Math.max(0, (dbProduct.stock || availableKeys.length) - takeQty)
+                }
+              });
+            }
+            if (deliveredKeys.length < item.quantity) {
+              const missingCount = item.quantity - deliveredKeys.length;
+              const prefix = (dbProduct.name || "KEY").substring(0, 4).toUpperCase();
+              const generatedKeys = Array.from({ length: missingCount }, () => generateRandomKey(prefix));
+              deliveredKeys = [...deliveredKeys, ...generatedKeys];
+            }
+            allDeliveredKeysForTelegram.push({ productName: dbProduct.name, keys: deliveredKeys });
+          }
+        }
+        await prisma.order.update({
+          where: { id: dbOrder.id },
+          data: { paymentStatus: "PAID", orderStatus: "DELIVERED" }
+        });
+        if (dbOrder.user.tgId) {
+          let keyDetailsMarkdown = "";
+          allDeliveredKeysForTelegram.forEach((kGroup) => {
+            keyDetailsMarkdown += `\n📦 *${kGroup.productName}*\n`;
+            kGroup.keys.forEach((k) => {
+              if (k.startsWith("http")) keyDetailsMarkdown += `🔗 [Click to Open Link](${k})\n\`${k}\`\n`;
+              else keyDetailsMarkdown += `🔑 \`${k}\`\n`;
+            });
+          });
+          const messageText = `🎉 *PAYMENT SUCCESSFUL - KEYS DELIVERED!*\n\n🛍️ *Order Number:* #${tran_id}\n💰 *Total Paid:* $${Number(dbOrder.totalAmount).toFixed(2)}\n${keyDetailsMarkdown}\n📌 *Activation Instructions:*\nRedeem keys in app or software settings.\n\n⚡ *Your keys are also permanently saved in your Web App Vault!*`;
+          sendTelegramBotNotification(dbOrder.user.tgId, messageText);
+        }
+        console.log(`✅ Order ${tran_id} marked as PAID and keys delivered.`);
+      }
     }
 
     res.status(200).json({ status: "0", message: "ABA Webhook processed successfully" });
