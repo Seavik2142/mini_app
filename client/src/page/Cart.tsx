@@ -82,12 +82,17 @@ const Cart: React.FC = () => {
   const submitAbaForm = () => {
     if (!abaData) return;
     
+    // Remove existing form if any
+    const existingForm = document.getElementById("aba_merchant_request");
+    if (existingForm) existingForm.remove();
+
     // Create and submit the ABA form
     const form = document.createElement("form");
+    form.id = "aba_merchant_request";
     form.method = "POST";
     form.action = abaData.apiUrl;
-    form.target = "_self"; // open in same frame to avoid popup blockers in Telegram
-    form.enctype = "multipart/form-data"; // MUST be multipart/form-data for ABA Payway HTML UI
+    form.target = "aba_webservice"; // MUST be aba_webservice for the popup plugin
+    form.enctype = "multipart/form-data"; 
 
     const addField = (name: string, value: string) => {
       const input = document.createElement("input");
@@ -115,15 +120,35 @@ const Cart: React.FC = () => {
     addField("type", abaData.type);
 
     document.body.appendChild(form);
-    form.submit();
     
-    toast.success("Redirecting to ABA PayWay...");
+    // Call the ABA PayWay JS checkout plugin!
+    if ((window as any).AbaPayway && (window as any).AbaPayway.checkout) {
+      (window as any).AbaPayway.checkout();
+    } else {
+      // Fallback if script failed to load
+      form.submit();
+    }
+    
+    toast.success("Opening ABA PayWay...");
     setShowModal(false);
     clearCart();
   };
 
-  // PayPal Script Injection & Rendering
+  // Script Injection for ABA and PayPal
   useEffect(() => {
+    // ABA PayWay Script
+    if (showModal && paymentMethod === "ABA") {
+      const scriptId = "aba-payway-js";
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = "https://checkout-sandbox.payway.com.kh/plugins/checkout2-0.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+
+    // PayPal Script
     if (showModal && paymentMethod === "PAYPAL") {
       const clientId = paypalData?.clientId || "Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe";
       const scriptId = "paypal-js-sdk";
