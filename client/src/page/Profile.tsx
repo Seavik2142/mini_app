@@ -249,6 +249,28 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
+          {/* Community & Support */}
+          <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg">
+            <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+              <FaTelegram className="text-fuchsia-400" /> Community & Support
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => window.open('https://t.me/your_channel', '_blank')}
+                  className="w-full py-2.5 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-300 font-extrabold text-xs rounded-xl border border-fuchsia-500/30 flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <FaTelegram className="text-sm" /> Channel
+                </button>
+                <button
+                  onClick={() => window.open('https://t.me/your_admin', '_blank')}
+                  className="w-full py-2.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 font-extrabold text-xs rounded-xl border border-orange-500/30 flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <FaPhoneAlt className="text-sm" /> Admin
+                </button>
+            </div>
+          </div>
+
           {/* Account Actions / Logout */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg">
             <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
