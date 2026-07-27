@@ -280,7 +280,7 @@ AdminRoute.patch("/products/:id", Utility.CatchAsync(async (req, res) => {
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
     if (isNew !== undefined) updateData.isNew = isNew;
     if (isOnSale !== undefined) updateData.isOnSale = isOnSale;
-    if (discount !== undefined) updateData.discount = discount;
+    if (discount !== undefined) updateData.discount = parseInt(discount as any) || 0;
     if (warranty !== undefined) updateData.warranty = warranty;
     if (digitalKeys !== undefined) updateData.digitalKeys = digitalKeys;
 

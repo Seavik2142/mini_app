@@ -243,7 +243,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Products — always replace with live DB data; empty DB = empty store
     fetchWithTimeout(`${API_BASE_URL}/shop/products`).then(data => {
       if (data && Array.isArray(data.data)) {
-        const processed = data.data.map(p => ({
+        const processed = data.data.map((p: Product) => ({
           ...p,
           originalPrice: p.price,
           price: p.isOnSale && p.discount ? p.price * (1 - p.discount / 100) : p.price
