@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserVaildation } from "../utils/Middleware";
-import { getProducts, getCategories, getProductById, createOrder, createAbaPayment, abaWebhook, createPaypalPayment, getBanners, getPromos, rateProduct, getUserOrders, getUserProfile, updateUserProfile } from "../module/shop.services";
+import { getProducts, getCategories, getProductById, createOrder, createAbaPayment, abaWebhook, createPaypalPayment, getBanners, getPromos, rateProduct, getUserOrders, getUserProfile, updateUserProfile, handlePaymentFailed } from "../module/shop.services";
 
 const ShopRoute = Router();
 
@@ -20,5 +20,6 @@ ShopRoute.get("/user-profile", UserVaildation, getUserProfile);
 ShopRoute.patch("/user-profile", UserVaildation, updateUserProfile);
 ShopRoute.post("/aba-checkout", UserVaildation, createAbaPayment);
 ShopRoute.post("/paypal-checkout", UserVaildation, createPaypalPayment);
+ShopRoute.post("/payment-failed", UserVaildation, handlePaymentFailed);
 
 export default ShopRoute;

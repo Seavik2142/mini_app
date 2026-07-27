@@ -150,6 +150,28 @@ const Cart: React.FC = () => {
                 if (order) {
                   navigate("/app/orders");
                 }
+              },
+              onCancel: async () => {
+                toast.error("PayPal Payment Cancelled");
+                try {
+                  await fetch(`${import.meta.env.VITE_API_URL || "https://miniapp1.onrender.com/api"}/shop/payment-failed`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ method: "PayPal", amount: totalPrice.toFixed(2) }),
+                    credentials: "include"
+                  });
+                } catch (e) {}
+              },
+              onError: async () => {
+                toast.error("PayPal Payment Failed");
+                try {
+                  await fetch(`${import.meta.env.VITE_API_URL || "https://miniapp1.onrender.com/api"}/shop/payment-failed`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ method: "PayPal", amount: totalPrice.toFixed(2) }),
+                    credentials: "include"
+                  });
+                } catch (e) {}
               }
             }).render("#paypal-button-container");
           } catch (e) {

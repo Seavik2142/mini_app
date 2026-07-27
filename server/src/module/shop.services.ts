@@ -510,10 +510,12 @@ export const createOrder: RequestHandler = async (req, res): Promise<void> => {
         });
       });
 
-      const messageText = `🎉 *PAYMENT SUCCESSFUL - KEYS DELIVERED!*
+      const messageText = `🎉 *PAYMENT SUCCESSFUL!*
 
-🛍️ *Order Number:* #${orderNumber}
-💰 *Total Paid:* $${Number(realTotalAmount).toFixed(2)}
+🧾 *Receipt Details:*
+• Order ID: #${orderNumber}
+• Amount: $${Number(realTotalAmount).toFixed(2)}
+• Method: ${paymentMethod}
 
 ${keyDetailsMarkdown}
 📌 *Activation Instructions:*
@@ -707,10 +709,45 @@ export const abaWebhook: RequestHandler = async (req, res): Promise<void> => {
               else keyDetailsMarkdown += `🔑 \`${k}\`\n`;
             });
           });
-          const messageText = `🎉 *PAYMENT SUCCESSFUL - KEYS DELIVERED!*\n\n🛍️ *Order Number:* #${tran_id}\n💰 *Total Paid:* $${Number(dbOrder.totalAmount).toFixed(2)}\n${keyDetailsMarkdown}\n📌 *Activation Instructions:*\nRedeem keys in app or software settings.\n\n⚡ *Your keys are also permanently saved in your Web App Vault!*`;
+          const messageText = `🎉 *PAYMENT SUCCESSFUL!*
+
+🧾 *Receipt Details:*
+• Order ID: #${tran_id}
+• Amount: $${Number(dbOrder.totalAmount).toFixed(2)}
+• Method: ABA PayWay
+
+${keyDetailsMarkdown}
+📌 *Activation Instructions:*
+Redeem keys in app or software settings.
+
+⚡ *Your keys are also permanently saved in your Web App Vault!*`;
           sendTelegramBotNotification(dbOrder.user.tgId, messageText);
         }
         console.log(`✅ Order ${tran_id} marked as PAID and keys delivered.`);
+      }
+    } else {
+      // Payment Failed Path
+      const dbOrder = await prisma.order.findUnique({
+        where: { orderNumber: tran_id },
+        include: { user: true }
+      });
+      if (dbOrder && dbOrder.paymentStatus !== "FAILED") {
+        await prisma.order.update({
+          where: { id: dbOrder.id },
+          data: { paymentStatus: "FAILED", orderStatus: "CANCELLED" }
+        });
+        if (dbOrder.user.tgId) {
+          const failMessage = `❌ *PAYMENT FAILED OR CANCELLED!*
+
+🧾 *Receipt Details:*
+• Order ID: #${tran_id}
+• Amount: $${Number(dbOrder.totalAmount).toFixed(2)}
+• Method: ABA PayWay
+
+Please try again or contact support if you need help.`;
+          sendTelegramBotNotification(dbOrder.user.tgId, failMessage);
+        }
+        console.log(`❌ Order ${tran_id} marked as FAILED.`);
       }
     }
 
@@ -953,6 +990,22 @@ export const updateUserProfile: RequestHandler = async (req, res): Promise<void>
       message: "Profile updated successfully!",
       data: updated
     });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const handlePaymentFailed: RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const { method, amount } = req.body;
+    const tgId = req.user?.tgId;
+    
+    if (tgId) {
+      const failMessage = `❌ *PAYMENT FAILED OR CANCELLED!*\n\n🧾 *Details:*\n• Amount: $${Number(amount || 0).toFixed(2)}\n• Method: ${method || 'PayPal'}\n\nPlease try again or contact support if you need help.`;
+      sendTelegramBotNotification(tgId, failMessage);
+    }
+    
+    res.status(200).json({ success: true });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
