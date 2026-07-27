@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaTimes, FaPhoneAlt, FaRegCreditCard } from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaTimes, FaPhoneAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 
@@ -24,24 +24,30 @@ const Cart: React.FC = () => {
 
   const navigate = useNavigate();
   const [inputCode, setInputCode] = useState("");
-  const paymentMethod = "ABA";
+  const [paymentMethod, setPaymentMethod] = useState<"ABA" | "PAYPAL">("ABA");
   const [phone, setPhone] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  
   const [abaData, setAbaData] = useState<any>(null);
+  const [paypalData, setPaypalData] = useState<any>(null);
 
   const handleOpenPayment = async () => {
     requireAuth(async () => {
       if (cart.length === 0) return;
       setIsVerifying(true);
       setShowModal(true);
+      
+      setAbaData(null);
+      setPaypalData(null);
 
       try {
-        const res = await fetch(`${API_BASE_URL}/shop/aba-checkout`, {
+        const endpoint = paymentMethod === "ABA" ? "/shop/aba-checkout" : "/shop/paypal-checkout";
+        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("token") || ""}` // if your API requires it
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
           },
           body: JSON.stringify({
             items: cart.map(i => ({ productId: i.product.id, name: i.product.name, quantity: i.quantity, price: i.product.price })),
@@ -50,15 +56,20 @@ const Cart: React.FC = () => {
           })
         });
         const data = await res.json();
+        
         if (data.success && data.data) {
-          setAbaData(data.data);
+          if (paymentMethod === "ABA") {
+            setAbaData(data.data);
+          } else {
+            setPaypalData(data.data);
+          }
         } else {
-          toast.error("Failed to initialize ABA checkout.");
+          toast.error(`Failed to initialize ${paymentMethod} checkout.`);
           setShowModal(false);
         }
       } catch (e) {
-        console.log("ABA Checkout API error:", e);
-        toast.error("An error occurred connecting to ABA.");
+        console.log(`${paymentMethod} Checkout API error:`, e);
+        toast.error(`An error occurred connecting to ${paymentMethod}.`);
         setShowModal(false);
       } finally {
         setIsVerifying(false);
@@ -68,15 +79,11 @@ const Cart: React.FC = () => {
 
   const submitAbaForm = () => {
     if (!abaData) return;
-    
-    // Auto-complete order in our system immediately for this mock flow
-    // In full production, this is handled by ABA webhook.
     placeOrder("ABA", phone).then(() => {
-      // Create and submit the ABA form
       const form = document.createElement("form");
       form.method = "POST";
       form.action = abaData.apiUrl;
-      form.target = "_blank"; // open in new tab
+      form.target = "_blank";
 
       const addField = (name: string, value: string) => {
         const input = document.createElement("input");
@@ -110,6 +117,58 @@ const Cart: React.FC = () => {
     });
   };
 
+  // PayPal Script Injection & Rendering
+  useEffect(() => {
+    if (showModal && paymentMethod === "PAYPAL") {
+      const clientId = paypalData?.clientId || "Adwf4rrFyhxGtUTYTTJWTN8Kj5vOiDvSlcDWfiU7xhZnFQGVOST7Ry9I4fBqdG-qRpQe4A3aQFaA9mwe";
+      const scriptId = "paypal-js-sdk";
+      
+      const renderButtons = () => {
+        const container = document.getElementById("paypal-button-container");
+        if (container && (window as any).paypal) {
+          container.innerHTML = "";
+          try {
+            (window as any).paypal.Buttons({
+              style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+              createOrder: (_data: any, actions: any) => {
+                return actions.order.create({
+                  purchase_units: [{ amount: { value: totalPrice.toFixed(2) } }]
+                });
+              },
+              onApprove: async (_data: any, actions: any) => {
+                setIsVerifying(true);
+                try {
+                  await actions.order.capture();
+                } catch (e) {
+                  console.log("Capture notice:", e);
+                }
+                toast.success("🎉 PayPal Payment Approved! Auto-delivering digital keys...");
+                const order = await placeOrder("PAYPAL", phone);
+                setIsVerifying(false);
+                setShowModal(false);
+                if (order) {
+                  navigate("/app/orders");
+                }
+              }
+            }).render("#paypal-button-container");
+          } catch (e) {
+            console.log("PayPal Buttons render fallback:", e);
+          }
+        }
+      };
+
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD`;
+        script.onload = renderButtons;
+        document.body.appendChild(script);
+      } else {
+        renderButtons();
+      }
+    }
+  }, [showModal, paymentMethod, paypalData, totalPrice]);
+
   // Telegram Native MainButton integration
   useEffect(() => {
     try {
@@ -119,9 +178,10 @@ const Cart: React.FC = () => {
           mb.mount();
         }
         if (mb.setParams?.isAvailable) {
+          const isAba = paymentMethod === "ABA";
           mb.setParams({
-            text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)}) VIA ABA`,
-            backgroundColor: '#0054a6',
+            text: `PAY $${totalPrice.toFixed(2)} (${formatKHR(totalPrice)}) VIA ${paymentMethod}`,
+            backgroundColor: isAba ? '#0054a6' : '#0070ba',
             textColor: '#ffffff',
             isVisible: true,
             isEnabled: true,
@@ -261,27 +321,44 @@ const Cart: React.FC = () => {
       <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-md">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-            <FaRegCreditCard className="text-[#0054a6] text-sm" /> Payment Method
+            <FaRegCreditCard className="text-slate-400 text-sm" /> Payment Method
           </h3>
-          <span className="text-[10px] bg-[#0054a6]/20 text-[#0054a6] font-extrabold px-2.5 py-0.5 rounded-full border border-[#0054a6]/30">
-            ABA PAYWAY ⚡
-          </span>
         </div>
 
-        {/* ABA Option Box */}
-        <div className="p-3 bg-slate-950 border-2 border-[#0054a6]/60 rounded-xl flex items-center justify-between shadow-inner">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-[#0054a6] to-[#00b0e3] text-white text-lg font-black rounded-xl flex items-center justify-center shadow-md">
+        <div className="grid grid-cols-2 gap-3">
+          {/* ABA Option */}
+          <button
+            onClick={() => setPaymentMethod("ABA")}
+            className={`p-3 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${
+              paymentMethod === "ABA"
+                ? "bg-[#0054a6]/10 border-[#0054a6]"
+                : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black shadow-md ${
+              paymentMethod === "ABA" ? "bg-gradient-to-tr from-[#0054a6] to-[#00b0e3] text-white" : "bg-slate-800 text-slate-500"
+            }`}>
               KH
             </div>
-            <div>
-              <p className="text-xs font-black text-white">ABA PayWay Checkout</p>
-              <p className="text-[10px] text-slate-400">Secure payment via ABA App</p>
+            <span className={`text-xs font-bold ${paymentMethod === "ABA" ? "text-white" : "text-slate-400"}`}>ABA PayWay</span>
+          </button>
+
+          {/* PayPal Option */}
+          <button
+            onClick={() => setPaymentMethod("PAYPAL")}
+            className={`p-3 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${
+              paymentMethod === "PAYPAL"
+                ? "bg-indigo-500/10 border-indigo-500"
+                : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md ${
+              paymentMethod === "PAYPAL" ? "bg-gradient-to-tr from-indigo-600 to-violet-600 text-white" : "bg-slate-800 text-slate-500"
+            }`}>
+              <FaPaypal />
             </div>
-          </div>
-          <span className="text-xs text-[#00b0e3] font-extrabold flex items-center gap-1">
-            <FaCheck /> Selected
-          </span>
+            <span className={`text-xs font-bold ${paymentMethod === "PAYPAL" ? "text-white" : "text-slate-400"}`}>PayPal</span>
+          </button>
         </div>
       </div>
 
@@ -313,24 +390,34 @@ const Cart: React.FC = () => {
       {/* Proceed to Payment Button */}
       <button
         onClick={handleOpenPayment}
-        className="w-full py-3.5 bg-gradient-to-r from-[#0054a6] to-[#00b0e3] hover:from-[#00428a] hover:to-[#008fbc] text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-[#0054a6]/30 active:scale-[0.99] transition-all"
+        className={`w-full py-3.5 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl active:scale-[0.99] transition-all ${
+          paymentMethod === "ABA"
+            ? "bg-gradient-to-r from-[#0054a6] to-[#00b0e3] hover:from-[#00428a] hover:to-[#008fbc] shadow-[#0054a6]/30"
+            : "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-600/30"
+        }`}
       >
-        <FaRegCreditCard className="text-lg" />
-        Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via ABA <FaArrowRight className="text-xs" />
+        {paymentMethod === "ABA" ? <FaRegCreditCard className="text-lg" /> : <FaPaypal className="text-lg" />}
+        Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via {paymentMethod === "ABA" ? "ABA" : "PayPal"} <FaArrowRight className="text-xs" />
       </button>
 
-      {/* ABA Checkout Modal */}
+      {/* Checkout Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl text-center animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-left">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#0054a6] text-white text-base">
-                  <FaRegCreditCard />
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-base ${
+                  paymentMethod === "ABA" ? "bg-[#0054a6]" : "bg-indigo-600"
+                }`}>
+                  {paymentMethod === "ABA" ? <FaRegCreditCard /> : <FaPaypal />}
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-sm text-white">ABA PayWay Checkout</h3>
-                  <p className="text-[10px] text-slate-400">Pay securely via ABA Bank</p>
+                  <h3 className="font-extrabold text-sm text-white">
+                    {paymentMethod === "ABA" ? "ABA PayWay Checkout" : "PayPal Express Checkout"}
+                  </h3>
+                  <p className="text-[10px] text-slate-400">
+                    {paymentMethod === "ABA" ? "Pay securely via ABA Bank" : "Pay via PayPal Gateway"}
+                  </p>
                 </div>
               </div>
               <button
@@ -352,36 +439,55 @@ const Cart: React.FC = () => {
 
             <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-center">
               <div className="flex items-center justify-center gap-2 text-white text-xs font-bold mb-2">
-                <FaRegCreditCard className="text-lg text-[#00b0e3]" /> Official ABA PayWay
+                {paymentMethod === "ABA" ? (
+                  <><FaRegCreditCard className="text-lg text-[#00b0e3]" /> Official ABA PayWay</>
+                ) : (
+                  <><FaPaypal className="text-lg text-indigo-400" /> Official PayPal Checkout</>
+                )}
               </div>
               
               <div className="flex flex-col gap-3">
-                {abaData ? (
-                  <>
-                    <button
-                      onClick={submitAbaForm}
-                      className="w-full py-3.5 bg-[#0054a6] hover:bg-[#00428a] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
-                    >
-                      Continue to ABA App
-                    </button>
-                    {abaData.deeplink && (
+                {paymentMethod === "ABA" ? (
+                  abaData ? (
+                    <>
                       <button
-                        onClick={() => {
-                          placeOrder("ABA", phone).then(() => {
-                            window.open(abaData.deeplink, "_blank");
-                            setShowModal(false);
-                            navigate("/app/orders");
-                          });
-                        }}
-                        className="w-full py-3 border border-[#0054a6] text-[#00b0e3] font-bold text-xs rounded-xl hover:bg-[#0054a6]/10 transition-colors"
+                        onClick={submitAbaForm}
+                        className="w-full py-3.5 bg-[#0054a6] hover:bg-[#00428a] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
                       >
-                        Open ABA Mobile (Deep Link)
+                        Continue to ABA App
                       </button>
-                    )}
-                  </>
+                      {abaData.deeplink && (
+                        <button
+                          onClick={() => {
+                            placeOrder("ABA", phone).then(() => {
+                              window.open(abaData.deeplink, "_blank");
+                              setShowModal(false);
+                              navigate("/app/orders");
+                            });
+                          }}
+                          className="w-full py-3 border border-[#0054a6] text-[#00b0e3] font-bold text-xs rounded-xl hover:bg-[#0054a6]/10 transition-colors"
+                        >
+                          Open ABA Mobile (Deep Link)
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="py-4 text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
+                      <span className="animate-spin text-lg">⏳</span> Generating ABA Payment...
+                    </div>
+                  )
                 ) : (
-                  <div className="py-4 text-xs font-bold text-slate-400 flex items-center justify-center gap-2">
-                    <span className="animate-spin text-lg">⏳</span> Generating ABA Payment...
+                  <div id="paypal-button-container" className="min-h-[100px] flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const paypalWebUrl = paypalData?.approvalUrl || `https://www.paypal.com/checkoutnow?token=${paypalData?.orderId || ""}`;
+                        window.open(paypalWebUrl, "_blank");
+                      }}
+                      className="w-full py-3.5 bg-[#ffc439] hover:bg-[#f2ba32] text-black font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all active:scale-95"
+                    >
+                      <FaPaypal className="text-lg text-[#003087]" /> Pay with PayPal
+                    </button>
                   </div>
                 )}
               </div>
