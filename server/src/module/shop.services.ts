@@ -542,7 +542,7 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     
     const merchantId = process.env.ABA_PAYWAY_MERCHANT_ID || "ec477129";
     const publicKey = process.env.ABA_PAYWAY_PUBLIC_KEY || "78445715560c048d3e0db4ced5167311a5817dfa";
-    const apiUrl = process.env.ABA_PAYWAY_API_URL || "https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase";
+    const apiUrl = process.env.ABA_PAYWAY_API_URL || "https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/checkout";
     
     const now = new Date();
     const YYYY = now.getUTCFullYear();
@@ -582,7 +582,7 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const userEmail = email || "customer@miniapp.com";
     const userPhone = phone || "+85512345678";
     const type = "purchase";
-    const payment_option = "cards"; // Force cards for testing
+    const payment_option = ""; // Empty string shows full checkout (QR + Cards)
     
     // Success Return and Callback URLs
     const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app-one-flax.vercel.app/app";
