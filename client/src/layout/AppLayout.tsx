@@ -1,5 +1,5 @@
 import { miniApp } from "@telegram-apps/sdk";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import BottomDock from "../components/bottomDock";
 import Header from "../components/header";
@@ -8,14 +8,73 @@ import { FaTelegram, FaUserShield, FaCommentDots, FaTimes } from "react-icons/fa
 
 const FloatingButtons = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [pos, setPos] = useState({ x: typeof window !== 'undefined' ? window.innerWidth - 70 : 300, y: typeof window !== 'undefined' ? window.innerHeight - 150 : 600 });
+    const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, moved: false });
+
+    useEffect(() => {
+        // Safe check for window
+        if (typeof window === 'undefined') return;
+        setPos({ x: window.innerWidth - 70, y: window.innerHeight - 150 });
+        
+        const move = (e: MouseEvent | TouchEvent) => {
+            if (!dragRef.current.isDragging) return;
+            if (e.cancelable) e.preventDefault();
+            
+            const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+            const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+            
+            let newX = clientX - dragRef.current.startX;
+            let newY = clientY - dragRef.current.startY;
+            
+            newX = Math.max(10, Math.min(newX, window.innerWidth - 66));
+            newY = Math.max(10, Math.min(newY, window.innerHeight - 66));
+            
+            dragRef.current.moved = true;
+            setPos({ x: newX, y: newY });
+        };
+        const up = () => { dragRef.current.isDragging = false; };
+
+        window.addEventListener('mousemove', move, { passive: false });
+        window.addEventListener('touchmove', move, { passive: false });
+        window.addEventListener('mouseup', up);
+        window.addEventListener('touchend', up);
+
+        return () => {
+            window.removeEventListener('mousemove', move);
+            window.removeEventListener('touchmove', move);
+            window.removeEventListener('mouseup', up);
+            window.removeEventListener('touchend', up);
+        };
+    }, []);
+
+    const down = (e: React.MouseEvent | React.TouchEvent) => {
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        dragRef.current = {
+            isDragging: true,
+            moved: false,
+            startX: clientX - pos.x,
+            startY: clientY - pos.y
+        };
+    };
+
+    const handleClick = () => {
+        if (!dragRef.current.moved) {
+            setIsOpen(!isOpen);
+        }
+        dragRef.current.moved = false; // Reset for next click
+    };
 
     return (
-        <div className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-3">
+        <div 
+            className="fixed z-50 flex flex-col items-end gap-3"
+            style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+        >
             {/* Expanded Menu */}
-            <div className={`flex flex-col gap-3 transition-all duration-300 origin-bottom ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-8 pointer-events-none'}`}>
+            <div className={`absolute bottom-[120%] right-0 flex flex-col items-end gap-3 transition-all duration-300 origin-bottom-right ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
                 <button
                     onClick={() => { setIsOpen(false); window.open('https://t.me/your_admin', '_blank'); }}
-                    className="flex items-center gap-3 group active:scale-95 transition-transform"
+                    className="flex items-center justify-end gap-3 group active:scale-95 transition-transform w-max"
                     aria-label="Contact Admin"
                 >
                     <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
@@ -27,7 +86,7 @@ const FloatingButtons = () => {
                 </button>
                 <button
                     onClick={() => { setIsOpen(false); window.open('https://t.me/your_channel', '_blank'); }}
-                    className="flex items-center gap-3 group active:scale-95 transition-transform"
+                    className="flex items-center justify-end gap-3 group active:scale-95 transition-transform w-max"
                     aria-label="Telegram Channel"
                 >
                     <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
@@ -41,8 +100,10 @@ const FloatingButtons = () => {
 
             {/* Main Toggle Button */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95 z-50 relative ${isOpen ? 'bg-slate-800 border border-slate-700 shadow-slate-900/50 rotate-90' : 'bg-gradient-to-tr from-fuchsia-600 to-orange-500 shadow-fuchsia-600/40 border border-fuchsia-400/30 rotate-0'}`}
+                onMouseDown={down}
+                onTouchStart={down}
+                onClick={handleClick}
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95 z-50 relative cursor-grab active:cursor-grabbing ${isOpen ? 'bg-slate-800 border border-slate-700 shadow-slate-900/50 rotate-90' : 'bg-gradient-to-tr from-fuchsia-600 to-orange-500 shadow-fuchsia-600/40 border border-fuchsia-400/30 rotate-0'}`}
                 aria-label="Support Menu"
             >
                 {isOpen ? <FaTimes className="text-2xl text-slate-400" /> : <FaCommentDots className="text-2xl text-white" />}
