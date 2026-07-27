@@ -360,7 +360,7 @@ AdminRoute.post("/broadcast-news", Utility.CatchAsync(async (req, res) => {
     code: 200,
     success: true,
     data: result,
-    message: `📢 Broadcast sent to ${result.successCount} Telegram users!`
+    message: `📢 Broadcast sent to ${result.successCount} Telegram recipients!`
   });
 }));
 

@@ -703,6 +703,7 @@ export async function sendBroadcastNews(payload: {
   btnUrl?: string;
 }) {
   const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
+  const channelTarget = process.env.CHANNEL_USERNAME || process.env.TELEGRAM_CHANNEL_USERNAME || '@MGDigitalKeys';
 
   const users = await prisma.user.findMany({
     where: { isDelete: false },
@@ -710,6 +711,9 @@ export async function sendBroadcastNews(payload: {
   });
 
   const chatIds = new Set<string>();
+  if (channelTarget && channelTarget.trim()) {
+    chatIds.add(channelTarget.trim());
+  }
   users.forEach(u => {
     if (u.tgId && u.tgId.trim()) chatIds.add(u.tgId.trim());
   });
