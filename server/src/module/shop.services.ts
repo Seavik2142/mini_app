@@ -589,9 +589,11 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const continue_success_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
     const return_url = Buffer.from(`${appBaseUrl}/orders`).toString("base64");
 
+    const currency = "USD";
+
     // HMAC SHA-512 Hash Generation according to ABA PayWay Purchase spec
     // When items and shipping are empty, we just pass empty strings in the hash
-    const rawData = `${req_time}${merchantId}${tran_id}${amount}${itemsBase64}${shipping}${fName}${lName}${userEmail}${userPhone}${type}${payment_option}${continue_success_url}${return_url}`;
+    const rawData = `${req_time}${merchantId}${tran_id}${amount}${itemsBase64}${shipping}${fName}${lName}${userEmail}${userPhone}${type}${payment_option}${continue_success_url}${return_url}${currency}`;
     const hash = crypto.createHmac("sha512", publicKey).update(rawData).digest("base64");
 
     // RSA Signature
