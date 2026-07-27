@@ -44,7 +44,7 @@ const Header = () => {
     return (
         <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
             {/* Hidden Audio Player */}
-            <audio ref={audioRef} src="/song.mp3" loop muted={isMuted} />
+            <audio ref={audioRef} src="/song.webm" loop muted={isMuted} />
             
             {/* App Branding */}
             <div 
