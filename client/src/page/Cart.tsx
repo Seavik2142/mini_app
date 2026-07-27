@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { FaTrash, FaPlus, FaMinus, FaTag, FaCheck, FaArrowRight, FaShoppingBag, FaTimes, FaPhoneAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
+import abaLogo from "../assets/aba-icon.svg";
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 
@@ -364,10 +365,10 @@ const Cart: React.FC = () => {
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black shadow-md ${
-              paymentMethod === "ABA" ? "bg-gradient-to-tr from-[#0054a6] to-[#00b0e3] text-white" : "bg-slate-800 text-slate-500"
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md overflow-hidden ${
+              paymentMethod === "ABA" ? "bg-[#0054a6] text-white" : "bg-slate-800 text-slate-500"
             }`}>
-              KH
+              <img src={abaLogo} alt="ABA" className="w-full h-full object-cover" />
             </div>
             <span className={`text-xs font-bold ${paymentMethod === "ABA" ? "text-white" : "text-slate-400"}`}>ABA PayWay</span>
           </button>
@@ -425,7 +426,7 @@ const Cart: React.FC = () => {
             : "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-600/30"
         }`}
       >
-        {paymentMethod === "ABA" ? <FaRegCreditCard className="text-lg" /> : <FaPaypal className="text-lg" />}
+        {paymentMethod === "ABA" ? <img src={abaLogo} className="w-5 h-5 rounded-md" alt="ABA" /> : <FaPaypal className="text-lg" />}
         Pay ${totalPrice.toFixed(2)} ({formatKHR(totalPrice)}) via {paymentMethod === "ABA" ? "ABA" : "PayPal"} <FaArrowRight className="text-xs" />
       </button>
 
@@ -435,10 +436,10 @@ const Cart: React.FC = () => {
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl text-center animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-left">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-base ${
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-base overflow-hidden ${
                   paymentMethod === "ABA" ? "bg-[#0054a6]" : "bg-indigo-600"
                 }`}>
-                  {paymentMethod === "ABA" ? <FaRegCreditCard /> : <FaPaypal />}
+                  {paymentMethod === "ABA" ? <img src={abaLogo} className="w-full h-full object-cover" alt="ABA" /> : <FaPaypal />}
                 </div>
                 <div>
                   <h3 className="font-extrabold text-sm text-white">
@@ -469,7 +470,7 @@ const Cart: React.FC = () => {
             <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3 text-center">
               <div className="flex items-center justify-center gap-2 text-white text-xs font-bold mb-2">
                 {paymentMethod === "ABA" ? (
-                  <><FaRegCreditCard className="text-lg text-[#00b0e3]" /> Official ABA PayWay</>
+                  <><img src={abaLogo} className="w-6 h-6 rounded-md shadow" alt="ABA" /> Official ABA PayWay</>
                 ) : (
                   <><FaPaypal className="text-lg text-indigo-400" /> Official PayPal Checkout</>
                 )}
