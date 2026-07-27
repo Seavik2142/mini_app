@@ -319,26 +319,6 @@ const AuthLogin: React.FC = () => {
 
               <div className="space-y-2.5">
                 <button
-                  onClick={() => {
-                    const botUrl = "https://t.me/Sik_mybot?start=vault";
-                    try {
-                      if (openTelegramLink.isAvailable()) {
-                        openTelegramLink(botUrl);
-                      } else {
-                        window.location.href = botUrl;
-                      }
-                    } catch {
-                      window.location.href = botUrl;
-                    }
-                  }}
-                  className="w-full py-3.5 bg-[#2AABEE] hover:bg-[#229ED9] text-white font-black text-sm rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  <FaTelegram className="text-lg" />
-                  Open @Sik_mybot to Start Key
-                  <FaExternalLinkAlt className="text-xs opacity-70" />
-                </button>
-
-                <button
                   onClick={() => navigate("/app", { replace: true })}
                   className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-black text-sm rounded-xl shadow-lg shadow-fuchsia-600/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
