@@ -7,7 +7,7 @@ import logoImg from "../assets/logo.jpg";
 
 import { openTelegramLink } from "@telegram-apps/sdk";
 
-const API_BASE_URL = "https://mini-app-mzu6.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com";
 
 const AuthLogin: React.FC = () => {
   const navigate = useNavigate();

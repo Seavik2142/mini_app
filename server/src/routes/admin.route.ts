@@ -13,11 +13,14 @@ AdminRoute.post("/login", Utility.CatchAsync(async (req, res) => {
   if (username && username.toLowerCase() === 'seavik' && password === 'Seavik214262') {
     const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
     const token = jwt.sign({ role: "SUPER_ADMIN", username: "Seavik" }, secret, { expiresIn: '7d' });
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const proto = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto;
+    const isSecure = process.env.NODE_ENV === 'production' || proto === 'https' || req.secure;
     res.cookie("admin_auth", token, {
         httpOnly: true,
-        secure: true,
+        secure: isSecure,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: "none",
+        sameSite: isSecure ? "none" : "lax",
     });
     res.json({ success: true, message: "Logged in successfully", token });
   } else {
@@ -26,7 +29,10 @@ AdminRoute.post("/login", Utility.CatchAsync(async (req, res) => {
 }));
 
 AdminRoute.post("/logout", (req, res) => {
-  res.clearCookie("admin_auth", { httpOnly: true, secure: true, sameSite: "none" });
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const proto = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto;
+  const isSecure = process.env.NODE_ENV === 'production' || proto === 'https' || req.secure;
+  res.clearCookie("admin_auth", { httpOnly: true, secure: isSecure, sameSite: isSecure ? "none" : "lax" });
   res.json({ success: true, message: "Logged out" });
 });
 

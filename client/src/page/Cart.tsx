@@ -6,7 +6,7 @@ import abaLogo from "../assets/aba-icon.svg";
 import { mainButton } from "@telegram-apps/sdk";
 import { toast } from "sonner";
 
-const API_BASE_URL = "https://mini-app-mzu6.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com";
 
 const Cart: React.FC = () => {
   const {
@@ -161,7 +161,7 @@ const Cart: React.FC = () => {
               onCancel: async () => {
                 toast.error("PayPal Payment Cancelled");
                 try {
-                  await fetch(`${import.meta.env.VITE_API_URL || "https://miniapp1.onrender.com/api"}/shop/payment-failed`, {
+                  await fetch(`${import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com"}/shop/payment-failed`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ method: "PayPal", amount: totalPrice.toFixed(2) }),
@@ -172,7 +172,7 @@ const Cart: React.FC = () => {
               onError: async () => {
                 toast.error("PayPal Payment Failed");
                 try {
-                  await fetch(`${import.meta.env.VITE_API_URL || "https://miniapp1.onrender.com/api"}/shop/payment-failed`, {
+                  await fetch(`${import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com"}/shop/payment-failed`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ method: "PayPal", amount: totalPrice.toFixed(2) }),

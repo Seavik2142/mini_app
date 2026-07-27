@@ -25,7 +25,7 @@ const Orders: React.FC = () => {
   const submitRating = async () => {
     if (!ratingProduct) return;
     try {
-      const API_BASE_URL = "https://mini-app-mzu6.onrender.com/shop";
+      const API_BASE_URL = `${import.meta.env.VITE_API_URL || "https://mini-app-mzu6.onrender.com"}/shop`;
 
       await fetch(`${API_BASE_URL}/products/${ratingProduct.id}/rate`, {
         method: "POST",
