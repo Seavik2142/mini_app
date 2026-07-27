@@ -122,12 +122,20 @@ const Cart: React.FC = () => {
     document.body.appendChild(form);
     
     // Call the ABA PayWay JS checkout plugin!
-    if ((window as any).AbaPayway && (window as any).AbaPayway.checkout) {
-      (window as any).AbaPayway.checkout();
-    } else {
-      // Fallback if script failed to load
-      form.submit();
-    }
+    // We add a tiny delay just in case the script is still downloading.
+    let retries = 0;
+    const tryCheckout = () => {
+      if ((window as any).AbaPayway && (window as any).AbaPayway.checkout) {
+        (window as any).AbaPayway.checkout();
+      } else if (retries < 5) {
+        retries++;
+        setTimeout(tryCheckout, 200);
+      } else {
+        // Fallback if script completely failed to load
+        form.submit();
+      }
+    };
+    tryCheckout();
     
     toast.success("Opening ABA PayWay...");
     setShowModal(false);
@@ -142,7 +150,7 @@ const Cart: React.FC = () => {
       if (!document.getElementById(scriptId)) {
         const script = document.createElement("script");
         script.id = scriptId;
-        script.src = "https://checkout-sandbox.payway.com.kh/plugins/checkout2-0.js";
+        script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
         script.async = true;
         document.body.appendChild(script);
       }
