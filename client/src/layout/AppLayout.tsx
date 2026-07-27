@@ -1,27 +1,58 @@
 import { miniApp } from "@telegram-apps/sdk";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import BottomDock from "../components/bottomDock";
 import Header from "../components/header";
 import { Toaster } from "sonner";
-import { FaTelegram, FaUserShield } from "react-icons/fa";
+import { FaTelegram, FaUserShield, FaCommentDots, FaTimes } from "react-icons/fa";
 
 const FloatingButtons = () => {
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
-        <div className="fixed bottom-28 right-4 z-50 flex flex-col gap-3">
+        <div className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-3">
+            {/* Expanded Menu */}
+            <div className={`flex flex-col gap-3 transition-all duration-300 origin-bottom ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-8 pointer-events-none'}`}>
+                <button
+                    onClick={() => { setIsOpen(false); window.open('https://t.me/your_admin', '_blank'); }}
+                    className="flex items-center gap-3 group active:scale-95 transition-transform"
+                    aria-label="Contact Admin"
+                >
+                    <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
+                        Contact Admin
+                    </span>
+                    <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-600/40 border border-orange-400/30">
+                        <FaUserShield className="text-xl" />
+                    </div>
+                </button>
+                <button
+                    onClick={() => { setIsOpen(false); window.open('https://t.me/your_channel', '_blank'); }}
+                    className="flex items-center gap-3 group active:scale-95 transition-transform"
+                    aria-label="Telegram Channel"
+                >
+                    <span className="bg-slate-900/95 backdrop-blur-sm text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg">
+                        Join Channel
+                    </span>
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 border border-blue-400/30">
+                        <FaTelegram className="text-2xl" />
+                    </div>
+                </button>
+            </div>
+
+            {/* Main Toggle Button */}
             <button
-                onClick={() => window.open('https://t.me/your_admin', '_blank')}
-                className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-600/40 border border-orange-400/30 transition-all active:scale-90 group relative"
-                aria-label="Contact Admin"
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95 z-50 relative ${isOpen ? 'bg-slate-800 border border-slate-700 shadow-slate-900/50 rotate-90' : 'bg-gradient-to-tr from-fuchsia-600 to-orange-500 shadow-fuchsia-600/40 border border-fuchsia-400/30 rotate-0'}`}
+                aria-label="Support Menu"
             >
-                <FaUserShield className="text-xl" />
-            </button>
-            <button
-                onClick={() => window.open('https://t.me/your_channel', '_blank')}
-                className="w-12 h-12 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 border border-blue-400/30 transition-all active:scale-90 group relative"
-                aria-label="Telegram Channel"
-            >
-                <FaTelegram className="text-2xl" />
+                {isOpen ? <FaTimes className="text-2xl text-slate-400" /> : <FaCommentDots className="text-2xl text-white" />}
+                
+                {!isOpen && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-orange-500 border-2 border-[#0b0f17]"></span>
+                    </span>
+                )}
             </button>
         </div>
     );
