@@ -99,8 +99,8 @@ const Cart: React.FC = () => {
     addField("hash", abaData.hash);
     addField("tran_id", abaData.tran_id);
     addField("amount", abaData.amount);
-    addField("items", abaData.items);
-    addField("shipping", abaData.shipping);
+    if (abaData.items) addField("items", abaData.items);
+    if (abaData.shipping) addField("shipping", abaData.shipping);
     addField("firstname", abaData.firstname);
     addField("lastname", abaData.lastname);
     addField("email", abaData.email);
