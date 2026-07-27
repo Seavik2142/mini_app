@@ -703,7 +703,7 @@ export async function sendBroadcastNews(payload: {
   btnUrl?: string;
 }) {
   const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
-  const channelTarget = process.env.CHANNEL_USERNAME || process.env.TELEGRAM_CHANNEL_USERNAME || '@MGDigitalKeys';
+  const channelTarget = (process.env.CHANNEL_ID || process.env.CHANNEL_USERNAME || process.env.TELEGRAM_CHANNEL_USERNAME || '@MGDigitalKeys').trim();
 
   const users = await prisma.user.findMany({
     where: { isDelete: false },
@@ -711,27 +711,32 @@ export async function sendBroadcastNews(payload: {
   });
 
   const chatIds = new Set<string>();
-  if (channelTarget && channelTarget.trim()) {
-    chatIds.add(channelTarget.trim());
-  }
+  if (channelTarget) chatIds.add(channelTarget);
   users.forEach(u => {
     if (u.tgId && u.tgId.trim()) chatIds.add(u.tgId.trim());
   });
 
   let successCount = 0;
   let failCount = 0;
+  const errors: string[] = [];
 
   const formattedText = `📢 *${payload.title.trim()}*\n\n${payload.message.trim()}`;
   const buttonUrl = payload.btnUrl?.trim() || getMiniAppUrl();
   const buttonText = payload.btnText?.trim() || '🚀 Open Key Vault Store';
 
-  const replyMarkup = {
-    inline_keyboard: [
-      [{ text: buttonText, web_app: { url: buttonUrl } }]
-    ]
-  };
-
   for (const chatId of chatIds) {
+    const isChannel = chatId.startsWith('@') || chatId.startsWith('-100') || chatId.startsWith('-');
+    const replyMarkup = buttonUrl
+      ? {
+          inline_keyboard: [[
+            {
+              text: buttonText,
+              ...(isChannel ? { url: buttonUrl } : { web_app: { url: buttonUrl } })
+            }
+          ]]
+        }
+      : undefined;
+
     try {
       const rawImg = (payload.imageUrl || '').trim();
       if (rawImg.startsWith('http')) {
@@ -743,12 +748,16 @@ export async function sendBroadcastNews(payload: {
             photo: rawImg,
             caption: formattedText,
             parse_mode: 'Markdown',
-            reply_markup: replyMarkup
+            ...(replyMarkup ? { reply_markup: replyMarkup } : {})
           })
         });
         const data = await res.json();
         if (data.ok) successCount++;
-        else failCount++;
+        else {
+          failCount++;
+          errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
+          console.error(`Broadcast failed for ${chatId}`, data);
+        }
       } else if (rawImg.startsWith('data:image')) {
         const base64Data = rawImg.split(',')[1];
         const mimeMatch = rawImg.match(/data:(image\/\w+);/);
@@ -760,7 +769,7 @@ export async function sendBroadcastNews(payload: {
         formData.append('photo', new Blob([buffer], { type: mimeType }), 'news.png');
         formData.append('caption', formattedText);
         formData.append('parse_mode', 'Markdown');
-        formData.append('reply_markup', JSON.stringify(replyMarkup));
+        if (replyMarkup) formData.append('reply_markup', JSON.stringify(replyMarkup));
 
         const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
           method: 'POST',
@@ -768,7 +777,11 @@ export async function sendBroadcastNews(payload: {
         });
         const data = await res.json();
         if (data.ok) successCount++;
-        else failCount++;
+        else {
+          failCount++;
+          errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
+          console.error(`Broadcast failed for ${chatId}`, data);
+        }
       } else {
         const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
@@ -777,17 +790,23 @@ export async function sendBroadcastNews(payload: {
             chat_id: chatId,
             text: formattedText,
             parse_mode: 'Markdown',
-            reply_markup: replyMarkup
+            ...(replyMarkup ? { reply_markup: replyMarkup } : {})
           })
         });
         const data = await res.json();
         if (data.ok) successCount++;
-        else failCount++;
+        else {
+          failCount++;
+          errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
+          console.error(`Broadcast failed for ${chatId}`, data);
+        }
       }
     } catch (err) {
       failCount++;
+      errors.push(`${chatId}: ${(err as Error).message}`);
+      console.error(`Broadcast exception for ${chatId}`, err);
     }
   }
 
-  return { successCount, failCount, totalTarget: chatIds.size };
+  return { successCount, failCount, totalTarget: chatIds.size, errors };
 }
