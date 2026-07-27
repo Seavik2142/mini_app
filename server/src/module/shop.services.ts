@@ -582,7 +582,7 @@ export const createAbaPayment: RequestHandler = async (req, res): Promise<void> 
     const userEmail = email || "customer@miniapp.com";
     const userPhone = phone || "+85512345678";
     const type = "purchase";
-    const payment_option = "abapay";
+    const payment_option = ""; // Empty string shows full checkout (QR + Cards)
     
     // Success Return and Callback URLs
     const appBaseUrl = process.env.MINI_APP_URL || "https://mini-app-one-flax.vercel.app/app";
