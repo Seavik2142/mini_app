@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaShieldAlt, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaBolt, FaCheck, FaGlobe, FaEnvelope, FaEdit } from "react-icons/fa";
+import { FaShieldAlt, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaCheck, FaGlobe, FaEnvelope, FaEdit } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { orders, telegramUser, isPhoneVerified, verifiedPhone, dbUserProfile, updateUserProfileData, verifyPhone, sendOtpCode, updateVerifiedPhone, logout } = useCart();
+  const { orders, telegramUser, isPhoneVerified, verifiedPhone, dbUserProfile, updateUserProfileData, verifyPhone, sendOtpCode, logout } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [inputEmail, setInputEmail] = useState(dbUserProfile?.email || "");
