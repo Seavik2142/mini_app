@@ -194,11 +194,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const telegramUser = {
-    id: realTgUser?.id ? String(realTgUser.id) : (userProfile?.tgId || (isPhoneVerified ? verifiedPhone : "")),
-    firstName: realTgUser?.first_name || userProfile?.name || (isPhoneVerified ? "Verified User" : ""),
+    id: realTgUser?.id ? String(realTgUser.id) : (dbUserProfile?.tgId || userProfile?.tgId || (isPhoneVerified ? verifiedPhone : "")),
+    firstName: realTgUser?.first_name || dbUserProfile?.name || userProfile?.name || (isPhoneVerified ? "Verified User" : ""),
     lastName: realTgUser?.last_name || "",
-    username: realTgUser?.username || userProfile?.username || "",
-    photoUrl: realTgUser?.photo_url || ""
+    username: realTgUser?.username || dbUserProfile?.username || userProfile?.username || "",
+    photoUrl: realTgUser?.photo_url || dbUserProfile?.photoUrl || userProfile?.photoUrl || ""
   };
 
   const [currentOtpCode, setCurrentOtpCode] = useState<string>("");

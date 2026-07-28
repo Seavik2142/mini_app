@@ -249,7 +249,8 @@ const verifyOtp = CatchAsync(async (req, res) => {
             name: userRecord.name,
             username: userRecord.username,
             balance: userRecord.balance,
-            referCode: userRecord.referCode
+            referCode: userRecord.referCode,
+            photoUrl: (tgUser as any)?.photo_url || null
         }
     });
 });

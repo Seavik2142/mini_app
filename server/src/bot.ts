@@ -210,15 +210,27 @@ export const initBot = () => {
         return;
       }
 
-      // Attach user's chatId and real Telegram identity to session
+      // Attach user's chatId and real Telegram identity (including profile photo) to session
       if (msg.from) {
+        let photoUrl: string | undefined = undefined;
+        try {
+          const photos = await bot.getUserProfilePhotos(msg.from.id, { limit: 1 });
+          if (photos && photos.total_count > 0 && photos.photos[0]?.length > 0) {
+            const fileId = photos.photos[0][0].file_id;
+            photoUrl = await bot.getFileLink(fileId);
+          }
+        } catch (err) {
+          console.log("Profile photo fetch notification:", err);
+        }
+
         attachTelegramUser(sessionId, chatId, {
           id: msg.from.id,
           first_name: msg.from.first_name,
           last_name: msg.from.last_name,
           username: msg.from.username,
-          language_code: msg.from.language_code
-        });
+          language_code: msg.from.language_code,
+          photo_url: photoUrl
+        } as any);
       }
 
       const expiresIn = getSecondsUntilExpiry(sessionId);
