@@ -14,27 +14,13 @@ const Header = () => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        const prepareAudio = () => {
-            if (audioRef.current) {
-                audioRef.current.volume = 0.5;
-                if (audioRef.current.paused && isMuted) {
-                    audioRef.current.play().catch(() => {});
-                }
-            }
-        };
-        
-        prepareAudio();
-        const handleFirstClick = () => {
-            if (audioRef.current && audioRef.current.paused) {
-                audioRef.current.play().catch(() => {});
-            }
-        };
-        document.addEventListener('click', handleFirstClick, { once: true });
-        
-        return () => {
-            document.removeEventListener('click', handleFirstClick);
-        };
-    }, [isMuted]);
+        if (audioRef.current) {
+            // Strictly enforce muted and paused state by default upon opening the web app via any link
+            audioRef.current.muted = true;
+            audioRef.current.volume = 0.5;
+            audioRef.current.pause();
+        }
+    }, []);
 
     const toggleMute = () => {
         if (audioRef.current) {
@@ -45,6 +31,8 @@ const Header = () => {
             if (!nextMuteState) {
                 audioRef.current.volume = 0.5;
                 audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+            } else {
+                audioRef.current.pause();
             }
         }
     };
