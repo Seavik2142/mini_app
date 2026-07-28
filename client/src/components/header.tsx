@@ -5,46 +5,100 @@ import { FaShoppingBag, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import logoImg from '../assets/logo.jpg';
 import { useState, useRef, useEffect } from 'react';
 
+declare global {
+    interface Window {
+        YT: any;
+        onYouTubeIframeAPIReady: () => void;
+    }
+}
+
 const Header = () => {
     const { totalItems } = useCart();
     const { language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
+    // Always open muted when using the web app as requested
     const [isMuted, setIsMuted] = useState(true);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const playerRef = useRef<any>(null);
 
     useEffect(() => {
-        const playAudio = () => {
-            if (audioRef.current) {
-                audioRef.current.play().catch(e => console.log("Autoplay blocked:", e));
-            }
-            document.removeEventListener('click', playAudio);
-        };
-        document.addEventListener('click', playAudio);
-        
-        if (audioRef.current) {
-            audioRef.current.volume = 0.5;
-            audioRef.current.play().catch(() => {});
+        // Load the YouTube Iframe API script dynamically
+        if (!window.YT) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
         }
 
+        const initPlayer = () => {
+            if (window.YT && window.YT.Player && !playerRef.current) {
+                playerRef.current = new window.YT.Player('youtube-audio-player', {
+                    height: '0',
+                    width: '0',
+                    videoId: 'z-qigE1ym40', // YouTube stream video ID from user's link
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 0,
+                        disablekb: 1,
+                        fs: 0,
+                        loop: 1,
+                        modestbranding: 1,
+                        playsinline: 1,
+                        mute: 1, // Start muted by default!
+                        playlist: 'z-qigE1ym40'
+                    },
+                    events: {
+                        onReady: (event: any) => {
+                            event.target.mute();
+                            event.target.setVolume(50);
+                            event.target.playVideo();
+                        }
+                    }
+                });
+            }
+        };
+
+        if (window.YT && window.YT.Player) {
+            initPlayer();
+        } else {
+            window.onYouTubeIframeAPIReady = initPlayer;
+        }
+
+        const handleFirstInteraction = () => {
+            if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+                playerRef.current.playVideo();
+            }
+            document.removeEventListener('click', handleFirstInteraction);
+        };
+        document.addEventListener('click', handleFirstInteraction);
+
         return () => {
-            document.removeEventListener('click', playAudio);
+            document.removeEventListener('click', handleFirstInteraction);
         };
     }, []);
 
     const toggleMute = () => {
-        if (audioRef.current) {
-            audioRef.current.muted = !audioRef.current.muted;
-            setIsMuted(audioRef.current.muted);
-            if (!audioRef.current.muted) {
-                audioRef.current.play().catch(e => console.log(e));
+        if (playerRef.current && typeof playerRef.current.isMuted === 'function') {
+            const currentlyMuted = playerRef.current.isMuted();
+            if (currentlyMuted) {
+                playerRef.current.unMute();
+                playerRef.current.setVolume(50);
+                playerRef.current.playVideo();
+                setIsMuted(false);
+            } else {
+                playerRef.current.mute();
+                setIsMuted(true);
             }
+        } else {
+            setIsMuted(!isMuted);
         }
     };
 
     return (
         <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
-            {/* Hidden Audio Player */}
-            <audio ref={audioRef} src="/song.webm" loop muted={isMuted} />
+            {/* Hidden YouTube Audio Player */}
+            <div className="hidden pointer-events-none absolute w-0 h-0 overflow-hidden">
+                <div id="youtube-audio-player" />
+            </div>
             
             {/* App Branding */}
             <div 
