@@ -321,15 +321,28 @@ AdminRoute.delete("/products/:id", Utility.CatchAsync(async (req, res) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id) || id > 2147483647) {
-    res.json({ code: 200, msg: "Product deleted" });
+    res.status(400).json({ code: 400, msg: "Invalid product id" });
+    return;
+  }
+
+  const existing = await prisma.product.findUnique({ where: { id } });
+  if (!existing) {
+    res.status(404).json({ code: 404, msg: "Product not found" });
     return;
   }
 
   try {
-    await prisma.product.delete({ where: { id } });
-  } catch (e) {}
+    await prisma.$transaction([
+      prisma.cart_item.deleteMany({ where: { productId: id } }),
+      prisma.order_item.deleteMany({ where: { productId: id } }),
+      prisma.product.delete({ where: { id } }),
+    ]);
 
-  res.json({ code: 200, msg: "Product deleted" });
+    res.json({ code: 200, msg: "Product deleted" });
+  } catch (e) {
+    console.error("Failed to delete product", e);
+    res.status(500).json({ code: 500, msg: "Failed to delete product" });
+  }
 }));
 
 // ── Categories ────────────────────────────────────────────────

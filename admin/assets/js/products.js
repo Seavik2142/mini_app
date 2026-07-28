@@ -312,14 +312,20 @@ async function saveProduct() {
 
 async function deleteProduct(id) {
   if (!confirm('Are you sure you want to delete this product?')) return;
-  productsList = productsList.filter(p => p.id !== id);
-  localStorage.setItem('mini_app_products', JSON.stringify(productsList));
-  renderProductsList(productsList);
-  showToast('Product deleted', 'info');
+
   try {
-    await apiFetch(`${API.products}/${id}`, { method: 'DELETE' });
+    const result = await apiFetch(`${API.products}/${id}`, { method: 'DELETE' });
+    if (result?.code === 200) {
+      productsList = productsList.filter(p => p.id !== id);
+      localStorage.setItem('mini_app_products', JSON.stringify(productsList));
+      renderProductsList(productsList);
+      showToast('Product deleted', 'info');
+    } else {
+      showToast(result?.msg || 'Unable to delete this product', 'error');
+    }
   } catch (err) {
     console.warn('API delete notice:', err);
+    showToast(err?.message || 'Unable to delete this product', 'error');
   }
 }
 
