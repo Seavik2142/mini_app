@@ -72,8 +72,17 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Common
     language: "ភាសា",
-    khmer: "🇰🇭 ភាសាខ្មែរ",
-    english: "🇬🇧 English"
+    languageSettings: "ការកំណត់ភាសា",
+    languageSettingsDescription: "ជ្រើសរើសភាសាសម្រាប់មឺនុយ ការទូទាត់ ការបញ្ជាទិញ និងព័ត៌មានគណនី។",
+    languageSavedHint: "ជម្រើសនេះនឹងត្រូវបានរក្សាទុកសម្រាប់ការប្រើប្រាស់លើកក្រោយ។",
+    languageUpdatedKm: "បានប្តូរទៅភាសាខ្មែរ",
+    languageUpdatedEn: "Language changed to English",
+    khmer: "ភាសាខ្មែរ",
+    english: "English",
+    khmerDescription: "ប្រើភាសាខ្មែរសម្រាប់បទពិសោធន៍ក្នុងហាងទាំងមូល។",
+    englishDescription: "Use English across the store, checkout, and account pages.",
+    selectLanguage: "ជ្រើសរើស",
+    selectedLanguage: "កំពុងប្រើ"
   },
   en: {
     // Header & Bottom Bar
@@ -137,8 +146,17 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Common
     language: "Language",
-    khmer: "🇰🇭 ភាសាខ្មែរ",
-    english: "🇬🇧 English"
+    languageSettings: "Language Preferences",
+    languageSettingsDescription: "Choose the language used for menus, checkout, orders, and account details.",
+    languageSavedHint: "Your preference is saved on this device for the next visit.",
+    languageUpdatedKm: "បានប្តូរទៅភាសាខ្មែរ",
+    languageUpdatedEn: "Language changed to English",
+    khmer: "ភាសាខ្មែរ",
+    english: "English",
+    khmerDescription: "Use Khmer across the store experience.",
+    englishDescription: "Use English across the store, checkout, and account pages.",
+    selectLanguage: "Select",
+    selectedLanguage: "Selected"
   }
 };
 

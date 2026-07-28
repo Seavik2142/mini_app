@@ -3,7 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { FaShieldAlt, FaPhoneAlt, FaLock, FaTimes, FaTelegram, FaSignOutAlt, FaCheck, FaGlobe } from "react-icons/fa";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
-import { useLanguage } from "../context/LanguageContext";
+import { type Language, useLanguage } from "../context/LanguageContext";
+
+const PROFILE_LANGUAGE_OPTIONS: Array<{
+  value: Language;
+  flag: string;
+  shortCode: string;
+  labelKey: string;
+  descriptionKey: string;
+}> = [
+  {
+    value: "km",
+    flag: "🇰🇭",
+    shortCode: "KM",
+    labelKey: "khmer",
+    descriptionKey: "khmerDescription"
+  },
+  {
+    value: "en",
+    flag: "🇬🇧",
+    shortCode: "EN",
+    labelKey: "english",
+    descriptionKey: "englishDescription"
+  }
+];
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +45,15 @@ const Profile: React.FC = () => {
   const [step, setStep] = useState<"PHONE" | "OTP">("PHONE");
   const [isSending, setIsSending] = useState(false);
 
+
+  const activeLanguage = PROFILE_LANGUAGE_OPTIONS.find((option) => option.value === language) ?? PROFILE_LANGUAGE_OPTIONS[0];
+
+  const handleLanguageChange = (nextLanguage: Language) => {
+    if (nextLanguage === language) return;
+
+    setLanguage(nextLanguage);
+    toast.success(nextLanguage === "km" ? t("languageUpdatedKm") : t("languageUpdatedEn"));
+  };
 
 
   const handleSendOtp = async () => {
@@ -53,6 +85,89 @@ const Profile: React.FC = () => {
     }
   };
 
+  const languagePreferenceCard = (
+    <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-4 shadow-lg">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 flex items-center justify-center shrink-0">
+            <FaGlobe className="text-lg" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-sm font-extrabold text-white">{t("languageSettings")}</h3>
+            <p className="text-[11px] leading-relaxed text-slate-400 font-medium mt-0.5">
+              {t("languageSettingsDescription")}
+            </p>
+          </div>
+        </div>
+        <span className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black text-emerald-300">
+          <span>{activeLanguage.flag}</span>
+          {activeLanguage.shortCode}
+        </span>
+      </div>
+
+      <div className="grid gap-2">
+        {PROFILE_LANGUAGE_OPTIONS.map((option) => {
+          const isActive = language === option.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => handleLanguageChange(option.value)}
+              aria-pressed={isActive}
+              className={`w-full min-h-[72px] rounded-2xl border px-3 py-3 text-left transition-all active:scale-[0.99] ${
+                isActive
+                  ? "bg-gradient-to-r from-fuchsia-600/25 to-orange-500/15 border-fuchsia-400/60 shadow-md shadow-fuchsia-950/40"
+                  : "bg-slate-950/80 border-slate-800 hover:border-slate-700"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl border shrink-0 ${
+                    isActive
+                      ? "bg-white/10 border-white/15"
+                      : "bg-slate-900 border-slate-800"
+                  }`}>
+                    {option.flag}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-2">
+                      <span className="text-sm font-extrabold text-white truncate">{t(option.labelKey)}</span>
+                      <span className="rounded-md bg-slate-800/80 px-1.5 py-0.5 text-[9px] font-black text-slate-300">
+                        {option.shortCode}
+                      </span>
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-slate-400 font-medium">
+                      {t(option.descriptionKey)}
+                    </span>
+                  </span>
+                </div>
+                <span className={`h-7 min-w-[86px] rounded-xl border px-2.5 text-[10px] font-black flex items-center justify-center gap-1.5 shrink-0 ${
+                  isActive
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                    : "bg-slate-900 border-slate-800 text-slate-400"
+                }`}>
+                  {isActive ? (
+                    <>
+                      <FaCheck className="text-[9px]" />
+                      {t("selectedLanguage")}
+                    </>
+                  ) : (
+                    t("selectLanguage")
+                  )}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="text-[10px] leading-relaxed text-slate-500 font-semibold border-t border-slate-800/80 pt-3">
+        {t("languageSavedHint")}
+      </p>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <div>
@@ -62,29 +177,32 @@ const Profile: React.FC = () => {
 
       {!isPhoneVerified ? (
         /* Not Logged In View */
-        <div className="p-6 bg-slate-900/90 border border-slate-800 rounded-3xl text-center space-y-4 shadow-xl relative overflow-hidden">
-          <div className="w-16 h-16 bg-[#2AABEE]/20 text-[#2AABEE] rounded-3xl flex items-center justify-center text-3xl mx-auto border border-[#2AABEE]/30 shadow-lg">
-            <FaTelegram />
-          </div>
+        <>
+          <div className="p-6 bg-slate-900/90 border border-slate-800 rounded-3xl text-center space-y-4 shadow-xl relative overflow-hidden">
+            <div className="w-16 h-16 bg-[#2AABEE]/20 text-[#2AABEE] rounded-3xl flex items-center justify-center text-3xl mx-auto border border-[#2AABEE]/30 shadow-lg">
+              <FaTelegram />
+            </div>
 
-          <div className="space-y-1 max-w-xs mx-auto">
-            <h2 className="text-base font-extrabold text-white">Telegram Account Verification</h2>
-            <p className="text-xs text-slate-400 leading-relaxed font-medium">
-              Connect your Telegram account to activate your Digital Keys and manage your digital key purchases.
-            </p>
-          </div>
+            <div className="space-y-1 max-w-xs mx-auto">
+              <h2 className="text-base font-extrabold text-white">Telegram Account Verification</h2>
+              <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                Connect your Telegram account to activate your Digital Keys and manage your digital key purchases.
+              </p>
+            </div>
 
-          <div className="space-y-2 pt-1">
-            {/* Verify via Bot OTP */}
-            <button
-              onClick={() => navigate("/auth")}
-              className="w-full py-3 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
-            >
-              <FaTelegram className="text-base" />
-              ⚡ Verify via Telegram Bot OTP
-            </button>
+            <div className="space-y-2 pt-1">
+              {/* Verify via Bot OTP */}
+              <button
+                onClick={() => navigate("/auth")}
+                className="w-full py-3 bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <FaTelegram className="text-base" />
+                ⚡ Verify via Telegram Bot OTP
+              </button>
+            </div>
           </div>
-        </div>
+          {languagePreferenceCard}
+        </>
       ) : (
 
         /* Logged In — Real Telegram Profile View */
@@ -151,34 +269,7 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Language Selector Card */}
-          <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-2.5 shadow-lg">
-            <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-              <FaGlobe className="text-fuchsia-400" /> {t("language")} / Select Language
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setLanguage("km")}
-                className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 border transition-all ${
-                  language === "km"
-                    ? "bg-fuchsia-600 text-white border-fuchsia-400 shadow-md shadow-fuchsia-600/30"
-                    : "bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700"
-                }`}
-              >
-                <span>🇰🇭</span> <span>{t("khmer")}</span>
-              </button>
-              <button
-                onClick={() => setLanguage("en")}
-                className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 border transition-all ${
-                  language === "en"
-                    ? "bg-fuchsia-600 text-white border-fuchsia-400 shadow-md shadow-fuchsia-600/30"
-                    : "bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700"
-                }`}
-              >
-                <span>🇬🇧</span> <span>{t("english")}</span>
-              </button>
-            </div>
-          </div>
+          {languagePreferenceCard}
 
           {/* Community & Support */}
           <div className="p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3 shadow-lg">
