@@ -856,22 +856,54 @@ export const rateProduct: RequestHandler = async (req, res): Promise<void> => {
 export const getUserOrders: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { tgId, phone } = req.query;
-    if (!tgId && !phone) {
-      res.status(200).json({ success: true, data: [] });
-      return;
+    const authUserId = req.user?.id;
+
+    let userIds: number[] = [];
+    let contactPhone: string | undefined;
+
+    if (authUserId) {
+      const authUser = await prisma.user.findUnique({
+        where: { id: authUserId },
+        select: { id: true, tgId: true, phone: true }
+      });
+
+      if (authUser) {
+        const relatedUsers = await prisma.user.findMany({
+          where: {
+            OR: [
+              { id: authUser.id },
+              ...(authUser.tgId ? [{ tgId: authUser.tgId }] : []),
+              ...(authUser.phone ? [{ phone: authUser.phone }] : [])
+            ],
+            isDelete: false
+          },
+          select: { id: true }
+        });
+
+        userIds = Array.from(new Set(relatedUsers.map((user) => user.id)));
+        contactPhone = authUser.phone || undefined;
+      }
     }
 
-    const userWhere: any[] = [];
-    if (tgId) userWhere.push({ tgId: String(tgId) });
-    if (phone) userWhere.push({ phone: String(phone) });
+    if (userIds.length === 0 && (tgId || phone)) {
+      const userWhere: any[] = [];
+      if (tgId) userWhere.push({ tgId: String(tgId) });
+      if (phone) userWhere.push({ phone: String(phone) });
 
-    const targetUser = await prisma.user.findFirst({
-      where: { OR: userWhere, isDelete: false }
-    });
+      const targetUser = await prisma.user.findFirst({
+        where: { OR: userWhere, isDelete: false },
+        select: { id: true, phone: true }
+      });
+
+      if (targetUser) {
+        userIds = [targetUser.id];
+        contactPhone = targetUser.phone || undefined;
+      }
+    }
 
     const OR: any[] = [];
-    if (targetUser) OR.push({ userId: targetUser.id });
-    if (phone) OR.push({ contactPhone: String(phone) });
+    if (userIds.length > 0) OR.push({ userId: { in: userIds } });
+    if (contactPhone) OR.push({ contactPhone: String(contactPhone) });
 
     if (OR.length === 0) {
       res.status(200).json({ success: true, data: [] });
@@ -897,18 +929,67 @@ export const getUserOrders: RequestHandler = async (req, res): Promise<void> => 
 export const getUserProfile: RequestHandler = async (req, res): Promise<void> => {
   try {
     const { tgId, phone } = req.query;
-    if (!tgId && !phone) {
-      res.status(200).json({ success: true, data: null });
-      return;
+    const authUserId = req.user?.id;
+
+    let user: any = null;
+    let userIds: number[] = [];
+    let contactPhone: string | undefined;
+
+    if (authUserId) {
+      user = await prisma.user.findUnique({
+        where: { id: authUserId },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          phone: true,
+          email: true,
+          tgId: true,
+          joinedAt: true
+        }
+      });
+
+      if (user) {
+        const relatedUsers = await prisma.user.findMany({
+          where: {
+            OR: [
+              { id: user.id },
+              ...(user.tgId ? [{ tgId: user.tgId }] : []),
+              ...(user.phone ? [{ phone: user.phone }] : [])
+            ],
+            isDelete: false
+          },
+          select: { id: true }
+        });
+
+        userIds = Array.from(new Set(relatedUsers.map((relatedUser) => relatedUser.id)));
+        contactPhone = user.phone || undefined;
+      }
     }
 
-    const OR: any[] = [];
-    if (tgId) OR.push({ tgId: String(tgId) });
-    if (phone) OR.push({ phone: String(phone) });
+    if (!user && (tgId || phone)) {
+      const OR: any[] = [];
+      if (tgId) OR.push({ tgId: String(tgId) });
+      if (phone) OR.push({ phone: String(phone) });
 
-    const user = await prisma.user.findFirst({
-      where: { OR, isDelete: false }
-    });
+      user = await prisma.user.findFirst({
+        where: { OR, isDelete: false },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          phone: true,
+          email: true,
+          tgId: true,
+          joinedAt: true
+        }
+      });
+
+      if (user) {
+        userIds = [user.id];
+        contactPhone = user.phone || undefined;
+      }
+    }
 
     if (!user) {
       res.status(200).json({ success: true, data: null });
@@ -918,8 +999,8 @@ export const getUserProfile: RequestHandler = async (req, res): Promise<void> =>
     const userOrders = await prisma.order.findMany({
       where: {
         OR: [
-          { userId: user.id },
-          ...(user.phone ? [{ contactPhone: user.phone }] : [])
+          ...(userIds.length > 0 ? [{ userId: { in: userIds } }] : []),
+          ...(contactPhone ? [{ contactPhone: String(contactPhone) }] : [])
         ]
       },
       include: {
