@@ -5,67 +5,28 @@ import { FaShoppingBag, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import logoImg from '../assets/logo.jpg';
 import { useState, useRef, useEffect } from 'react';
 
-declare global {
-    interface Window {
-        YT: any;
-        onYouTubeIframeAPIReady: () => void;
-    }
-}
-
 const Header = () => {
     const { totalItems } = useCart();
     const { language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
     // Always open muted when using the web app as requested
     const [isMuted, setIsMuted] = useState(true);
-    const playerRef = useRef<any>(null);
+    const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+    const sendCommand = (func: string, args: any[] = []) => {
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.contentWindow.postMessage(
+                JSON.stringify({ event: 'command', func, args }),
+                '*'
+            );
+        }
+    };
 
     useEffect(() => {
-        // Load the YouTube Iframe API script dynamically
-        if (!window.YT) {
-            const tag = document.createElement('script');
-            tag.src = 'https://www.youtube.com/iframe_api';
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
-        }
-
-        const initPlayer = () => {
-            if (window.YT && window.YT.Player && !playerRef.current) {
-                playerRef.current = new window.YT.Player('youtube-audio-player', {
-                    height: '0',
-                    width: '0',
-                    videoId: 'z-qigE1ym40', // YouTube stream video ID from user's link
-                    playerVars: {
-                        autoplay: 1,
-                        controls: 0,
-                        disablekb: 1,
-                        fs: 0,
-                        loop: 1,
-                        modestbranding: 1,
-                        playsinline: 1,
-                        mute: 1, // Start muted by default!
-                        playlist: 'z-qigE1ym40'
-                    },
-                    events: {
-                        onReady: (event: any) => {
-                            event.target.mute();
-                            event.target.setVolume(50);
-                            event.target.playVideo();
-                        }
-                    }
-                });
-            }
-        };
-
-        if (window.YT && window.YT.Player) {
-            initPlayer();
-        } else {
-            window.onYouTubeIframeAPIReady = initPlayer;
-        }
-
         const handleFirstInteraction = () => {
-            if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
-                playerRef.current.playVideo();
+            if (isMuted) {
+                sendCommand('mute');
+                sendCommand('playVideo');
             }
             document.removeEventListener('click', handleFirstInteraction);
         };
@@ -74,30 +35,32 @@ const Header = () => {
         return () => {
             document.removeEventListener('click', handleFirstInteraction);
         };
-    }, []);
+    }, [isMuted]);
 
     const toggleMute = () => {
-        if (playerRef.current && typeof playerRef.current.isMuted === 'function') {
-            const currentlyMuted = playerRef.current.isMuted();
-            if (currentlyMuted) {
-                playerRef.current.unMute();
-                playerRef.current.setVolume(50);
-                playerRef.current.playVideo();
-                setIsMuted(false);
-            } else {
-                playerRef.current.mute();
-                setIsMuted(true);
-            }
+        if (isMuted) {
+            sendCommand('unMute');
+            sendCommand('setVolume', [50]);
+            sendCommand('playVideo');
+            setIsMuted(false);
         } else {
-            setIsMuted(!isMuted);
+            sendCommand('mute');
+            setIsMuted(true);
         }
     };
 
     return (
         <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
-            {/* Hidden YouTube Audio Player */}
+            {/* Native React Managed Hidden YouTube Iframe Audio Player (Prevents DOM Crashes) */}
             <div className="hidden pointer-events-none absolute w-0 h-0 overflow-hidden">
-                <div id="youtube-audio-player" />
+                <iframe
+                    ref={iframeRef}
+                    id="youtube-audio-player"
+                    src="https://www.youtube.com/embed/z-qigE1ym40?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist=z-qigE1ym40&controls=0"
+                    title="YouTube background stream"
+                    allow="autoplay; encrypted-media"
+                    style={{ width: 0, height: 0, border: 'none' }}
+                />
             </div>
             
             {/* App Branding */}
