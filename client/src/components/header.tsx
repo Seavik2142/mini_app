@@ -11,57 +11,48 @@ const Header = () => {
     const navigate = useNavigate();
     // Always open muted when using the web app as requested
     const [isMuted, setIsMuted] = useState(true);
-    const iframeRef = useRef<HTMLIFrameElement | null>(null);
-
-    const sendCommand = (func: string, args: any[] = []) => {
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-            iframeRef.current.contentWindow.postMessage(
-                JSON.stringify({ event: 'command', func, args }),
-                '*'
-            );
-        }
-    };
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        const handleFirstInteraction = () => {
-            if (isMuted) {
-                sendCommand('mute');
-                sendCommand('playVideo');
+        const prepareAudio = () => {
+            if (audioRef.current) {
+                audioRef.current.volume = 0.5;
+                if (audioRef.current.paused && isMuted) {
+                    audioRef.current.play().catch(() => {});
+                }
             }
-            document.removeEventListener('click', handleFirstInteraction);
         };
-        document.addEventListener('click', handleFirstInteraction);
-
+        
+        prepareAudio();
+        const handleFirstClick = () => {
+            if (audioRef.current && audioRef.current.paused) {
+                audioRef.current.play().catch(() => {});
+            }
+        };
+        document.addEventListener('click', handleFirstClick, { once: true });
+        
         return () => {
-            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('click', handleFirstClick);
         };
     }, [isMuted]);
 
     const toggleMute = () => {
-        if (isMuted) {
-            sendCommand('unMute');
-            sendCommand('setVolume', [50]);
-            sendCommand('playVideo');
-            setIsMuted(false);
-        } else {
-            sendCommand('mute');
-            setIsMuted(true);
+        if (audioRef.current) {
+            const nextMuteState = !audioRef.current.muted;
+            audioRef.current.muted = nextMuteState;
+            setIsMuted(nextMuteState);
+            
+            if (!nextMuteState) {
+                audioRef.current.volume = 0.5;
+                audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+            }
         }
     };
 
     return (
         <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
-            {/* Native React Managed Hidden YouTube Iframe Audio Player (Prevents DOM Crashes) */}
-            <div className="hidden pointer-events-none absolute w-0 h-0 overflow-hidden">
-                <iframe
-                    ref={iframeRef}
-                    id="youtube-audio-player"
-                    src="https://www.youtube.com/embed/z-qigE1ym40?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist=z-qigE1ym40&controls=0"
-                    title="YouTube background stream"
-                    allow="autoplay; encrypted-media"
-                    style={{ width: 0, height: 0, border: 'none' }}
-                />
-            </div>
+            {/* Native HTML5 Audio Player (100% Reliable across Telegram Mini Apps & Mobile Web) */}
+            <audio ref={audioRef} src="/song.webm" loop muted={isMuted} preload="auto" />
             
             {/* App Branding */}
             <div 
