@@ -67,6 +67,8 @@ const Home: React.FC = () => {
     );
   });
 
+  const isOutOfStock = (product: Product) => (product.stock ?? 0) <= 0;
+
   return (
     <div className="space-y-4">
       {/* Original Size Hero Banner Carousel (Zero Text Overlays in Front) */}
@@ -146,6 +148,13 @@ const Home: React.FC = () => {
               <div className="absolute bottom-2 right-2 bg-slate-950/85 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] text-amber-300 font-bold flex items-center gap-1 border border-slate-800">
                 <FaStar className="text-[9px] text-amber-400" /> {product.rating}
               </div>
+              {isOutOfStock(product) && (
+                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[1px] flex items-center justify-center">
+                  <span className="px-2.5 py-1 rounded-full bg-black/80 text-[10px] font-black uppercase tracking-wider text-white border border-white/20">
+                    {t("outOfStock")}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="p-3 flex-1 flex flex-col justify-between space-y-2.5">
@@ -175,10 +184,14 @@ const Home: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={() => requireAuth(() => addToCart(product))}
-                  className="w-full py-2 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-fuchsia-600/30 transition-all"
+                  onClick={() => !isOutOfStock(product) && requireAuth(() => addToCart(product))}
+                  disabled={isOutOfStock(product)}
+                  className={`w-full py-2 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all ${isOutOfStock(product)
+                    ? "bg-slate-700 text-slate-400 cursor-not-allowed shadow-none"
+                    : "bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 active:scale-[0.98] text-white shadow-fuchsia-600/30"
+                  }`}
                 >
-                  <FaKey className="text-xs" /> {t("buyNow")}
+                  <FaKey className="text-xs" /> {isOutOfStock(product) ? t("outOfStock") : t("buyNow")}
                 </button>
               </div>
             </div>
@@ -296,14 +309,19 @@ const Home: React.FC = () => {
             <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-md pt-2 pb-1 -mb-1 z-10 border-t border-slate-800/80">
               <button
                 onClick={() => {
+                  if (isOutOfStock(selectedProduct)) return;
                   requireAuth(() => {
                     addToCart(selectedProduct, modalQuantity);
                     setSelectedProduct(null);
                   });
                 }}
-                className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-fuchsia-600/30 active:scale-[0.98] transition-all"
+                disabled={isOutOfStock(selectedProduct)}
+                className={`w-full py-3.5 font-extrabold text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl transition-all ${isOutOfStock(selectedProduct)
+                  ? "bg-slate-700 text-slate-400 cursor-not-allowed shadow-none"
+                  : "bg-gradient-to-r from-fuchsia-600 to-orange-600 hover:from-fuchsia-500 hover:to-orange-500 text-white shadow-fuchsia-600/30 active:scale-[0.98]"
+                }`}
               >
-                <FaKey /> Add {modalQuantity > 1 ? `${modalQuantity} Keys` : "Key"} to Cart (${(selectedProduct.price * modalQuantity).toFixed(2)})
+                <FaKey /> {isOutOfStock(selectedProduct) ? t("outOfStock") : `Add ${modalQuantity > 1 ? `${modalQuantity} Keys` : "Key"} to Cart ($${(selectedProduct.price * modalQuantity).toFixed(2)})`}
               </button>
             </div>
           </div>

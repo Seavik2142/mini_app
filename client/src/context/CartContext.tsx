@@ -462,6 +462,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addToCart = (product: Product, quantity: number = 1) => {
+    if ((product.stock ?? 0) <= 0) {
+      toast.error(`${product.name} is out of stock`);
+      return;
+    }
+
     setCart((prev) => {
       const existingIndex = prev.findIndex((item) => item.product.id === product.id);
       if (existingIndex > -1) {
