@@ -92,7 +92,7 @@ const FloatingButtons = () => {
             {/* Expanded Menu */}
             <div className={`absolute bottom-[120%] flex flex-col gap-3 transition-all duration-300 ${isLeftEdge ? 'left-0 items-start origin-bottom-left' : 'right-0 items-end origin-bottom-right'} ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}>
                 <button
-                    onClick={() => { setIsOpen(false); window.open('https://t.me/your_admin', '_blank'); }}
+                    onClick={() => { setIsOpen(false); window.open('https://t.me/BoomBaya_ik', '_blank'); }}
                     className={`flex items-center gap-3 group active:scale-95 transition-transform w-max ${isLeftEdge ? 'flex-row-reverse' : ''}`}
                     aria-label="Contact Admin"
                 >

@@ -279,13 +279,13 @@ const Profile: React.FC = () => {
             
             <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => window.open('https://t.me/your_channel', '_blank')}
+                  onClick={() => window.open('https://t.me/MGDigitalKeys', '_blank')}
                   className="w-full py-2.5 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-300 font-extrabold text-xs rounded-xl border border-fuchsia-500/30 flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
                   <FaTelegram className="text-sm" /> Channel
                 </button>
                 <button
-                  onClick={() => window.open('https://t.me/your_admin', '_blank')}
+                  onClick={() => window.open('https://t.me/BoomBaya_ik', '_blank')}
                   className="w-full py-2.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 font-extrabold text-xs rounded-xl border border-orange-500/30 flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
                   <FaPhoneAlt className="text-sm" /> Admin
