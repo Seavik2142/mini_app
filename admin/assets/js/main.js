@@ -286,34 +286,26 @@
       var isAuthPage = path.indexOf("login.html") !== -1 || path.indexOf("register.html") !== -1 || path.indexOf("forgot-password.html") !== -1;
       var sessionStr = window.localStorage.getItem("mini_app_admin_session");
 
-      if (!isAuthPage) {
-        if (!sessionStr) {
-          window.localStorage.setItem('mini_app_admin_session', JSON.stringify({
-            username: 'Seavik',
-            role: 'SUPER_ADMIN',
-            loggedInAt: new Date().toISOString()
-          }));
-          return true;
-        }
-        try {
-          var parsed = JSON.parse(sessionStr);
-          if (!parsed || !parsed.username) {
-            window.localStorage.setItem('mini_app_admin_session', JSON.stringify({
-              username: 'Seavik',
-              role: 'SUPER_ADMIN',
-              loggedInAt: new Date().toISOString()
-            }));
-            return true;
-          }
-        } catch (e) {
-          window.localStorage.setItem('mini_app_admin_session', JSON.stringify({
-            username: 'Seavik',
-            role: 'SUPER_ADMIN',
-            loggedInAt: new Date().toISOString()
-          }));
-          return true;
-        }
+      if (isAuthPage) {
+        return true;
       }
+
+      if (!sessionStr) {
+        window.location.replace("login.html");
+        return false;
+      }
+
+      try {
+        var parsed = JSON.parse(sessionStr);
+        if (!parsed || !parsed.username || !parsed.role) {
+          window.location.replace("login.html");
+          return false;
+        }
+      } catch (e) {
+        window.location.replace("login.html");
+        return false;
+      }
+
       return true;
     }
 
