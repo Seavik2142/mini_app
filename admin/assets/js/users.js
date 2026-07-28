@@ -27,11 +27,6 @@ async function loadUsers(page = 1, search = '') {
   const paginationEl = document.getElementById('users-pagination');
   if (!tbody) return;
 
-  const localUsers = JSON.parse(localStorage.getItem('mini_app_users')) || [
-    { id: 1, name: 'Seavik Admin', username: 'seavik', tgId: '123456789', balance: 500.00, referCode: 'SEAVIK2026', isBlock: false, joinedAt: '2026-01-01' },
-    { id: 2, name: 'John Doe', username: 'johndoe', tgId: '987654321', balance: 45.50, referCode: 'REF987', isBlock: false, joinedAt: '2026-01-10' }
-  ];
-
   let usersList = [];
 
   try {
@@ -40,12 +35,11 @@ async function loadUsers(page = 1, search = '') {
 
     const data = await apiFetch(url);
     const remote = data.data?.users || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-    usersList = Array.isArray(remote) ? remote : localUsers;
+    usersList = Array.isArray(remote) ? remote : [];
   } catch (e) {
-    usersList = localUsers;
+    console.warn('Failed to load users from PostgreSQL database:', e);
+    usersList = [];
   }
-
-  localStorage.setItem('mini_app_users', JSON.stringify(usersList));
 
   if (search) {
     usersList = usersList.filter(u => 

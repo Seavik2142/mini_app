@@ -106,3 +106,10 @@ model banner {
   createdAt DateTime @default(now())
 }
 
+model promo {
+  id              Int      @id @default(autoincrement())
+  code            String   @unique
+  discountPercent Int
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}

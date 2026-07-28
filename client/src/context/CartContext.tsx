@@ -206,20 +206,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Products come entirely from live DB — start empty, API fetch below replaces with real data
   const [products, setProducts] = useState<Product[]>([]);
 
-  const [bannerSlides, setBannerSlides] = useState<BannerSlide[]>(() => {
-    const saved = localStorage.getItem("mini_app_banners");
-    return saved ? JSON.parse(saved) : DEFAULT_BANNER_SLIDES;
-  });
-
-  const [promoCodesList, setPromoCodesList] = useState<PromoCodeItem[]>(() => {
-    const saved = localStorage.getItem("mini_app_promos");
-    return saved ? JSON.parse(saved) : INITIAL_PROMOS;
-  });
-
-  const [adminUsersList, setAdminUsersList] = useState<AdminUserItem[]>(() => {
-    const saved = localStorage.getItem("mini_app_admin_users");
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
-  });
+  const [bannerSlides, setBannerSlides] = useState<BannerSlide[]>(DEFAULT_BANNER_SLIDES);
+  const [promoCodesList, setPromoCodesList] = useState<PromoCodeItem[]>(INITIAL_PROMOS);
+  const [adminUsersList, setAdminUsersList] = useState<AdminUserItem[]>(INITIAL_USERS);
 
   // Sync Products, Banners & Promos from live server API on every app load
   // Always replace state with API response so admin changes (add/edit/delete) are reflected instantly
@@ -263,19 +252,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  // Do NOT cache products in localStorage — always use live API data so admin changes sync instantly
-
-  useEffect(() => {
-    localStorage.setItem("mini_app_banners", JSON.stringify(bannerSlides));
-  }, [bannerSlides]);
-
-  useEffect(() => {
-    localStorage.setItem("mini_app_promos", JSON.stringify(promoCodesList));
-  }, [promoCodesList]);
-
-  useEffect(() => {
-    localStorage.setItem("mini_app_admin_users", JSON.stringify(adminUsersList));
-  }, [adminUsersList]);
+  // Do NOT cache products, banners, promos, or admin lists in localStorage — all global data comes exclusively from PostgreSQL database!
 
   const addProduct = (newProd: Omit<Product, "id">) => {
     const p: Product = {

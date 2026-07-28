@@ -8,9 +8,6 @@ let productsList = [];
 let _savingProduct = false; // guard against double-submit
 
 document.addEventListener('DOMContentLoaded', () => {
-  const local = JSON.parse(localStorage.getItem('mini_app_products'));
-  productsList = Array.isArray(local) && local.length > 0 ? local : [];
-  renderProductsList(productsList);
   loadProducts(1);
   loadCategoriesForForm();
 });
@@ -22,10 +19,9 @@ async function loadProducts(page = 1) {
     const remote = data.data?.products || (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
     if (Array.isArray(remote)) {
       productsList = remote;
-      localStorage.setItem('mini_app_products', JSON.stringify(productsList));
     }
   } catch (e) {
-    console.warn('API products fetch notice (using cached list):', e);
+    console.warn('API products fetch notice:', e);
   }
   // Always render — clears loading spinner
   renderProductsList(productsList);
@@ -268,20 +264,8 @@ async function saveProduct() {
 
   // Capture editingId before clearing it
   const savedEditingId = editingId;
-  const newProductObj = { id: savedEditingId || Date.now(), ...body, rating: 5.0, reviewCount: 0 };
 
-  // Instant local render
-  if (savedEditingId) {
-    productsList = productsList.map(p => p.id === savedEditingId ? { ...p, ...newProductObj } : p);
-    showToast('✅ Product updated successfully!');
-  } else {
-    productsList.unshift(newProductObj);
-    showToast('✅ Product created successfully!');
-  }
-  localStorage.setItem('mini_app_products', JSON.stringify(productsList));
-  renderProductsList(productsList);
-
-  // Close modal and reset form
+  // Close modal and reset form immediately
   editingId = null;
   const modalEl = document.getElementById('productModal');
   if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
@@ -289,22 +273,20 @@ async function saveProduct() {
   if (formEl) formEl.reset();
   updateProductImagePreview('');
 
-  // Sync to backend API in background
+  // Save directly to backend API and reload from database
   try {
     let result;
     if (savedEditingId) {
       result = await apiFetch(`${API.products}/${savedEditingId}`, { method: 'PATCH', body: JSON.stringify(body) });
+      showToast('✅ Product updated in database!');
     } else {
       result = await apiFetch(API.products, { method: 'POST', body: JSON.stringify(body) });
+      showToast('✅ Product created in database!');
     }
-    // Update local list with real DB id
-    if (result?.data?.id && !savedEditingId) {
-      productsList = productsList.map(p => p.id === newProductObj.id ? { ...p, id: result.data.id } : p);
-      localStorage.setItem('mini_app_products', JSON.stringify(productsList));
-      renderProductsList(productsList);
-    }
+    await loadProducts(currentPage);
   } catch (e) {
-    console.warn('API save notice (saved locally):', e);
+    console.warn('API save notice:', e);
+    showToast('Failed to save product to database', 'error');
   }
 
   _savingProduct = false;
@@ -316,10 +298,8 @@ async function deleteProduct(id) {
   try {
     const result = await apiFetch(`${API.products}/${id}`, { method: 'DELETE' });
     if (result?.code === 200) {
-      productsList = productsList.filter(p => p.id !== id);
-      localStorage.setItem('mini_app_products', JSON.stringify(productsList));
-      renderProductsList(productsList);
-      showToast('Product deleted', 'info');
+      showToast('Product deleted from database', 'info');
+      await loadProducts(currentPage);
     } else {
       showToast(result?.msg || 'Unable to delete this product', 'error');
     }

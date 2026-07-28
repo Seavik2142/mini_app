@@ -156,15 +156,13 @@
     let promos = [];
 
     async function loadPromos() {
-      const local = JSON.parse(localStorage.getItem('mini_app_promos')) || [];
       try {
         const res = await apiFetch(API.promos);
-        const remote = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-        promos = Array.isArray(remote) ? remote : local;
+        promos = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
       } catch (e) {
-        promos = local;
+        console.warn('Failed to load promos from database:', e);
+        promos = [];
       }
-      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
       renderPromos();
     }
 
@@ -196,35 +194,28 @@
       const percent = parseInt(document.getElementById('promoPercentInput').value) || 10;
       if (!code) return;
 
-      const newPromoObj = { id: Date.now(), code, discountPercent: percent, isActive: true };
-      promos.unshift(newPromoObj);
-      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
-      renderPromos();
-      showToast(`Promo code ${code} created`);
-
       document.getElementById('promoCodeInput').value = '';
 
       try {
-        await apiFetch(API.promos, {
+        const res = await apiFetch(API.promos, {
           method: 'POST',
           body: JSON.stringify({ code, discountPercent: percent })
         });
+        showToast(`Promo code ${code} created in database`);
+        await loadPromos();
       } catch (err) {
-        console.warn('Promo API save notice (saved locally):', err);
+        console.warn('Promo DB save notice:', err);
       }
     }
 
     async function deletePromo(id) {
       if (!confirm('Delete this promo code?')) return;
-      promos = promos.filter(p => p.id !== id);
-      localStorage.setItem('mini_app_promos', JSON.stringify(promos));
-      renderPromos();
-      showToast('Promo code deleted', 'info');
-
       try {
         await apiFetch(`${API.promos}/${id}`, { method: 'DELETE' });
+        showToast('Promo code deleted from database', 'info');
+        await loadPromos();
       } catch (err) {
-        console.warn('Promo API delete notice:', err);
+        console.warn('Promo DB delete notice:', err);
       }
     }
 

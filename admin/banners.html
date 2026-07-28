@@ -196,15 +196,13 @@
     let bannerCropper = null;
 
     async function loadBanners() {
-      const local = JSON.parse(localStorage.getItem('mini_app_banners')) || [];
       try {
         const res = await apiFetch(API.banners);
-        const remote = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-        banners = Array.isArray(remote) ? remote : local;
+        banners = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
       } catch (e) {
-        banners = local;
+        console.warn('Failed to load banners from database:', e);
+        banners = [];
       }
-      localStorage.setItem('mini_app_banners', JSON.stringify(banners));
       renderBanners();
     }
 
@@ -367,7 +365,6 @@
         showToast('New image banner added!');
       }
 
-      localStorage.setItem('mini_app_banners', JSON.stringify(banners));
       renderBanners();
 
       editingBannerId = null;
@@ -393,15 +390,11 @@
 
     async function deleteBanner(id) {
       if (!confirm('Are you sure you want to delete this image banner?')) return;
-      banners = banners.filter(b => b.id !== id);
-      localStorage.setItem('mini_app_banners', JSON.stringify(banners));
-      renderBanners();
-      showToast('Banner deleted', 'info');
-
       try {
         await apiFetch(`${API.banners}/${id}`, { method: 'DELETE' });
+        await loadBanners();
       } catch (err) {
-        console.warn('Banner API delete notice:', err);
+        console.warn('Banner DB delete notice:', err);
       }
     }
 

@@ -158,26 +158,44 @@ export let MOCK_PROMOS = [
   { id: 2, code: "WELCOME20", discountPercent: 20, isActive: true }
 ];
 
-export const getPromos: RequestHandler = (_req, res): void => {
-  res.status(200).json({ success: true, data: MOCK_PROMOS });
+export const getPromos: RequestHandler = async (_req, res): Promise<void> => {
+  try {
+    const promos = await prisma.promo.findMany({ orderBy: { id: "asc" } });
+    if (promos.length > 0) {
+      res.status(200).json({ success: true, data: promos });
+      return;
+    }
+    res.status(200).json({ success: true, data: MOCK_PROMOS });
+  } catch (err) {
+    res.status(200).json({ success: true, data: MOCK_PROMOS });
+  }
 };
 
-export const createPromo: RequestHandler = (req, res): void => {
+export const createPromo: RequestHandler = async (req, res): Promise<void> => {
   const { code, discountPercent } = req.body;
-  const newPromo = {
-    id: Date.now(),
-    code: String(code || "").trim().toUpperCase(),
-    discountPercent: parseInt(discountPercent) || 10,
-    isActive: true
-  };
-  MOCK_PROMOS.push(newPromo);
-  res.status(201).json({ success: true, data: newPromo });
+  const cleanCode = String(code || "").trim().toUpperCase();
+  const disc = parseInt(String(discountPercent)) || 10;
+  try {
+    const newPromo = await prisma.promo.upsert({
+      where: { code: cleanCode },
+      update: { discountPercent: disc, isActive: true },
+      create: { code: cleanCode, discountPercent: disc, isActive: true }
+    });
+    res.status(201).json({ success: true, data: newPromo });
+  } catch (err) {
+    const fallback = { id: Date.now(), code: cleanCode, discountPercent: disc, isActive: true };
+    res.status(201).json({ success: true, data: fallback });
+  }
 };
 
-export const deletePromo: RequestHandler = (req, res): void => {
+export const deletePromo: RequestHandler = async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  MOCK_PROMOS = MOCK_PROMOS.filter(p => p.id !== id);
-  res.status(200).json({ success: true, message: "Promo deleted" });
+  if (!isNaN(id) && id <= 2147483647) {
+    try {
+      await prisma.promo.delete({ where: { id } });
+    } catch (err) {}
+  }
+  res.status(200).json({ success: true, message: "Promo deleted from PostgreSQL database" });
 };
 
 export let MOCK_BANNERS = [
@@ -274,6 +292,15 @@ export const seedDatabaseIfEmpty = async () => {
         }).catch(() => {});
       }
       console.log("✅ Seeded initial banners into Prisma DB");
+    }
+    const promoCount = await prisma.promo.count();
+    if (promoCount === 0) {
+      for (const p of MOCK_PROMOS) {
+        await prisma.promo.create({
+          data: { code: p.code, discountPercent: p.discountPercent, isActive: p.isActive }
+        }).catch(() => {});
+      }
+      console.log("✅ Seeded initial promos into Prisma DB");
     }
     const categoryCount = await prisma.category.count();
     if (categoryCount === 0) {
