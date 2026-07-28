@@ -15,33 +15,32 @@ const Header = () => {
     const userManuallyMutedRef = useRef(false);
 
     useEffect(() => {
-        const attemptPlay = () => {
+        const playMusic = () => {
             if (audioRef.current && !userManuallyMutedRef.current) {
                 audioRef.current.muted = false;
                 audioRef.current.volume = 0.5;
-                audioRef.current.play().catch(err => {
-                    console.log("Waiting for user touch/click to play sound aloud:", err);
-                });
+                if (audioRef.current.paused) {
+                    audioRef.current.play().catch(() => {
+                        // Browser security policy waiting for initial user physical gesture
+                    });
+                }
             }
         };
 
-        attemptPlay();
+        playMusic();
 
-        // If mobile OS blocks autoplay until first touch, start playing aloud on very first tap or click
-        const handleFirstInteraction = () => {
-            if (audioRef.current && !userManuallyMutedRef.current) {
-                audioRef.current.muted = false;
-                audioRef.current.volume = 0.5;
-                audioRef.current.play().catch(() => {});
+        // Listen to broad interactive events so any touch, click, scroll, or pointer event launches sound aloud immediately on iOS & Telegram WebViews
+        const events = ['click', 'touchstart', 'pointerdown', 'keydown', 'scroll'];
+        const handleUserInteraction = () => {
+            if (audioRef.current && audioRef.current.paused && !userManuallyMutedRef.current) {
+                playMusic();
             }
         };
 
-        document.addEventListener('click', handleFirstInteraction);
-        document.addEventListener('touchstart', handleFirstInteraction);
+        events.forEach(evt => document.addEventListener(evt, handleUserInteraction, { passive: true }));
 
         return () => {
-            document.removeEventListener('click', handleFirstInteraction);
-            document.removeEventListener('touchstart', handleFirstInteraction);
+            events.forEach(evt => document.removeEventListener(evt, handleUserInteraction));
         };
     }, []);
 
@@ -67,8 +66,8 @@ const Header = () => {
 
     return (
         <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
-            {/* Native HTML5 Audio Player (100% Reliable across Telegram Mini Apps & Mobile Web) */}
-            <audio ref={audioRef} src="/relaxing_music.webm?v=20260728" loop muted={isMuted} preload="auto" />
+            {/* Native HTML5 Audio Player (Universal MP3 format for 100% iOS, Android & Telegram compatibility) */}
+            <audio ref={audioRef} src="/relaxing_music.mp3?v=20260729" loop autoPlay muted={isMuted} preload="auto" />
             
             {/* App Branding */}
             <div 
