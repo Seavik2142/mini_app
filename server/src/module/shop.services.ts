@@ -209,17 +209,25 @@ export const getBanners: RequestHandler = async (_req, res): Promise<void> => {
 };
 
 export const createBanner: RequestHandler = async (req, res): Promise<void> => {
-  const { image } = req.body;
+  const { image, id } = req.body;
   const imageUrl = image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80";
   try {
-    const newBanner = await prisma.banner.create({
-      data: { image: imageUrl }
-    });
+    let newBanner;
+    if (id && !isNaN(Number(id)) && Number(id) <= 2147483647) {
+      newBanner = await prisma.banner.upsert({
+        where: { id: Number(id) },
+        update: { image: imageUrl },
+        create: { id: Number(id), image: imageUrl }
+      });
+    } else {
+      newBanner = await prisma.banner.create({
+        data: { image: imageUrl }
+      });
+    }
     res.status(201).json({ success: true, data: newBanner });
   } catch (err) {
-    const newBanner = { id: Date.now(), image: imageUrl };
-    MOCK_BANNERS.push(newBanner);
-    res.status(201).json({ success: true, data: newBanner });
+    const fallbackBanner = await prisma.banner.create({ data: { image: imageUrl } }).catch(() => ({ id: Date.now(), image: imageUrl }));
+    res.status(201).json({ success: true, data: fallbackBanner });
   }
 };
 
@@ -227,17 +235,20 @@ export const updateBanner: RequestHandler = async (req, res): Promise<void> => {
   const id = Number(req.params.id);
   const { image } = req.body;
 
-  if (isNaN(id) || id > 2147483647) {
-    res.status(200).json({ success: true, data: { id, image: image || "" } });
-    return;
-  }
-
   try {
-    const updated = await prisma.banner.update({
-      where: { id },
-      data: { ...(image ? { image } : req.body) }
-    });
-    res.status(200).json({ success: true, data: updated });
+    if (!isNaN(id) && id <= 2147483647) {
+      const updated = await prisma.banner.upsert({
+        where: { id },
+        update: { ...(image ? { image } : req.body) },
+        create: { id, image: image || "" }
+      });
+      res.status(200).json({ success: true, data: updated });
+    } else {
+      const created = await prisma.banner.create({
+        data: { image: image || "" }
+      });
+      res.status(200).json({ success: true, data: created });
+    }
   } catch (err) {
     res.status(200).json({ success: true, data: { id, image: image || "" } });
   }
@@ -245,16 +256,11 @@ export const updateBanner: RequestHandler = async (req, res): Promise<void> => {
 
 export const deleteBanner: RequestHandler = async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-
-  if (isNaN(id) || id > 2147483647) {
-    res.status(200).json({ success: true, message: "Banner deleted" });
-    return;
+  if (!isNaN(id) && id <= 2147483647) {
+    try {
+      await prisma.banner.delete({ where: { id } });
+    } catch (err) {}
   }
-
-  try {
-    await prisma.banner.delete({ where: { id } });
-  } catch (err) {}
-
   res.status(200).json({ success: true, message: "Banner deleted" });
 };
 

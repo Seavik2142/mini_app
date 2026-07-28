@@ -382,10 +382,8 @@
         } else {
           res = await apiFetch(API.banners, { method: 'POST', body: JSON.stringify(newBannerObj) });
         }
-        if (res?.data?.id && !savedEditingId) {
-          banners = banners.map(b => b.id === newBannerObj.id ? { ...b, id: res.data.id } : b);
-          localStorage.setItem('mini_app_banners', JSON.stringify(banners));
-          renderBanners();
+        if (res && res.success) {
+          await loadBanners();
         }
       } catch (err) {
         console.warn('Banner API sync notice (saved locally):', err);
