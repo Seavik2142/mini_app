@@ -2136,9 +2136,89 @@ html[data-theme="dark"] .btn-outline-primary:hover {
   h3, .h3 { font-size: 1.1rem !important; }
 }
 
-
 /* ====== MOBILE ADMIN UI OVERHAUL ====== */
 @media (max-width: 767.98px) {
+  .admin-shell {
+    min-height: 100vh;
+  }
+
+  .admin-main {
+    margin-left: 0 !important;
+    padding: 0 0 1rem;
+  }
+
+  .admin-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    border-bottom: 1px solid var(--admin-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .admin-navbar .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .dashboard-content > .container-fluid {
+    padding: 1rem 0.75rem 1.25rem !important;
+  }
+
+  .page-heading {
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+
+  .page-heading .page-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .panel,
+  .card {
+    padding: 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  .form-control,
+  .form-select,
+  .form-check-input,
+  .input-group .btn {
+    min-height: 44px;
+  }
+
+  .form-label {
+    font-size: 0.8rem;
+  }
+
+  .btn-group,
+  .d-flex.gap-2,
+  .d-flex.gap-3 {
+    flex-wrap: wrap;
+  }
+
+  .btn-group .btn,
+  .d-flex.gap-2 .btn,
+  .d-flex.gap-3 .btn {
+    flex: 1 1 100%;
+  }
+
+  .table-responsive td > * {
+    max-width: 100%;
+    width: 100%;
+    text-align: left;
+  }
+
+  .table-responsive td.text-end {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .table-responsive .btn {
+    width: 100%;
+    justify-content: center;
+  }
   .table-responsive {
     border: none !important;
   }
