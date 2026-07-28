@@ -150,11 +150,11 @@ const i18n = {
 
 // Helper to construct exact, clean Mini App URLs for subpages (/app, /app/orders, /app/profile)
 export const getMiniAppUrl = (path: string = ''): string => {
-  let baseUrl = (process.env.MINI_APP_URL || 'https://mini-app-2z1.pages.dev/app').trim();
+  let baseUrl = (process.env.MINI_APP_URL || 'https://mgdigitalkeys.store').trim();
   baseUrl = baseUrl.replace(/\/+$/, '');
   
   if (!baseUrl.endsWith('/app')) {
-    baseUrl = `${baseUrl}/app`;
+    baseUrl = `${baseUrl}`;
   }
 
   if (!path) return baseUrl;
