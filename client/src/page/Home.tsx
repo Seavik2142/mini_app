@@ -67,7 +67,11 @@ const Home: React.FC = () => {
     );
   });
 
-  const isOutOfStock = (product: Product) => (product.stock ?? 0) <= 0;
+  const isOutOfStock = (product: Product) => {
+    const numericStock = Number(product.stock ?? 0);
+    const keyInventory = Array.isArray((product as any).digitalKeys) ? (product as any).digitalKeys : [];
+    return numericStock <= 0 || keyInventory.length <= 0;
+  };
 
   return (
     <div className="space-y-4">
