@@ -9,30 +9,58 @@ const Header = () => {
     const { totalItems } = useCart();
     const { language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
-    // Always open muted when using the web app as requested
-    const [isMuted, setIsMuted] = useState(true);
+    // Always OPEN sound ON (isMuted = false) by default when using the web app as requested
+    const [isMuted, setIsMuted] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const userManuallyMutedRef = useRef(false);
 
     useEffect(() => {
-        if (audioRef.current) {
-            // Strictly enforce muted and paused state by default upon opening the web app via any link
-            audioRef.current.muted = true;
-            audioRef.current.volume = 0.5;
-            audioRef.current.pause();
-        }
+        const attemptPlay = () => {
+            if (audioRef.current && !userManuallyMutedRef.current) {
+                audioRef.current.muted = false;
+                audioRef.current.volume = 0.5;
+                audioRef.current.play().catch(err => {
+                    console.log("Waiting for user touch/click to play sound aloud:", err);
+                });
+            }
+        };
+
+        attemptPlay();
+
+        // If mobile OS blocks autoplay until first touch, start playing aloud on very first tap or click
+        const handleFirstInteraction = () => {
+            if (audioRef.current && !userManuallyMutedRef.current) {
+                audioRef.current.muted = false;
+                audioRef.current.volume = 0.5;
+                audioRef.current.play().catch(() => {});
+            }
+        };
+
+        document.addEventListener('click', handleFirstInteraction);
+        document.addEventListener('touchstart', handleFirstInteraction);
+
+        return () => {
+            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('touchstart', handleFirstInteraction);
+        };
     }, []);
 
     const toggleMute = () => {
         if (audioRef.current) {
-            const nextMuteState = !audioRef.current.muted;
-            audioRef.current.muted = nextMuteState;
+            const nextMuteState = !isMuted;
             setIsMuted(nextMuteState);
             
-            if (!nextMuteState) {
+            if (nextMuteState) {
+                // User explicitly clicked the icon to CLOSE / MUTE the song
+                userManuallyMutedRef.current = true;
+                audioRef.current.muted = true;
+                audioRef.current.pause();
+            } else {
+                // User explicitly clicked the icon to OPEN / UNMUTE the song
+                userManuallyMutedRef.current = false;
+                audioRef.current.muted = false;
                 audioRef.current.volume = 0.5;
                 audioRef.current.play().catch(e => console.log("Audio play failed:", e));
-            } else {
-                audioRef.current.pause();
             }
         }
     };
