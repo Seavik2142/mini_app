@@ -52,7 +52,7 @@ const Header = () => {
     return (
         <header className="sticky top-0 z-40 bg-[#0b0f17]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-lg shadow-black/20">
             {/* Native HTML5 Audio Player (100% Reliable across Telegram Mini Apps & Mobile Web) */}
-            <audio ref={audioRef} src="/song.webm" loop muted={isMuted} preload="auto" />
+            <audio ref={audioRef} src="/relaxing_music.webm?v=20260728" loop muted={isMuted} preload="auto" />
             
             {/* App Branding */}
             <div 
