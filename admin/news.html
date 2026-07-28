@@ -274,6 +274,7 @@
       try {
         const res = await apiFetch(API.broadcastNews, {
           method: 'POST',
+          timeout: 60000, // 60-second timeout for Telegram API verification
           body: JSON.stringify({ title, message, imageUrl, btnText, btnUrl })
         });
 

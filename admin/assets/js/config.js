@@ -21,28 +21,35 @@ const API = {
  * Generic fetch helper — returns parsed JSON or throws error
  */
 async function apiFetch(url, options = {}) {
+  const { timeout = 15000, ...fetchOptions } = options;
   const token = localStorage.getItem('admin_token');
-  const customHeaders = { 'Content-Type': 'application/json', ...options.headers };
+  const customHeaders = { 'Content-Type': 'application/json', ...fetchOptions.headers };
   if (token) customHeaders['Authorization'] = `Bearer ${token}`;
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  let timeoutId = null;
+  if (timeout > 0) {
+    timeoutId = setTimeout(() => controller.abort(), timeout);
+  }
   try {
     const res = await fetch(url, {
       credentials: 'include',
       cache: 'no-store',
       headers: customHeaders,
       signal: controller.signal,
-      ...options,
+      ...fetchOptions,
     });
-    clearTimeout(timeoutId);
+    if (timeoutId) clearTimeout(timeoutId);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || err.msg || err.error || `HTTP ${res.status}`);
     }
     return await res.json();
   } catch (err) {
-    clearTimeout(timeoutId);
+    if (timeoutId) clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. Please check if the broadcast is processing on the server.');
+    }
     throw err;
   }
 }

@@ -373,14 +373,22 @@ AdminRoute.post("/broadcast-news", Utility.CatchAsync(async (req, res) => {
     return;
   }
 
-  const result = await sendBroadcastNews({ title, message, imageUrl, btnText, btnUrl });
+  try {
+    const result = await sendBroadcastNews({ title, message, imageUrl, btnText, btnUrl });
 
-  res.json({
-    code: 200,
-    success: true,
-    data: result,
-    message: `📢 Broadcast sent to ${result.successCount} Telegram recipients!`
-  });
+    res.json({
+      code: 200,
+      success: true,
+      data: result,
+      message: result.message || `📢 Broadcast sent to ${result.successCount} Telegram recipients!`
+    });
+  } catch (err: any) {
+    res.status(400).json({
+      code: 400,
+      success: false,
+      message: err.message || "Error occurred during broadcast"
+    });
+  }
 }));
 
 export default AdminRoute;

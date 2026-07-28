@@ -692,6 +692,8 @@ async function sendWelcome(bot: TelegramBot, chatId: number, firstName: string, 
   ).catch(console.error);
 }
 
+let isBroadcasting = false;
+
 export async function sendBroadcastNews(payload: {
   title: string;
   message: string;
@@ -699,42 +701,48 @@ export async function sendBroadcastNews(payload: {
   btnText?: string;
   btnUrl?: string;
 }) {
-  const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
-  const channelTarget = (process.env.CHANNEL_ID || process.env.CHANNEL_USERNAME || process.env.TELEGRAM_CHANNEL_USERNAME || '@MGDigitalKeys').trim();
+  if (isBroadcasting) {
+    throw new Error("A broadcast is currently in progress. Please wait until it finishes before starting another.");
+  }
+  isBroadcasting = true;
 
-  const users = await prisma.user.findMany({
-    where: { isDelete: false },
-    select: { tgId: true }
-  });
+  try {
+    const token = process.env.BOT_TOKEN || '8833845544:AAGTuW9rZQHH9XLBsjSM3weWtFrwWtP2g94';
+    const channelTarget = (process.env.CHANNEL_ID || process.env.CHANNEL_USERNAME || process.env.TELEGRAM_CHANNEL_USERNAME || '@MGDigitalKeys').trim();
 
-  const chatIds = new Set<string>();
-  if (channelTarget) chatIds.add(channelTarget);
-  users.forEach(u => {
-    if (u.tgId && u.tgId.trim()) chatIds.add(u.tgId.trim());
-  });
+    const users = await prisma.user.findMany({
+      where: { isDelete: false },
+      select: { tgId: true }
+    });
 
-  let successCount = 0;
-  let failCount = 0;
-  const errors: string[] = [];
+    const userChatIds = new Set<string>();
+    users.forEach(u => {
+      if (u.tgId && u.tgId.trim() && u.tgId.trim() !== channelTarget) {
+        userChatIds.add(u.tgId.trim());
+      }
+    });
 
-  const formattedText = `📢 *${payload.title.trim()}*\n\n${payload.message.trim()}`;
-  const buttonUrl = payload.btnUrl?.trim() || getMiniAppUrl();
-  const buttonText = payload.btnText?.trim() || '🚀 Open Key Vault Store';
+    let successCount = 0;
+    let failCount = 0;
+    const errors: string[] = [];
 
-  for (const chatId of chatIds) {
-    const isChannel = chatId.startsWith('@') || chatId.startsWith('-100') || chatId.startsWith('-');
-    const replyMarkup = buttonUrl
-      ? {
-          inline_keyboard: [[
-            {
-              text: buttonText,
-              ...(isChannel ? { url: buttonUrl } : { web_app: { url: buttonUrl } })
-            }
-          ]]
-        }
-      : undefined;
+    const formattedText = `📢 *${payload.title.trim()}*\n\n${payload.message.trim()}`;
+    const buttonUrl = payload.btnUrl?.trim() || getMiniAppUrl();
+    const buttonText = payload.btnText?.trim() || '🚀 Open Key Vault Store';
 
-    try {
+    const sendToChat = async (chatId: string) => {
+      const isChannel = chatId.startsWith('@') || chatId.startsWith('-100') || chatId.startsWith('-');
+      const replyMarkup = buttonUrl
+        ? {
+            inline_keyboard: [[
+              {
+                text: buttonText,
+                ...(isChannel ? { url: buttonUrl } : { web_app: { url: buttonUrl } })
+              }
+            ]]
+          }
+        : undefined;
+
       const rawImg = (payload.imageUrl || '').trim();
       if (rawImg.startsWith('http')) {
         const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
@@ -748,13 +756,7 @@ export async function sendBroadcastNews(payload: {
             ...(replyMarkup ? { reply_markup: replyMarkup } : {})
           })
         });
-        const data = await res.json();
-        if (data.ok) successCount++;
-        else {
-          failCount++;
-          errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
-          console.error(`Broadcast failed for ${chatId}`, data);
-        }
+        return await res.json();
       } else if (rawImg.startsWith('data:image')) {
         const base64Data = rawImg.split(',')[1];
         const mimeMatch = rawImg.match(/data:(image\/\w+);/);
@@ -772,13 +774,7 @@ export async function sendBroadcastNews(payload: {
           method: 'POST',
           body: formData
         });
-        const data = await res.json();
-        if (data.ok) successCount++;
-        else {
-          failCount++;
-          errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
-          console.error(`Broadcast failed for ${chatId}`, data);
-        }
+        return await res.json();
       } else {
         const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
@@ -790,20 +786,69 @@ export async function sendBroadcastNews(payload: {
             ...(replyMarkup ? { reply_markup: replyMarkup } : {})
           })
         });
-        const data = await res.json();
-        if (data.ok) successCount++;
-        else {
-          failCount++;
-          errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
-          console.error(`Broadcast failed for ${chatId}`, data);
-        }
+        return await res.json();
       }
-    } catch (err) {
-      failCount++;
-      errors.push(`${chatId}: ${(err as Error).message}`);
-      console.error(`Broadcast exception for ${chatId}`, err);
-    }
-  }
+    };
 
-  return { successCount, failCount, totalTarget: chatIds.size, errors };
+    // 1. Send synchronously to channel first to ensure immediate delivery & check valid syntax/image
+    if (channelTarget) {
+      try {
+        const data = await sendToChat(channelTarget);
+        if (data.ok) {
+          successCount++;
+        } else {
+          failCount++;
+          const errDesc = data.description || 'Unknown Telegram error';
+          errors.push(`${channelTarget}: ${errDesc}`);
+          console.error(`Broadcast failed for channel ${channelTarget}`, data);
+          isBroadcasting = false;
+          throw new Error(`Failed to broadcast to channel (${channelTarget}): ${errDesc}`);
+        }
+      } catch (err: any) {
+        isBroadcasting = false;
+        throw new Error(err.message || `Failed to send broadcast to channel: ${err}`);
+      }
+    }
+
+    const totalTarget = (channelTarget ? 1 : 0) + userChatIds.size;
+
+    // 2. Deliver to individual users asynchronously in the background without blocking the HTTP request
+    setTimeout(async () => {
+      try {
+        for (const chatId of userChatIds) {
+          try {
+            const data = await sendToChat(chatId);
+            if (data.ok) successCount++;
+            else {
+              failCount++;
+              errors.push(`${chatId}: ${data.description || 'Unknown error'}`);
+            }
+          } catch (err) {
+            failCount++;
+            errors.push(`${chatId}: ${(err as Error).message}`);
+          }
+          // Small pause to prevent Telegram API 429 rate limit errors (~30 msgs/sec limit)
+          await new Promise(r => setTimeout(r, 50));
+        }
+        console.log(`Background broadcast completed. Success: ${successCount}, Failed: ${failCount}, Total: ${totalTarget}`);
+      } catch (err) {
+        console.error("Error in background broadcast user loop:", err);
+      } finally {
+        isBroadcasting = false;
+      }
+    }, 0);
+
+    return { 
+      successCount, 
+      failCount, 
+      totalTarget, 
+      errors,
+      message: channelTarget
+        ? `📢 Broadcast sent immediately to ${channelTarget}! Delivering to ${userChatIds.size} users in background.`
+        : `📢 Broadcast delivery started in background for ${userChatIds.size} users.`
+    };
+  } catch (err) {
+    isBroadcasting = false;
+    throw err;
+  }
 }
