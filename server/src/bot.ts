@@ -514,7 +514,8 @@ export const initBot = () => {
             name,
             username,
             phone: rawPhone,
-            referCode: 'REF' + Math.floor(100000 + Math.random() * 900000)
+            referCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+            balance: 0
           }
         });
 
@@ -684,7 +685,7 @@ async function sendWelcome(bot: TelegramBot, chatId: number, firstName: string, 
           tgId,
           name,
           username,
-          referCode: tgId.slice(-6),
+          referCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
           referBy: "0",
           balance: 0,
         }

@@ -42,9 +42,9 @@ const create_user = CatchAsync(async (req, res) => {
                 name: parseValue?.user?.first_name + " " + parseValue?.user?.last_name,
                 tgId: String(parseValue?.user?.id),
                 username: parseValue?.user?.username,
-                referCode: String(parseValue?.user?.id),
+                referCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
                 referBy: "0",
-                balance: Math.floor(Math.random() * 400),
+                balance: 0,
             }
         });
 
@@ -225,9 +225,9 @@ const verifyOtp = CatchAsync(async (req, res) => {
             name: realName,
             username: username,
             phone: cleanPhone || null,
-            referCode: tgId.slice(-6),
+            referCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
             referBy: "0",
-            balance: 100, // welcome bonus
+            balance: 0,
         }
     });
 
@@ -289,7 +289,7 @@ const verifySms = CatchAsync(async (req, res) => {
     const userRecord = await prisma.user.upsert({
         where: { tgId: cleanPhone },
         update: {},
-        create: { name: `User ${cleanPhone.slice(-4)}`, tgId: cleanPhone, username: null, referCode: cleanPhone.slice(-6), referBy: "0", balance: 0 }
+        create: { name: `User ${cleanPhone.slice(-4)}`, tgId: cleanPhone, username: null, referCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(), referBy: "0", balance: 0 }
     });
     const secret = process.env.SECRET || "miniapp-super-secret-jwt-key-2026";
     const token = jwt.sign({ id: userRecord.id, tgId: userRecord.tgId }, secret);
