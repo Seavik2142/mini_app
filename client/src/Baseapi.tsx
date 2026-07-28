@@ -13,9 +13,17 @@ const normalizeApiBaseUrl = (value?: string) => {
 export const getApiBaseUrl = () => {
     const fromEnv = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
     if (fromEnv) return fromEnv;
-    if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
-        return "http://localhost:3000";
+
+    if (typeof window !== "undefined") {
+        const hostname = window.location.hostname.toLowerCase();
+        if (hostname === "localhost" || hostname === "127.0.0.1") {
+            return "http://localhost:3000";
+        }
+        if (hostname === "mgdigitalkeys.store" || hostname === "www.mgdigitalkeys.store" || hostname === "admin.mgdigitalkeys.store") {
+            return "https://mini-app-mzu6.onrender.com";
+        }
     }
+
     return "https://mini-app-mzu6.onrender.com";
 };
 

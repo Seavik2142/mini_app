@@ -9,10 +9,31 @@ import path from "path";
 export const app = express();
 export const prisma = new PrismaClient();
 
+const allowedOrigins = new Set([
+    "https://mgdigitalkeys.store",
+    "https://www.mgdigitalkeys.store",
+    "https://admin.mgdigitalkeys.store",
+    "https://mini-app-mzu6.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173"
+]);
+
 app.use(cors({
     origin: (origin, callback) => {
-        // Dynamically allow requesting origin (Telegram WebApps, Vercel preview URLs, localhost)
-        callback(null, true);
+        if (!origin || allowedOrigins.has(origin)) {
+            callback(null, true);
+            return;
+        }
+
+        // Allow common preview and local development hosts.
+        if (origin.includes("vercel.app") || origin.includes("netlify.app") || origin.includes("localhost") || origin.includes("127.0.0.1")) {
+            callback(null, true);
+            return;
+        }
+
+        callback(null, false);
     },
     credentials: true
 }));
